@@ -1,0 +1,94 @@
+<style type="text/css">
+    .glob-product-block {
+        text-align: center; 
+        padding: 10px 10px; 
+        height: 200px;
+    }
+
+    .glob-product-block:hover {
+        background-color: #e1e1e1;
+    }
+</style>
+
+<div ng-if="pickedProduct">
+  <div class="col-lg-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <span class="pull-left">Choose delivery</span>
+        <button class="btn btn-sm btn-warning pull-right" style="margin-top: 2px;" ng-click="cancelProduct();" data-dismiss="modal">Change</button>
+      </div>
+      <table>
+        <tr>
+          <td style="width: 70%;">
+            <img ng-if="pickedProduct.carrierLogoLink" ng-src="{{ pickedProduct.carrierLogoLink }}" alt="{{ pickedProduct.carrierName }}" />
+            <strong ng-bind="pickedProduct.carrierName"></strong><br/>
+            <span ng-bind="pickedProduct.name"></span> 
+          </td>
+          <td style="padding: 0px 10px;">
+            Total: <strong>{{ pickedProduct.netPrice }}zł</strong>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div ng-show="!pickedProduct">
+  <p>
+      <strong>Specify the dimensions and weight of the shipment</strong><br>
+  </p>
+  <p>
+      [cm]
+      <input style="width: auto; display: inline-block;" size="2" ng-model="packageInfo.length" type="text" placeholder="Height"> x
+      <input style="width: auto; display: inline-block;" size="2" ng-model="packageInfo.width" type="text" placeholder="Width"> x
+      <input style="width: auto; display: inline-block;" size="2" ng-model="packageInfo.height" type="text" placeholder="Depth"> -
+      <input style="width: auto; display: inline-block;" size="2" ng-model="packageInfo.weight" type="text" placeholder="Weight">
+  </p>
+  <p>
+      Content: <input style="width: auto; display: inline-block;" size="10" type="text" ng-model="packageInfo.content" placeholder="e.g. Ceramics">
+      Quantity: <input style="width: auto; display: inline-block;" size="2" ng-model="packageInfo.count" type="text">
+  </p>
+  <p>
+      <button class="btn btn-success" id="wycen" ng-click="getServices();" onclick="clik();">
+          <span ng-show="!isAjax">Rate the cost of the service</span>
+          <span ng-show="isAjax"><i class="icon-cog icon-spin"></i></span>
+      </button>
+      <span ng-show="products.length > 0" style="color: #777;">* The prices shown are net prices</span>
+  </p>
+
+  <p ng-show="error" ng-bind="error"></p>
+
+  <div class="best-price-products">
+      <div class="radio" ng-repeat="product in products | orderBy:'+netPrice' | limitTo:3">
+        <label ng-click="pickProduct(product);">
+          <input type="radio" name="productRadios" ng-value="product.symbol">
+          <strong>{{ product.carrierName }} - {{ product.name }}</strong> - {{ product.netPrice }}zł
+        </label>
+      </div>
+
+      <a href ng-show="products.length > 3" data-toggle="modal" data-target="#allProducts">Show all ({{ products.length }})</a>
+  </div>
+</div>
+
+<div class="modal fade" id="allProducts" tabindex="-1" role="dialog">
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Check delivery</h4>
+    </div>
+    <div class="modal-body row">
+        <div class="col-lg-4 glob-product-block" ng-repeat="product in products | orderBy:'+netPrice'">
+          <img ng-if="product.carrierLogoLink" ng-src="{{ product.carrierLogoLink }}" alt="{{ product.carrierName }}" /><br/>
+          <strong ng-bind="product.carrierName"></strong><br/>
+          <span ng-bind="product.name"></span><br/><br/>
+          <strong>{{ product.netPrice }}zł</strong><br/>
+          (tax exclude)<br/><br/>
+          <button class="btn btn-sm btn-success" ng-click="pickProduct(product);" data-dismiss="modal">Choose</button>
+        </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+    </div>
+  </div>
+</div>
+</div>

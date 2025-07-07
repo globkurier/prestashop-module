@@ -1,0 +1,121 @@
+/**
+* 2007-2015 PrestaShop
+*
+* NOTICE OF LICENSE
+*
+* This source file is subject to the Academic Free License (AFL 3.0)
+* that is bundled with this package in the file LICENSE.txt.
+* It is also available through the world-wide-web at this URL:
+* http://opensource.org/licenses/afl-3.0.php
+* If you did not receive a copy of the license and are unable to
+* obtain it through the world-wide-web, please send an email
+* to license@prestashop.com so we can send you a copy immediately.
+*
+* DISCLAIMER
+*
+* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+* versions in the future. If you wish to customize PrestaShop for your
+* needs please refer to http://www.prestashop.com for more information.
+*
+*  @author    PrestaShop SA <contact@prestashop.com>
+*  @copyright 2007-2015 PrestaShop SA
+*  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+*  International Registered Trademark & Property of PrestaShop SA
+*
+* Don't forget to prefix your containers with your own identifier
+* to avoid any conflicts with others containers.
+*/
+
+.pickup-search {
+    margin-bottom: 20px;
+}
+.pickup-search span {
+    margin-bottom: 10px;
+    display: block;
+    width: 100%;
+}
+.pickup-result {
+    display: none;
+}
+.pickup-result span {
+    margin-bottom: 10px;
+    display: block;
+    width: 100%;
+}
+
+.pickup-loader .lds-ripple {
+    display: none;
+}
+
+.lds-ripple {
+    display: block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+}
+.lds-ripple div {
+    position: absolute;
+    border: 4px solid #000;
+    opacity: 1;
+    border-radius: 50%;
+    animation: lds-ripple 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+.lds-ripple div:nth-child(2) {
+    animation-delay: -0.5s;
+}
+@keyframes lds-ripple {
+    0% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 0;
+    }
+    4.9% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 0;
+    }
+    5% {
+        top: 36px;
+        left: 36px;
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        top: 0px;
+        left: 0px;
+        width: 72px;
+        height: 72px;
+        opacity: 0;
+    }
+}
+
+.pickup-point-selected p {
+    padding: 10px;
+    margin: 15px 0 0 0;
+}
+.marker-info-link {
+    cursor: pointer;
+    color: #fff !important;
+    margin-top: 10px;
+}
+div.marker-info {
+    padding: 15px 0 0;
+}
+div.marker-info p {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    color: #000 !important;
+}
+button.gm-ui-hover-effect {
+    padding: 5px;
+    right: 5px;
+    font-size: 14px;
+    font-weight: 700;
+}
