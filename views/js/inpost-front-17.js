@@ -141,9 +141,7 @@ $(function () {
         let value = searchTownInput.val();
         if( value.indexOf(',') != -1 ){
             let x = value.split(',');
-            console.log(x);
             value = x.join(', ');
-            console.log(value)
         }
         let url = baseApiUrl + 'points',
             town = value,
@@ -228,6 +226,9 @@ $(function () {
                     return false;
                 }
                 $('.pickup-point-selected').append('<p>Wybrany punkt: <b>'+selected_point+'</b><br />'+point_name+'</p>');
+
+                // Dodajemy mechanizm odblokowywania checkout
+                enableCheckoutStep();
             });
         return true;
     });
@@ -496,6 +497,25 @@ $(function () {
         }
     }
 });
+
+// Funkcja odblokowująca checkout po wybraniu punktu odbioru
+function enableCheckoutStep() {
+
+    // Ukryj komunikat o braku wybranego punktu
+    $('.no_inpost_point_selected').hide();
+
+    // Pokaż krok dostawy jeśli był ukryty
+    $('#checkout-delivery-step .content').show();
+
+    // Włącz przycisk continue jeśli istnieje
+    $('button[name="confirmDeliveryOption"]').prop('disabled', false);
+    $('button[name="confirmDeliveryOption"]').removeClass('disabled');
+
+    // Usuń blokadę formularza dostawy
+    $('#js-delivery').off('submit').on('submit', function() {
+        return true;
+    });
+}
 
 $(document).on('ready', function () {
     let delivery_select = 0,

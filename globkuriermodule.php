@@ -54,7 +54,7 @@ class Globkuriermodule extends Module
     {
         $this->name = 'globkuriermodule';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.1.1';
+        $this->version = '3.1.2';
         $this->author = 'GlobKurier.pl';
         $this->need_instance = 0;
         $this->bootstrap = true;

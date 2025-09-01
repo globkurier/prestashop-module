@@ -23,7 +23,7 @@
  * International Registered Trademark & Property of PrestaShop SA
  */
 $(function(){
-    
+
     var self = this;
     // var baseApiUrl = 'http://test.api.globkurier.pl/v1/';
     var baseApiUrl = 'https://api.globkurier.pl/v1/';
@@ -60,7 +60,7 @@ $(function(){
 
         opcCheck();
     }
-    
+
     /**
      * Pokazuje/ukrywa okno z wyborem paczkomatow
      * usuwa ew. informacje o wybranym paczkomacie, kiedy np. klient
@@ -168,7 +168,7 @@ $(function(){
 
         $.getJSON(url, postData)
         .done(function (r) {
-            
+
             $('img.ajax-loader').hide();
 
             if (!r.success) {
@@ -176,6 +176,10 @@ $(function(){
                 return false;
             } else {
                 self.inpost_point_saved = true;
+                // Dodajemy wywołanie opcCheck() aby odblokować checkout
+                if (typeof opcCheck === 'function') {
+                    opcCheck();
+                }
             }
         });
 
@@ -251,5 +255,5 @@ $(function(){
         if (window.inpost_carrier_id === undefined) return false;
         return ($('input[value="' + paczkaruch_carrier_id + ',"]').length > 0 && $('input[value="' + paczkaruch_carrier_id + ',"]').is(':checked')) ? true : false;
     }
-    
+
 });

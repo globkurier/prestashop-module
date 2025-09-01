@@ -1000,7 +1000,11 @@ function clik()
 
                 function pickProduct(p)
                 {
-                    $scope.pickedProduct = p, $scope.pickedProduct.packageInfo = $scope.packageInfo, $scope.pickedProduct.lastParameters = $scope.lastParameters
+                    $scope.pickedProduct = p;
+                    if ($scope.pickedProduct) {
+                        $scope.pickedProduct.packageInfo = $scope.packageInfo;
+                        $scope.pickedProduct.lastParameters = $scope.lastParameters;
+                    }
 
                     checkPickedServiceType($scope.pickedProduct, $scope);
                 }
@@ -1392,6 +1396,11 @@ function customRequiredFields(productId, collectionType, r_id, s_id, type = '')
 
 function checkPickedServiceType(delivery, $scope)
 {
+    if (!delivery || !delivery.collectionTypes) {
+        $('.deliverySending').removeClass('loading');
+        return;
+    }
+
     let type = delivery.collectionTypes,
         type_selected = 'PICKUP';
     $('.deliverySending').addClass('loading');
@@ -1414,7 +1423,9 @@ function checkPickedServiceType(delivery, $scope)
         } else {
             $('.deliverySending input#pickup').attr('disabled', 'disabled').closest('.radio').addClass('disabled');
         }
-        customRequiredFields($scope.pickedProduct.id, type_selected, $scope.recevicerAddress.country.id, $scope.senderAddress.country.id, $scope.pickedProduct.carrierName);
+        if ($scope.pickedProduct && $scope.pickedProduct.id) {
+            customRequiredFields($scope.pickedProduct.id, type_selected, $scope.recevicerAddress.country.id, $scope.senderAddress.country.id, $scope.pickedProduct.carrierName);
+        }
 
         $('.deliverySending').removeClass('loading');
     }, 3000);
