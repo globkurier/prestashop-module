@@ -210,3 +210,6 @@ $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_5e408603ae11bdc576b14294
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_d55669822f1a8cf72ec1911e462a54eb'] = 'dla';
 
 $_MODULE['<{globkuriermodule}prestashop>globAdditionalInformation_c8e8fa320b236bcb76a76cc2abf8f18b'] = 'Nie wybrano żadnego punktu odbioru!';
+
+// Error messages for getLabel controller
+$_MODULE['<{globkuriermodule}prestashop>getLabel_8b36ec2d9b6d1f23585875c4225f98f0'] = 'Plik etykiety paczki nie jest dostępny dla tej przesyłki.';

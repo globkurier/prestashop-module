@@ -29,13 +29,6 @@ if (!defined('_PS_VERSION_')) {
 class GlobkuriermoduleGetLabelModuleFrontController extends ModuleFrontController
 {
 
-    private $translate = [
-        'pl' => [
-            'Package label file is not available for this shipment.' => 'Plik etykiety paczki nie jest dostępny dla tej przesyłki.',
-        ]
-    ];
-
-    private $token;
     public function init()
     {
         $this->page_name = 'getlabel';
@@ -55,10 +48,12 @@ class GlobkuriermoduleGetLabelModuleFrontController extends ModuleFrontControlle
                 $req = json_decode($request, true);
                 $fields = $req['fields'];
                 $html = '';
-                $language = new Language($this->context->cookie->id_lang);
+
                 if (!empty($fields)) {
                     foreach ($fields as $field) {
-                        $html .= $this->translate[$language->iso_code][$field].'<br />';
+                        // Use PrestaShop translation system
+                        $translatedText = $this->module->l('Package label file is not available for this shipment.', 'getLabel');
+                        $html .= $translatedText . '<br />';
                     }
                 }
                 $return['errors'] = $html;
