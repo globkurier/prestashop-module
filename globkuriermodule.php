@@ -187,8 +187,26 @@ class Globkuriermodule extends Module
         }
     }
 
+    /**
+     * Check if PDF label is ready for download
+     * This method makes an internal API call to check the status of a parcel label
+     *
+     * @param string|null $hash The parcel hash identifier
+     * @return int Returns 1 if PDF is ready, 0 otherwise
+     */
     private function checkPDFReady($hash)
     {
+        // Check if hash is null or empty - prevent null access errors
+        if ($hash === null || $hash === '') {
+            return 0;
+        }
+
+        // Verify that context and shop objects exist - required for URL construction
+        if (!isset($this->context) || !isset($this->context->shop)) {
+            return 0;
+        }
+
+        // Build internal API URL to check label status
         $url = 'https://tebimpro:tebimpro@'.$this->context->shop->domain.$this->context->shop->physical_uri.'module/globkuriermodule/getLabel?hash='.$hash.'&ajax=1';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -197,7 +215,18 @@ class Globkuriermodule extends Module
         curl_setopt($ch, CURLOPT_VERBOSE, true);
         $result = curl_exec($ch);
         curl_close($ch);
+
+        // Check if cURL request failed
+        if ($result === false) {
+            return 0;
+        }
+
+        // Decode JSON response and validate structure
         $return = json_decode($result, true);
+        if (!is_array($return) || !isset($return['status'])) {
+            return 0;
+        }
+
         return $return['status'];
     }
 

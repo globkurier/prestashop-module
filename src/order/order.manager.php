@@ -56,6 +56,11 @@ class OrderManager
      */
     public function getByOrderId($orderId)
     {
+        // Check if orderId is null or empty or less than 0
+        if ($orderId === null || $orderId === '' || $orderId <= 0) {
+            return [];
+        }
+
         $orders = [];
         $sql = 'SELECT * FROM ' . _DB_PREFIX_ . 'gk_orders WHERE order_id = ' . (int) $orderId;
         $results = \Db::getInstance()->executeS($sql);

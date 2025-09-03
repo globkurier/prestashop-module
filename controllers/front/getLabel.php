@@ -43,7 +43,7 @@ class GlobkuriermoduleGetLabelModuleFrontController extends ModuleFrontControlle
         parent::init();
 
         $return = [];
-        $hash = $_REQUEST['hash'];
+        $hash = isset($_REQUEST['hash']) ? $_REQUEST['hash'] : '';
         $ajax = isset($_REQUEST['ajax']) ? (int)$_REQUEST['ajax'] : 0;
         if (!empty($hash)) {
             $c = new Globkuriermodule\Common\Config();

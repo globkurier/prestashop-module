@@ -32,6 +32,14 @@ class GlobkuriermodulegetAdditionalInfoModuleFrontController extends ModuleFront
     {
         parent::init();
         $request = [];
+
+        // Sprawdź czy context i cart istnieją
+        if (!isset($this->context) || !isset($this->context->cart)) {
+            $request['error'] = 'Context or cart not exists';
+            echo json_encode($request);
+            exit;
+        }
+
         $id_cart = (int) $this->context->cart->id;
         if ($id_cart > 0) {
             $request['id_cart'] = $id_cart;
