@@ -24,13 +24,17 @@
  *}
 <style type="text/css">
     .glob-product-block {
-        text-align: center; 
-        padding: 10px 10px; 
-        height: 200px;
+        text-align: center;
+        padding: 10px 10px;
     }
 
     .glob-product-block:hover {
         background-color: #e1e1e1;
+    }
+
+    .modal-body.row {
+        display: flex;
+        flex-wrap: wrap;
     }
 </style>
 
@@ -135,7 +139,7 @@
                             <option value="{$country.isoCode|escape:'htmlall':'UTF-8'}" {if $config->defaultCountryCode == $country.isoCode}selected="true"{/if}>{$country.name|escape:'htmlall':'UTF-8'}</option>
                             {/foreach}
                             </select>
-                        </div>     
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -201,12 +205,12 @@
 
                     <div class="form-group">
                         <label class="col-lg-4 control-label">{l s='Carrier' mod='globkuriermodule'}:</label>
-                        <label 
-                        class="col-lg-6 control-label" 
-                        style="text-align: right;" 
-                        default-service-selector 
-                        init-id="{$config->defaultServiceCode|escape:'htmlall':'UTF-8'}" 
-                        init-name="{$config->defaultServiceName|escape:'htmlall':'UTF-8'}" 
+                        <label
+                        class="col-lg-6 control-label"
+                        style="text-align: right;"
+                        default-service-selector
+                        init-id="{$config->defaultServiceCode|escape:'htmlall':'UTF-8'}"
+                        init-name="{$config->defaultServiceName|escape:'htmlall':'UTF-8'}"
                         ng-model="service"></label>
                         <input type="hidden" name="config_defaultServiceCode" value="" />
                         <input type="hidden" name="config_defaultServiceName" value="" />
@@ -249,7 +253,7 @@
                                 <option value="P" {if $config->defaultPaymentType == "P"}selected="selected"{/if}>{l s='Prepaid' mod='globkuriermodule'}</option>
                                 <option value="D" {if $config->defaultPaymentType == "D"}selected="selected"{/if}>{l s='Delayed payment' mod='globkuriermodule'}</option>
                             </select>
-                        </div>     
+                        </div>
                     </div>
                 </div>
             </div>
@@ -259,7 +263,7 @@
             <div class="form-group">
                 <label class="col-lg-4 control-label" style="text-align: right;margin-bottom: 0;padding-top:7px; width: 34%;">
                 {l s='Google Maps API' mod='globkuriermodule'}</label>
-                 <div class="col-lg-4">    
+                 <div class="col-lg-4">
                     <input type="text" name="config_googleMapsApiKey" value="{html_entity_decode($config->googleMapsApiKey|escape:'htmlall':'UTF-8')}" />
                  </div>
             </div>
@@ -268,14 +272,14 @@
             <button type="button" ng-click="updateCacheWithPickupPoints('{html_entity_decode($getCachePointsLink|escape:'htmlall':'UTF-8')}')" class="btn btn-primary">
             {l s='Cache points for whole country' mod='globkuriermodule'}</button>
           <span ng-if="isAjaxCacheLoad"><i class="icon-cog icon-spin"></i></span>
-        </div>        
+        </div>
 
         <div class="row" style="margin-top: 50px;">
             <div class="form-group">
                 <label class="col-lg-4 control-label" style="margin-bottom: 0;
                 padding-top: 7px; text-align: right; width: 34%;">
                 {l s='Enable inPost carrier' mod='globkuriermodule'}</label>
-                 <div class="col-lg-4"> 
+                 <div class="col-lg-4">
                      <span class="switch prestashop-switch fixed-width-lg">
                         <input name="config_inPostEnabled" id="ps_layered_filter_price_rounding_on" value="1" {if $config->inPostEnabled == 1}checked="checked"{/if} type="radio">
                         <label for="ps_layered_filter_price_rounding_on" class="radioCheck">
@@ -302,7 +306,7 @@
                         <option value="{$carrier['id_carrier']|escape:'htmlall':'UTF-8'}" {if $config->inPostCarrier == $carrier['id_carrier']}selected="true"{/if}>{$carrier['name']|escape:'htmlall':'UTF-8'}</option>
                         {/foreach}
                     </select>
-                </div>     
+                </div>
             </div>
         </div>
 
@@ -339,7 +343,7 @@
                         <option value="{$carrier['id_carrier']|escape:'htmlall':'UTF-8'}" {if $config->inPostCODCarrier == $carrier['id_carrier']}selected="true"{/if}>{$carrier['name']|escape:'htmlall':'UTF-8'}</option>
                         {/foreach}
                     </select>
-                </div>     
+                </div>
             </div>
         </div>
 
@@ -355,7 +359,7 @@
                         <option value="{$terminal.departmentId|escape:'htmlall':'UTF-8'}" {if $config->defaultInPostPoint == $terminal.departmentId}selected="true"{/if}>[{$terminal.departmentId|escape:'htmlall':'UTF-8'}] {$terminal.address|escape:'htmlall':'UTF-8'}, {$terminal.town|escape:'htmlall':'UTF-8'}</option>
                         {/foreach}
                     </select>*}
-                </div>     
+                </div>
             </div>
         </div>
         <div class="row hidden" style="margin-top: 60px;">
@@ -366,7 +370,7 @@
                 </label>
                  <div class="col-lg-4">
                      <span class="switch prestashop-switch fixed-width-lg">
-                        <input name="config_globboxEnabled" id="1" value="1" 
+                        <input name="config_globboxEnabled" id="1" value="1"
                         {if $config->globboxEnabled == 1}checked="checked"{/if} type="radio">
                         <label for="1" class="radioCheck">
                             <i class="color_success"></i> Tak
@@ -414,7 +418,7 @@
                         <option value="{$carrier['id_carrier']|escape:'htmlall':'UTF-8'}" {if $config->paczkaRuchCarrier == $carrier['id_carrier']}selected="true"{/if}>{$carrier['name']|escape:'htmlall':'UTF-8'}</option>
                         {/foreach}
                     </select>
-                </div>     
+                </div>
             </div>
         </div>
         {* End of paczka w Ruchu *}
@@ -535,7 +539,7 @@
             </div>
         </div>
         {* End of DPD Pickupl *}
-        
+
     </div>
     <div class="panel-footer">
         <input type="hidden" name="action" value="updateConfig"/>
@@ -552,7 +556,7 @@
       <div class="modal-header">
         <h4 class="modal-title">{l s='Select carrier' mod='globkuriermodule'}</h4>
       </div>
-      <div class="modal-body row">
+      <div class="modal-body row" style="display: flex;flex-wrap: wrap;">
           <div class="col-lg-4 glob-product-block" ng-repeat="product in products | orderBy:price_gross">
             <img ng-if="product.courier_img" ng-src="{{ product.courier_img }}" alt="{{ product.courier }}" /><br/>
             <strong ng-bind="product.courier"></strong><br/>

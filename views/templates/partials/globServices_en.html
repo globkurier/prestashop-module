@@ -1,12 +1,16 @@
 <style type="text/css">
     .glob-product-block {
-        text-align: center; 
-        padding: 10px 10px; 
-        height: 200px;
+        text-align: center;
+        padding: 10px 10px;
     }
 
     .glob-product-block:hover {
         background-color: #e1e1e1;
+    }
+
+    .modal-body.row {
+        display: flex;
+        flex-wrap: wrap;
     }
 </style>
 
@@ -22,7 +26,7 @@
           <td style="width: 70%;">
             <img ng-if="pickedProduct.carrierLogoLink" ng-src="{{ pickedProduct.carrierLogoLink }}" alt="{{ pickedProduct.carrierName }}" />
             <strong ng-bind="pickedProduct.carrierName"></strong><br/>
-            <span ng-bind="pickedProduct.name"></span> 
+            <span ng-bind="pickedProduct.name"></span>
           </td>
           <td style="padding: 0px 10px;">
             Total: <strong>{{ pickedProduct.netPrice }}zł</strong>
@@ -76,7 +80,7 @@
     <div class="modal-header">
       <h4 class="modal-title">Check delivery</h4>
     </div>
-    <div class="modal-body row">
+    <div class="modal-body row" >
         <div class="col-lg-4 glob-product-block" ng-repeat="product in products | orderBy:'+netPrice'">
           <img ng-if="product.carrierLogoLink" ng-src="{{ product.carrierLogoLink }}" alt="{{ product.carrierName }}" /><br/>
           <strong ng-bind="product.carrierName"></strong><br/>
