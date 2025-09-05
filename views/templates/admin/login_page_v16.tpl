@@ -76,20 +76,20 @@
                         </div>
                     </div>
                 </div>
-                
+
             </div>{* .col-lg-4 *}
 
             <div class="col-lg-6 globconfig" style="padding: 10px 50px;">
               <h3>{l s='Benefits' mod='globkuriermodule'}: <span style="color: rgb(206, 0, 0);">{l s='Benefits of GlobKurier' mod='globkuriermodule'}:</span></h3>
               <ul style="padding: 10px; font-size: 1.2em; line-height: 25px;">
-                <li>{l s='low carrier fees' mod='globkuriermodule'}</li>
-                <li>{l s='information about your parcel' mod='globkuriermodule'}</li>
-                <li>{l s='fast compare all carries' mod='globkuriermodule'}</li>
-                <li>{l s='you can define shipping methods' mod='globkuriermodule'}</li>
-                <li>{l s='you can print waybill directly from prestashop' mod='globkuriermodule'}</li>
+                <li><strong>{l s='Pełna kontrola nad logistyką' mod='globkuriermodule'}</strong> – {l s='Wszystkie zamówienia trafiają automatycznie do panelu, a etykiety drukujesz jednym kliknięciem.' mod='globkuriermodule'}</li>
+                <li><strong>{l s='Wysyłka bez granic' mod='globkuriermodule'}</strong> – {l s='Dostęp do ponad 50 przewoźników krajowych i międzynarodowych, bez podpisywania dodatkowych umów.' mod='globkuriermodule'}</li>
+                <li><strong>{l s='Wygoda dla klientów' mod='globkuriermodule'}</strong> – {l s='Różne opcje dostawy i punkty odbioru sprawiają, że każda paczka trafia tam, gdzie chce Twój klient.' mod='globkuriermodule'}</li>
+                <li><strong>{l s='Pełna przejrzystość' mod='globkuriermodule'}</strong> – {l s='Śledzenie przesyłek w czasie rzeczywistym i powiadomienia mail/SMS budują zaufanie i lojalność.' mod='globkuriermodule'}</li>
+                <li><strong>{l s='Łatwe zwroty' mod='globkuriermodule'}</strong> – {l s='Etykieta zwrotna w paczce lub serwis zwroty.globkurier.pl gwarantują prostą obsługę i zadowolenie klienta.' mod='globkuriermodule'}</li>
               </ul>
             </div>{* .col-lg-4 *}
-{* 
+{*
             <div class="col-lg-4">
               <div style="border: 1px solid rgb(204, 204, 204);" class="col-lg-12 globconfig">
                 <h3 style="background-color: rgb(21, 191, 21); border-radius: 10px; color: white; height: 3em; line-height: 3em; padding-left: 15px;">{l s='How to start' mod='globkuriermodule'}</h3>
@@ -101,7 +101,7 @@
                   {l s='3. Complete other account data.' mod='globkuriermodule'}<br>
                   {l s='It’s done !' mod='globkuriermodule'}
                 </p>
-                
+
               </div>
               <div class="col-lg-12">
                 <p class="text-center" style="margin-top: 20px;">

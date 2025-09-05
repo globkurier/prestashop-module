@@ -213,3 +213,15 @@ $_MODULE['<{globkuriermodule}prestashop>globAdditionalInformation_c8e8fa320b236b
 
 // Error messages for getLabel controller
 $_MODULE['<{globkuriermodule}prestashop>getLabel_8b36ec2d9b6d1f23585875c4225f98f0'] = 'Plik etykiety paczki nie jest dostępny dla tej przesyłki.';
+
+// Benefits section translations
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_benefit1_title'] = 'Pełna kontrola nad logistyką';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_benefit1_desc'] = 'Wszystkie zamówienia trafiają automatycznie do panelu, a etykiety drukujesz jednym kliknięciem.';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_benefit2_title'] = 'Wysyłka bez granic';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_benefit2_desc'] = 'Dostęp do ponad 50 przewoźników krajowych i międzynarodowych, bez podpisywania dodatkowych umów.';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_benefit3_title'] = 'Wygoda dla klientów';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_benefit3_desc'] = 'Różne opcje dostawy i punkty odbioru sprawiają, że każda paczka trafia tam, gdzie chce Twój klient.';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_benefit4_title'] = 'Pełna przejrzystość';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_benefit4_desc'] = 'Śledzenie przesyłek w czasie rzeczywistym i powiadomienia mail/SMS budują zaufanie i lojalność.';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_benefit5_title'] = 'Łatwe zwroty';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_benefit5_desc'] = 'Etykieta zwrotna w paczce lub serwis zwroty.globkurier.pl gwarantują prostą obsługę i zadowolenie klienta.';
