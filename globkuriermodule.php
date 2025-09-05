@@ -178,11 +178,17 @@ class Globkuriermodule extends Module
             'moduleApiUrl' => $this->link->getAdminLink('AdminGlobkurierHistory'),
             'newParcelPageLink' => $newParcelPageLink,
         ]);
-        if (version_compare(_PS_VERSION_, '1.7.0', '>=') === true) {
+        if (version_compare(_PS_VERSION_, '8.0.0', '>=') === true) {
+            // PrestaShop 8.x and 9.x
+            return $this->display(__FILE__, 'views/templates/hooks/admin_order.tpl');
+        } elseif (version_compare(_PS_VERSION_, '1.7.0', '>=') === true) {
+            // PrestaShop 1.7.x
             return $this->display(__FILE__, 'views/templates/hooks/admin_order.tpl');
         } elseif (version_compare(_PS_VERSION_, '1.6.0', '>=') === true) {
+            // PrestaShop 1.6.x
             return $this->display(__FILE__, 'views/templates/hooks/order_details_page_v16.tpl');
         } else {
+            // PrestaShop 1.5.x and older
             return $this->display(__FILE__, 'views/templates/hooks/order_details_v15.tpl');
         }
     }
@@ -250,15 +256,20 @@ class Globkuriermodule extends Module
             'pocztex48owp_carrier_id' => $config->pocztex48owpEnabled ? $config->pocztex48owpCarrier : null,
             'cart_id' => $params['cart']->id,
             'rest_endpoint' => $this->context->link->getModuleLink($this->name, 'restinterface', [], true),
-            'gk_token' => Tools::encrypt($params['cart']->id),
+            'gk_token' => $this->encryptCartId($params['cart']->id),
             'address_all' => json_encode($params),
             'baseurl' => 'htts://' . $this->context->shop->domain . $this->context->shop->physical_uri,
             'city' => $address->city,
             'postcode' => $address->postcode,
         ]);
-        if (version_compare(_PS_VERSION_, '1.7.0', '>=') === true) {
+        if (version_compare(_PS_VERSION_, '8.0.0', '>=') === true) {
+            // PrestaShop 8.x and 9.x
+            return $this->display(__FILE__, 'views/templates/hooks/carrier_list_17.tpl');
+        } elseif (version_compare(_PS_VERSION_, '1.7.0', '>=') === true) {
+            // PrestaShop 1.7.x
             return $this->display(__FILE__, 'views/templates/hooks/carrier_list_17.tpl');
         } else {
+            // PrestaShop 1.6.x and older
             return $this->display(__FILE__, 'views/templates/hooks/carrier_list.tpl');
         }
     }
@@ -300,7 +311,26 @@ class Globkuriermodule extends Module
         if ($code != 'order' && $code != 'order-opc') {
             return;
         }
-        if (version_compare(_PS_VERSION_, '1.7.0', '>=') === true) {
+        if (version_compare(_PS_VERSION_, '8.0.0', '>=') === true) {
+            // PrestaShop 8.x and 9.x - use modern asset management
+            $this->context->controller->registerStylesheet(
+                'module-' . $this->name . '-style',
+                'modules/' . $this->name . '/views/css/front.css',
+                [
+                    'media' => 'all',
+                    'priority' => 200,
+                ]
+            );
+            $this->context->controller->registerStylesheet(
+                'module-' . $this->name . '-select2-style',
+                'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css',
+                [
+                    'media' => 'all',
+                    'priority' => 200,
+                ]
+            );
+        } elseif (version_compare(_PS_VERSION_, '1.7.0', '>=') === true) {
+            // PrestaShop 1.7.x
             $this->context->controller->addCSS($this->_path . '/views/css/front.css', 'all');
             $this->context->controller->addCSS('https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', 'all');
             $this->context->controller->registerStylesheet(
@@ -361,5 +391,18 @@ class Globkuriermodule extends Module
     public function hookDisplayBackOfficeHeader($params)
     {
         $this->context->controller->addCSS($this->_path . 'views/css/back.css', 'all');
+    }
+
+    /**
+     * Encrypt cart ID for security token
+     * Compatible with all PrestaShop versions
+     * @param int $cartId
+     * @return string
+     */
+    private function encryptCartId($cartId)
+    {
+        // Use hash with salt for security
+        $salt = _COOKIE_KEY_ . $this->name;
+        return hash('sha256', $cartId . $salt);
     }
 }

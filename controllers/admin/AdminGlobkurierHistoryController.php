@@ -82,7 +82,7 @@ class AdminGlobkurierHistoryController extends ModuleAdminController
             $resData['error'] = $e->getMessage();
         }
         header('Content-Type: application/json');
-        echo Tools::jsonEncode($resData);
+        echo json_encode($resData);
         return true;
     }
 }

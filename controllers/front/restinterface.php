@@ -252,12 +252,25 @@ class GlobkuriermoduleRestinterfaceModuleFrontController extends ModuleFrontCont
             $this->tokenAuth = false;
             return false;
         }
-        if ($token == Tools::encrypt($id_cart)) {
+        if ($token == $this->encryptCartId($id_cart)) {
             $this->tokenAuth = true;
             $this->id_cart = $id_cart;
         } else {
             $this->tokenAuth = false;
         }
         return $this->tokenAuth;
+    }
+
+    /**
+     * Encrypt cart ID for security token
+     * Compatible with all PrestaShop versions
+     * @param int $cartId
+     * @return string
+     */
+    private function encryptCartId($cartId)
+    {
+        // Use hash with salt for security
+        $salt = _COOKIE_KEY_ . 'globkuriermodule';
+        return hash('sha256', $cartId . $salt);
     }
 }

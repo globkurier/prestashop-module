@@ -151,7 +151,7 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
     private function getSplittedAddres(Address $address)
     {
         $splitter = new AddressSplitter\AddressSplitter();
-        if ($address->address2 && Tools::strlen($address->address2) && $splitter->split($address->address1 . ' ' . $address->address2)) {
+        if ($address->address2 && strlen($address->address2) && $splitter->split($address->address1 . ' ' . $address->address2)) {
             return $splitter;
         }
 
@@ -218,7 +218,7 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
 
         header('Content-Type: application/csv');
         header('Content-Disposition: attachment; filename=log-globkurier.csv');
-        header('Content-Length: ' . Tools::strlen($string));
+        header('Content-Length: ' . strlen($string));
 
         echo $string;
     }

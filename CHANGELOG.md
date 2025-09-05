@@ -5,6 +5,7 @@
 + Display of detailed pricing information (net, gross, discount, VAT, fuel surcharge)
 + Added CHANGELOG.md file with module change history
 + Fix the layout grid of the list of carriers
++ Added support for PrestaShop 9.x
 
 ## [3.1.1] - 2025-08-01
 

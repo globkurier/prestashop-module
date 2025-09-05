@@ -112,7 +112,7 @@ class GlobkurierApi
         $query = http_build_query($data);
 
         $r = $this->sendHttpRequest($url, $query);
-        $r = \Tools::jsonDecode($r, true);
+        $r = json_decode($r, true);
 
         if ($r['status'] != true) {
             $errorMsg = $r['error'] ? $r['error'] : 'Nie udało się pobrać listu przewozowego';
@@ -200,7 +200,7 @@ class GlobkurierApi
             $jsonData = json_encode($data);
             curl_setopt($curl, CURLOPT_POSTFIELDS, $jsonData);
             $headers[] = 'Content-Type: application/json';
-            $headers[] = 'Content-Length: ' . \Tools::strlen($jsonData);
+            $headers[] = 'Content-Length: ' . strlen($jsonData);
         }
 
         if ($token) {

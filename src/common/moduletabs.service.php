@@ -53,12 +53,6 @@ class ModuleTabs
     public static function install()
     {
         $parentId = self::add(4, 'AdminGlobkurier');
-        self::add(
-            3,
-            'AdminGlobkurierPlaceOrder',
-            \Tab::getIdFromClassName('AdminParentShipping')
-        );
-
         self::add(0, 'AdminGlobkurierPlaceOrder', $parentId);
         self::add(1, 'AdminGlobkurierHistory', $parentId);
         self::add(2, 'AdminGlobkurierConfiguration', $parentId);
@@ -93,7 +87,6 @@ class ModuleTabs
         $tabs = [
             'AdminGlobkurierConfiguration',
             'AdminGlobkurierHistory',
-            'AdminGlobkurierPlaceOrder',
             'AdminGlobkurierPlaceOrder',
             'AdminGlobkurier',
         ];
