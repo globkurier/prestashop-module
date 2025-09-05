@@ -374,7 +374,7 @@ function clik()
                     }, paramsToSend),
                     url: baseApiUrl + "order/pickupTimeRanges",
                     headers: {
-                        "accept-language": "pl"
+                        "accept-language": InitialValues.isoCode === 'pl' ? 'pl' : 'en'
                     }
                 }).then(function(r) {
                     return callback(null, r.data)
@@ -426,7 +426,7 @@ function clik()
                     url: baseApiUrl + "order/price",
                     headers: {
                         "x-auth-token": token,
-                        "accept-language": "pl"
+                        "accept-language": InitialValues.isoCode === 'pl' ? 'pl' : 'en'
                     }
                 }).then(function(r) {
                     return callback(null, r.data)
@@ -487,7 +487,7 @@ function clik()
                     data: JSON.stringify(orderData),
                     headers: {
                         "Content-Type": "application/json",
-                        "accept-language": "pl",
+                        "accept-language": InitialValues.isoCode === 'pl' ? 'pl' : 'en',
                         "x-auth-token": token
                     }
                 }).then(function(r) {
