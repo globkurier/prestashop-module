@@ -1,0 +1,115 @@
+<!-- Order summary content -->
+        <div class="well">
+            <div class="row">
+                <div class="col-lg-6">
+                    <strong>Service:</strong><br>
+                    <span>{{ serviceModel.carrierName }} - {{ serviceModel.name }}</span>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Discount code field -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        <div class="col-lg-8">
+                            <div class="input-group">
+                                <input type="text"
+                                       class="form-control"
+                                       ng-model="$parent.discountCode"
+                                       placeholder="Enter discount code"
+                                       ng-keyup="$event.keyCode === 13 && applyDiscountCode()"
+                                       ng-change="onDiscountCodeChange()">
+                                <span class="input-group-prepend">
+                                    <button class="btn btn-primary"
+                                            ng-click="applyDiscountCode()"
+                                            ng-disabled="loaders.priceCalculation">
+                                        <i class="icon-check" ng-if="!loaders.priceCalculation"></i>
+                                        <i class="icon-spinner icon-spin" ng-if="loaders.priceCalculation"></i>
+                                        Apply
+                                    </button>
+                                </span>
+                                <span class="input-group-prepend" ng-if="$parent.discountCode">
+                                    <button class="btn btn-default" ng-click="clearDiscountCode()">
+                                        <i class="icon-trash"></i> Clear
+                                    </button>
+                                </span>
+                            </div>
+                            <div class="help-block" ng-if="discountError" style="color: #a94442;">
+                                {{ discountError }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div ng-if="orderSummary" class="row">
+                <div class="col-lg-8">
+                    <strong>Base net price:</strong>
+                </div>
+                <div class="col-lg-4 text-right">
+                    <strong>{{ orderSummary.productNetPrice | currency:'':2 }} PLN</strong>
+                </div>
+            </div>
+
+            <div ng-if="orderSummary && orderSummary.addonsNetPrice > 0" class="row">
+                <div class="col-lg-8">
+                    <strong>Selected additional services:</strong>
+                </div>
+                <div class="col-lg-4 text-right">
+                    <strong>{{ orderSummary.addonsNetPrice | currency:'':2 }} PLN</strong>
+                </div>
+            </div>
+
+            <div ng-if="orderSummary && orderSummary.discountNetPrice > 0" class="row">
+                <div class="col-lg-8">
+                    <strong>Discount tax excluded ({{ $parent.discountCode }}):</strong>
+                </div>
+                <div class="col-lg-4 text-right text-success">
+                    <strong>-{{ orderSummary.discountGrossPrice || orderSummary.discountNetPrice | currency:'':2 }} PLN</strong>
+                </div>
+            </div>
+
+            <div ng-if="orderSummary" class="row">
+                <div class="col-lg-8">
+                    <strong>Total net cost with fuel surcharge:</strong>
+                </div>
+                <div class="col-lg-4 text-right">
+                    <strong>{{ orderSummary.totalNetPrice | currency:'':2 }} PLN</strong>
+                </div>
+            </div>
+
+            <div ng-if="orderSummary" class="row">
+                <div class="col-lg-8">
+                    <strong>Total gross cost:</strong>
+                </div>
+                <div class="col-lg-4 text-right">
+                    <strong>{{ orderSummary.totalGrossPrice | currency:'':2 }} PLN</strong>
+                </div>
+            </div>
+
+            <div ng-if="orderSummary && orderSummary.fuelSurchargeNetPrice > 0" class="row">
+                <div class="col-lg-8">
+                    <small>including fuel surcharge: {{ orderSummary.fuelSurchargeNetPrice | currency:'':2 }} PLN</small>
+                </div>
+            </div>
+
+            <div ng-if="orderSummary && orderSummary.vatPercent > 0" class="row">
+                <div class="col-lg-8">
+                    <small>including TAX ({{ orderSummary.vatPercent }}%): {{ (orderSummary.totalGrossPrice - orderSummary.totalNetPrice) | currency:'':2 }} PLN</small>
+                </div>
+            </div>
+
+            <!-- Error message -->
+            <div ng-if="priceError" class="row" style="margin-top: 15px;">
+                <div class="col-lg-12">
+                    <div style="color: #a94442; font-weight: bold;">
+                        <i class="icon-exclamation-triangle"></i>
+                        Error calculating price: {{ priceError }}
+                    </div>
+                </div>
+            </div>
+        </div>

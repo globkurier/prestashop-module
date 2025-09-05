@@ -32,7 +32,6 @@
     function defaultServiceSelector() {
         function globServicesController($scope, $http) {
             function getServices() {
-                console.log('getServices')
                 var baseApiUrl = "https://api.globkurier.pl/v1/",
                     url = baseApiUrl + "products",
                     parameters = {

@@ -139,8 +139,33 @@
              service-options="serviceOptions"
              service-model="pickedService"></div>
 
-        <div class="panel-footer" style="text-align: center;">
-            <button type="submit" class="btn btn-success" style="padding: 12px 40px;" ng-click="send();" ng-hide="orderPlaced" ng-disabled="isProcessing || !pickedService">
+        <!-- Section discount code and summary -->
+        <div class="col-lg-12" ng-show="pickedService && additionalInfo && additionalInfo.paymentType" style="margin-top: 20px;">
+           <div class="panel">
+                <div class="panel-heading">Podsumowanie zamówienia</div>
+                <div class="panel-body">
+                    <div glob-discount-code-and-summary
+                         service-model="pickedService"
+                         service-options="serviceOptions"
+                         additional-info="additionalInfo"
+                         package-info="pickedService.packageInfo"
+                         sender-address="senderAddress"
+                         recevicer-address="recevicerAddress"
+                         discount-code="discountCode"
+                         price-error="priceError"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class=" col-lg-12 panel-footer" style="text-align: center;">
+            <button
+                type="submit"
+                class="btn btn-success"
+                style="padding: 12px 40px;"
+                ng-click="send();"
+                ng-hide="orderPlaced"
+                ng-disabled="isProcessing || !pickedService || priceError"
+            >
                 <i class="icon-send" ng-show="!isProcessing"></i>
                 <i class="icon-cog icon-spin" ng-show="isProcessing"></i>
                 {l s='Send' mod='globkuriermodule'}

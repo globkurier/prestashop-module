@@ -120,7 +120,7 @@ function clik()
             return $scope.sender.phone || (r.noSenderPhone = !0), $scope.receiver.phone || (r.noReceiverPhone = !0), Object.keys(r).length > 0 ? r : null
         }
 
-        $scope.sender = Address.getNew(), $scope.receiver = Address.getNew(), $scope.additionalInfo = null, $scope.service = {}, $scope.pickedService = null, $scope.serviceOptions = null, $scope.isProcessing = !1, $scope.send = sendOrder, $scope.orderError = null, $scope.validationError = null, $scope.terminalCode = null, $scope.terminalType = null, $scope.filterServices = [], $scope.orderPlaced = null, $scope.disableServiceFilters = function() {
+        $scope.sender = Address.getNew(), $scope.receiver = Address.getNew(), $scope.senderAddress = $scope.sender, $scope.recevicerAddress = $scope.receiver, $scope.additionalInfo = null, $scope.service = {}, $scope.pickedService = null, $scope.serviceOptions = [], $scope.discountCode = '', $scope.priceError = null, $scope.isProcessing = !1, $scope.send = sendOrder, $scope.orderError = null, $scope.validationError = null, $scope.terminalCode = null, $scope.terminalType = null, $scope.filterServices = [], $scope.orderPlaced = null, $scope.disableServiceFilters = function() {
             toggleServiceFilters(!1)
         }, $scope.enableServiceFilters = function() {
             toggleServiceFilters(!0)
@@ -412,6 +412,35 @@ function clik()
                 }), service
             }
 
+            function getOrderPrice(parameters, callback)
+            {
+                angular.isFunction(callback) || (callback = function() {});
+                for (var requiredParameters = ["productId", "length", "width", "height", "weight", "quantity", "senderCountryId", "receiverCountryId", "senderPostCode", "receiverPostCode", "paymentId"], i = requiredParameters.length - 1; i >= 0; i--) {
+                    var p = requiredParameters[i];
+                    if (void 0 === parameters[p]) return callback(InitialValues.lang1+" " + p + " "+InitialValues.lang2)
+                }
+
+                $http({
+                    method: "GET",
+                    params: parameters,
+                    url: baseApiUrl + "order/price",
+                    headers: {
+                        "x-auth-token": token,
+                        "accept-language": "pl"
+                    }
+                }).then(function(r) {
+                    return callback(null, r.data)
+                }, function(r) {
+                    if (r.data.fields) {
+                        var err = "";
+                        return angular.forEach(r.data.fields, function(value, key) {
+                            err += key + ": " + value + ", "
+                        }), callback(err)
+                    }
+                    return callback("Something wrong")
+                })
+            }
+
             function getCountries(callback)
             {
                 return angular.isFunction(callback) || (callback = function() {}), $http({
@@ -499,7 +528,8 @@ function clik()
                     getProductAddons: getProductAddons,
                     getPickupTimeRanges: getPickupTimeRanges,
                     getPayments: getPayments,
-                    getStates: getStates
+                    getStates: getStates,
+                    getOrderPrice: getOrderPrice
                 };
             return service
         }
@@ -578,17 +608,11 @@ function clik()
                     if (r.data.success) {
                         setTimeout(function() {
                             window.location.replace(urlRedirect+'#nadajGK');
-                            console.log('redirect: '+urlRedirect);
                         }, 2000);
                     }
 
-                    console.log('1');
-                    console.log(r.data);
-                    console.log(callback);
                     return r.data.success ? void callback(null, r.data) : void callback(commonErrorMsg)
                 }, function(r) {
-                    console.log('2');
-                    console.log(callback);
                     callback(commonErrorMsg)
                 })
             }
@@ -640,7 +664,6 @@ function clik()
                         collectionTypeSelected = $(this).val();
                     }
                 });
-                console.log('ORDER');
                 var data = {
                     shipment: generateShipment(order.service.id, order.packageInfo),
                     senderAddress: generateAddress(order.sender, order.additionalInfo, order.service, 'senderAddress'),
@@ -802,7 +825,6 @@ function clik()
             }
 
             function link(scope, element, attrs) {}
-            // console.log(InitialValues);
             var htmlTpl = '<p><strong ng-bind="addressTitle"></strong> <a href data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#{{ modalId }}" ng-click="loadCountries();">'+InitialValues.lang12+'</a><br/><span ng-bind="ngModel.name"></span><br/><span ng-bind="ngModel.street"></span> <span ng-bind="ngModel.houseNumber"></span> / <span ng-bind="ngModel.apartmentNumber"></span><br/><span ng-bind="ngModel.postalCode"></span> <span ng-bind="ngModel.city"></span><br/><span ng-bind="ngModel.country.country"></span> (<span ng-bind="ngModel.country.isoCode"></span>)<br/><br/><u>'+InitialValues.lang3+'</u><br/><span ng-bind="ngModel.contactPerson"></span><br/><span ng-bind="ngModel.phone"></span><br/><span ng-bind="ngModel.email"></span><div class="modal fade" id="{{ modalId }}" tabindex="-1" role="dialog"><div class="modal-dialog"><form class="modal-content" name="addressForm" ng-submit="submitForm()"><div class="modal-header"><h4 class="modal-title">'+InitialValues.lang4+'</h4></div>' +
                     '<div class="modal-body form-horizontal"><div class="form-group"><label class="col-lg-4 control-label">'+InitialValues.lang5+'</label><div class="col-lg-6"><input type="text" ng-model="ngModel.name" required/></div></div><div class="form-group"><label class="col-lg-4 control-label">'+InitialValues.lang6+'</label><div class="col-lg-6"><input type="text" ng-model="ngModel.street" required/></div></div><div class="form-group"><label class="col-lg-4 control-label">'+InitialValues.lang7+'</label><div class="col-lg-6"><input type="text" ng-model="ngModel.houseNumber" required/></div></div>' +
                     '<div class="form-group"><label class="col-lg-4 control-label">'+InitialValues.lang8+'</label><div class="col-lg-6"><input type="text" ng-model="ngModel.apartmentNumber"/></div></div><div class="form-group"><label class="col-lg-4 control-label">'+InitialValues.lang9+'</label><div class="col-lg-6"><input type="text" ng-model="ngModel.postalCode" required/></div></div><div class="form-group"><label class="col-lg-4 control-label">'+InitialValues.lang10+'</label><div class="col-lg-6"><input type="text" ng-model="ngModel.city" required/></div></div><div class="form-group"><label class="col-lg-4 control-label">'+InitialValues.lang11+'</label><div class="col-lg-6"><select type="text" ng-model="ngModel.country" ng-options="c as (c.isoCode+\': \'+c.name) for c in countries"></select></div></div><div class="form-group"><label class="col-lg-4 control-label">'+InitialValues.lang1+'</label><div class="col-lg-6"><input type="text" ng-model="ngModel.contactPerson" required/></div></div><div class="form-group"><label class="col-lg-4 control-label">'+InitialValues.lang13+'</label><div class="col-lg-6"><input type="text" ng-model="ngModel.phone" required/></div></div><div class="form-group"><label class="col-lg-4 control-label">'+InitialValues.lang14+'</label><div class="col-lg-6"><input type="email" class="form-control" ng-model="ngModel.email" required/></div></div></div><div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">'+InitialValues.lang15+'</button><button type="submit" class="btn btn-primary">'+InitialValues.lang16+'</button></div></form></div></div></p>',
@@ -909,7 +931,7 @@ function clik()
 
                 function onOptionChanged(option)
                 {
-                    option.picked ? addOption(option) : removeOption(option), console.log($scope.ngModel)
+                    option.picked ? addOption(option) : removeOption(option)
                 }
 
                 function removeOption(option)
@@ -936,14 +958,14 @@ function clik()
                 {
                     $scope.collectionTypes = service.collectionTypes, // this for checking number of collectionTypes options (> 1)
                         $scope.isAjax = !0, $scope.options.length = 0, GlobApi.getProductAddons(service.id, service.lastParameters, function(err, addons) {
-                        return $scope.isAjax = !1, err ? console.log(err) : void($scope.options = addons)
+                        return $scope.isAjax = !1, err ? void 0 : void($scope.options = addons)
                     })
                 }
 
                 CollectionTypeService.setCollectionType("PICKUP");
                 CollectionTypeService.setCollectionType("POINT");
                 CollectionTypeService.setCollectionType("PARCEL");
-                $scope.isAjax = !1, $scope.ngModel = [], $scope.options = [], $scope.pickedCollectionType = "PICKUP", $scope.collectionTypeChanged = onCollectionTypeChanged, $scope.optionChanged = onOptionChanged, $scope.$watch("serviceModel", function(newValue, oldValue) {
+                $scope.isAjax = !1, $scope.ngModel = [], $scope.options = [], $scope.pickedCollectionType = "PICKUP", $scope.collectionTypeChanged = onCollectionTypeChanged, $scope.optionChanged = onOptionChanged,                 $scope.$watch("serviceModel", function(newValue, oldValue) {
                     return $scope.ngModel.length = 0, $scope.serviceModel && $scope.serviceModel.id ? void loadOptionsForService($scope.serviceModel) : void($scope.options.length = 0)
                 })
             }
@@ -1001,9 +1023,12 @@ function clik()
                 function pickProduct(p)
                 {
                     $scope.pickedProduct = p;
+                    $scope.pickedService = p; // Dodajemy ustawienie pickedService
                     if ($scope.pickedProduct) {
                         $scope.pickedProduct.packageInfo = $scope.packageInfo;
                         $scope.pickedProduct.lastParameters = $scope.lastParameters;
+                        $scope.pickedService.packageInfo = $scope.packageInfo; // Dodajemy packageInfo do pickedService
+                        $scope.pickedService.lastParameters = $scope.lastParameters; // Dodajemy lastParameters do pickedService
                     }
 
                     checkPickedServiceType($scope.pickedProduct, $scope);
@@ -1011,7 +1036,8 @@ function clik()
 
                 function cancelProduct()
                 {
-                    $scope.pickedProduct = null
+                    $scope.pickedProduct = null;
+                    $scope.pickedService = null; // Dodajemy ustawienie pickedService na null
                 }
 
                 function getServices(noValidate, callback)
@@ -1092,7 +1118,7 @@ function clik()
                         }
                     });
                 }
-                $scope.getServices = getServices, $scope.pickProduct = pickProduct, $scope.cancelProduct = cancelProduct, $scope.isAjax = !1, $scope.packageInfo = InitialValues.defaultPackageInfo, $scope.lastParameters = {}, $scope.error = null, $scope.products = [], $scope.pickedProduct = null, $scope.availableWeights = [{
+                $scope.getServices = getServices, $scope.pickProduct = pickProduct, $scope.cancelProduct = cancelProduct, $scope.isAjax = !1, $scope.packageInfo = InitialValues.defaultPackageInfo, $scope.lastParameters = {}, $scope.error = null, $scope.products = [], $scope.pickedProduct = null, $scope.pickedService = null, $scope.availableWeights = [{
                     v: 1,
                     name: "1kg"
                 }, {
@@ -1276,6 +1302,188 @@ function clik()
             return service
         }
         angular.module("newParcelApp").factory("XmlGenerator", ["InitialValues", xmlGenerator])
+    }(),
+    function() {
+        "use strict";
+
+        function globDiscountCodeAndSummary(InitialValues, GlobApi)
+        {
+            function globDiscountCodeAndSummaryController($scope, $timeout, InitialValues, GlobApi)
+            {
+
+                function calculateOrderPrice()
+                {
+
+                    if (!$scope.serviceModel || !$scope.serviceModel.id) {
+                        return;
+                    }
+
+                    if (!$scope.additionalInfo || !$scope.additionalInfo.paymentType) {
+                        $scope.priceError = 'Proszę wybrać metodę płatności';
+                        $scope.orderSummary = null;
+                        return;
+                    }
+
+                    var parameters = {
+                        productId: $scope.serviceModel.id,
+                        length: $scope.packageInfo ? $scope.packageInfo.length : (InitialValues.defaultPackageInfo ? InitialValues.defaultPackageInfo.length : 0),
+                        width: $scope.packageInfo ? $scope.packageInfo.width : (InitialValues.defaultPackageInfo ? InitialValues.defaultPackageInfo.width : 0),
+                        height: $scope.packageInfo ? $scope.packageInfo.height : (InitialValues.defaultPackageInfo ? InitialValues.defaultPackageInfo.height : 0),
+                        weight: $scope.packageInfo ? $scope.packageInfo.weight : (InitialValues.defaultPackageInfo ? InitialValues.defaultPackageInfo.weight : 0),
+                        quantity: $scope.packageInfo ? $scope.packageInfo.count : (InitialValues.defaultPackageInfo ? InitialValues.defaultPackageInfo.count : 1),
+                        senderCountryId: $scope.senderAddress && $scope.senderAddress.country ? $scope.senderAddress.country.id : InitialValues.senderCountryIdNew,
+                        receiverCountryId: $scope.recevicerAddress && $scope.recevicerAddress.country ? $scope.recevicerAddress.country.id : InitialValues.receiverCountryIdNew,
+                        senderPostCode: $scope.senderAddress && $scope.senderAddress.postalCode ? $scope.senderAddress.postalCode : (InitialValues.sender && InitialValues.sender.postCode ? InitialValues.sender.postCode : ''),
+                        receiverPostCode: $scope.recevicerAddress && $scope.recevicerAddress.postalCode ? $scope.recevicerAddress.postalCode : (InitialValues.receiver && InitialValues.receiver.postCode ? InitialValues.receiver.postCode : ''),
+                        paymentId: parseInt(($scope.additionalInfo && $scope.additionalInfo.paymentType) || InitialValues.defaultPaymentType || 1)
+                    };
+
+                    // Dodaj opcje dodatkowe
+                    if ($scope.serviceOptions && Array.isArray($scope.serviceOptions) && $scope.serviceOptions.length > 0) {
+                        var addonIds = $scope.serviceOptions.map(function(option) {
+                            return parseInt(option.id) || option.id;
+                        });
+                        // Zgodnie z dokumentacją API, addonIds powinien być przekazywany jako addonIds[]
+                        parameters['addonIds[]'] = addonIds;
+                    }
+
+                    // Dodaj wartość ubezpieczenia
+                    if ($scope.additionalInfo && $scope.additionalInfo.insuranceAmount) {
+                        parameters.insuranceValue = $scope.additionalInfo.insuranceAmount;
+                    }
+
+                    // Dodaj wartość pobrania
+                    if ($scope.additionalInfo && $scope.additionalInfo.codAmount) {
+                        parameters.cashOnDeliveryValue = $scope.additionalInfo.codAmount;
+                    }
+
+                    // Dodaj kod rabatowy
+                    var discountCode = $scope.$parent.discountCode;
+                    if (discountCode && discountCode.trim() !== '') {
+                        parameters.discountCode = discountCode.trim();
+                    }
+
+                    $scope.loaders.priceCalculation = true;
+                    $scope.priceError = null;
+
+                    GlobApi.getOrderPrice(parameters, function(err, priceData) {
+                        $scope.loaders.priceCalculation = false;
+                        if (err) {
+                            $scope.$parent.priceError = err;
+                            $scope.orderSummary = null; // Wyczyść podsumowanie gdy jest błąd
+                        } else {
+                            $scope.$parent.priceError = null;
+                            $scope.orderSummary = priceData;
+                        }
+                    });
+                }
+
+                function applyDiscountCode()
+                {
+                    var discountCode = $scope.$parent.discountCode;
+
+                    if (!discountCode || discountCode.trim() === '') {
+                        $scope.discountError = 'Proszę wprowadzić kod rabatowy';
+                        return;
+                    }
+
+                    if (!$scope.additionalInfo || !$scope.additionalInfo.paymentType) {
+                        $scope.discountError = 'Proszę najpierw wybrać metodę płatności';
+                        return;
+                    }
+
+                    // Sprawdźmy czy kod rabatowy ma odpowiednią długość (minimum 3 znaki)
+                    if (discountCode.trim().length < 3) {
+                        $scope.discountError = 'Kod rabatowy musi mieć co najmniej 3 znaki';
+                        return;
+                    }
+
+                    $scope.discountError = null;
+                    calculateOrderPrice();
+                }
+
+                function clearDiscountCode()
+                {
+                    $scope.$parent.discountCode = '';
+                    $scope.discountError = null;
+                    calculateOrderPrice();
+                }
+
+                function onDiscountCodeChange()
+                {
+                    var discountCode = $scope.$parent.discountCode;
+
+                    // Jeśli kod rabatowy został usunięty, wyczyść błąd i przelicz cenę
+                    if (!discountCode || discountCode.trim() === '') {
+                        $scope.$parent.priceError = null;
+                        $scope.discountError = null;
+                        calculateOrderPrice();
+                    }
+                }
+
+                // Inicjalizacja zmiennych
+                $scope.discountError = null;
+                $scope.orderSummary = null;
+                $scope.loaders = {
+                    priceCalculation: false
+                };
+
+                $scope.applyDiscountCode = applyDiscountCode;
+                $scope.clearDiscountCode = clearDiscountCode;
+                $scope.onDiscountCodeChange = onDiscountCodeChange;
+
+                // Nasłuchuj zmian w discountCode
+                $scope.$watch('$parent.discountCode', function(newValue, oldValue) {
+
+                    // Jeśli kod rabatowy został usunięty, wyczyść błędy
+                    if (!newValue || newValue.trim() === '') {
+                        $scope.$parent.priceError = null;
+                        $scope.discountError = null;
+                        calculateOrderPrice();
+                    }
+                });
+
+                // Nasłuchuj zmian w danych przesyłki
+                $scope.$watchCollection('serviceModel', function() {
+                    if ($scope.serviceModel && $scope.serviceModel.id && $scope.additionalInfo && $scope.additionalInfo.paymentType) {
+                        calculateOrderPrice();
+                    }
+                });
+
+                $scope.$watchCollection('serviceOptions', function() {
+                    if ($scope.serviceModel && $scope.serviceModel.id && $scope.additionalInfo && $scope.additionalInfo.paymentType) {
+                        calculateOrderPrice();
+                    }
+                });
+
+                $scope.$watchCollection('additionalInfo', function() {
+                    if ($scope.serviceModel && $scope.serviceModel.id && $scope.additionalInfo && $scope.additionalInfo.paymentType) {
+                        calculateOrderPrice();
+                    }
+                }, true);
+            }
+
+            function link(scope, element, attrs) {}
+
+            var directive = {
+                restrict: "A",
+                templateUrl: InitialValues.partialsPath + "globDiscountCodeAndSummary_"+InitialValues.isoCode+".html",
+                scope: {
+                    serviceModel: "=",
+                    serviceOptions: "=",
+                    additionalInfo: "=",
+                    packageInfo: "=",
+                    senderAddress: "=",
+                    recevicerAddress: "=",
+                    discountCode: "=",
+                    priceError: "="
+                },
+                controller: ["$scope", "$timeout", "InitialValues", "GlobApi", globDiscountCodeAndSummaryController],
+                link: link
+            };
+            return directive
+        }
+        angular.module("newParcelApp").directive("globDiscountCodeAndSummary", ["InitialValues", "GlobApi", globDiscountCodeAndSummary])
     }(),
     function() {
         "use strict";
