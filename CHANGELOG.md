@@ -6,6 +6,8 @@
 + Added CHANGELOG.md file with module change history
 + Fix the layout grid of the list of carriers
 + Added support for PrestaShop 9.x
++ Overall improvements and bug fixes.
++ Fixed security issues
 
 ## [3.1.1] - 2025-08-01
 
