@@ -432,7 +432,7 @@ function cardForProduct(product) {
     const logo = product.carrierLogoLink ? '<img src="' + product.carrierLogoLink + '" alt="' + (product.carrierName || '') + '" />' : '';
     const price = (product.netPrice != null) ? (product.netPrice + ' net') : '';
 		return (
-			'<div class="col-lg-4 glob-product-block text-center">' +
+			'<div class="col-lg-4 col-md-6 col-sm-6 glob-product-block text-center">' +
 				'<div class="glob-product-wrapper">' +
 				'<div class="glob-product-logo">' + logo + '</div>' +
 				'<strong>' + (product.carrierName || '') + '</strong><br/>' +
@@ -453,7 +453,7 @@ function fetchProducts() {
     GK.state.showAllCarriers = !!showAllFromDom;
     const terminalType = GK.state.terminalType || (window.InitialValues && window.InitialValues.terminalType) || null;
 		const url = 'https://api.globkurier.pl/v1/products?' + new URLSearchParams(params).toString();
-		$('#servicesListBox').html('<div class="col-lg-12 text-center"><i class="icon-cog icon-spin"></i></div>');
+		$('#servicesModalList').html('<div class="col-lg-12 text-center"><i class="icon-cog icon-spin"></i></div>');
 		$('#servicesContainer').addClass('loading');
 		const $btn = $('#getServicesBtn');
 		$btn.prop('disabled', true);
