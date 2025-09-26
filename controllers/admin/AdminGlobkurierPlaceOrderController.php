@@ -55,8 +55,8 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
         }
 
         $this->context->controller->addJqueryUI('ui.datepicker');
-        $this->context->controller->addJS($this->path . '/views/js/angular.min.js');
-        $this->context->controller->addJS($this->path . '/views/js/newParcelApp.261.js');
+        // Angular removed; Vue/jQuery app will be added later
+        $this->context->controller->addJS($this->path . '/views/js/newParcelApp.jquery.js');
 
         if (!empty($c->defaultCountryCode)) {
             $country = Country::getByIso($c->defaultCountryCode);

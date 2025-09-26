@@ -26,6 +26,58 @@
 * to avoid any conflicts with others containers.
 */
 
+.bootstrap a {
+    color:#1e3042;
+}
+
+.bootstrap .btn.btn-primary {
+    background-color:#1e3042;
+    border-color: #4B596D;
+}
+
+.bootstrap .btn.btn-primary:hover {
+    background-color:#4B596D;
+}
+
+.bootstrap .btn.btn-success {
+    background-color:#96c21f;
+    border-color: #79a600;
+}
+
+.bootstrap .btn.btn-success:hover {
+    background-color:#79a600;
+}
+
+.bootstrap .prestashop-switch input:first-of-type:checked ~ .slide-button {
+    background:#96c21f;
+}
+
+.glob-product-wrapper {
+    padding: 10px;
+    border: 1px solid #e1e1e1;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.glob-product-wrapper:hover {
+    box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, 0.2);
+}
+
+.glob-product-logo {
+    height: 80px;
+    width: 150px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.glob-product-logo img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
 .best-price-products {
     padding: 15px 15px 5px;
     border: 1px solid #e1e1e1;
@@ -59,7 +111,23 @@
     justify-content: center;
     align-items: center;
 }
-.additionalInfo.loading > .panel:before {
+.servicesContainer.loading > .panel:before {
+    content: "trwa ładowanie...";
+    position: absolute;
+    z-index: 9999;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    text-align: center;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.loading:before {
     content: "trwa ładowanie...";
     position: absolute;
     z-index: 9999;

@@ -1,0 +1,1217 @@
+/**
+ * New Parcel page (BO) – minimal jQuery MVP replacing Angular
+ * Note: This provides the skeleton and basic interactions. Extend feature parity as needed.
+ */
+
+(function() {
+	'use strict';
+
+	const GK = window.GK || (window.GK = {});
+	GK.state = {
+		isProcessing: false,
+		orderPlaced: null,
+		sender: {},
+		receiver: {},
+		pickedService: null,
+		serviceOptions: [],
+		additionalInfo: { paymentType: null },
+		discountCode: '',
+		priceError: null,
+		orderSummary: null,
+		packageInfo: null,
+		availablePayments: [],
+		forModal: false,
+		forceShowAll: false
+	};
+
+function setProcessing(on) {
+		GK.state.isProcessing = !!on;
+		$('#processingBox').toggle(!!on);
+		$('#sendIcon').toggle(!on);
+		$('#processingIcon').toggle(!!on);
+	}
+
+	function updateEnabledOptionsUI() {
+		const s = GK.state;
+		// derive active addon categories
+		const activeCategories = (s.serviceOptions || []).map(function(v){ return v && v.category ? v.category : (v.category || ''); });
+		// NKO → force COD and disable payment select
+		if (activeCategories.indexOf('NKO') !== -1) {
+			$('#paymentSelect').val('COD').prop('disabled', true);
+			if (!s.additionalInfo) s.additionalInfo = {};
+			s.additionalInfo.paymentType = 'COD';
+		} else {
+			$('#paymentSelect').prop('disabled', false);
+			if (s.additionalInfo && s.additionalInfo.paymentType === 'COD' && activeCategories.indexOf('NKO') === -1) {
+				// keep as chosen by user; do nothing
+			}
+		}
+		// CASH_ON_DELIVERY → show COD fields
+		const hasCOD = activeCategories.indexOf('CASH_ON_DELIVERY') !== -1;
+		$('#codAmountGroup, #codAccountGroup, #codAccountHolderGroup, #codAccountAddr1Group, #codAccountAddr2Group').toggle(hasCOD);
+		if (hasCOD) {
+			if (window.InitialValues && window.InitialValues.defaultCodAccount) {
+				$('#codAccountInput').val(window.InitialValues.defaultCodAccount);
+			}
+		} else {
+			$('#codAmountInput, #codAccountInput, #codAccountHolderInput, #codAccountAddr1Input, #codAccountAddr2Input').val('');
+		}
+		// INSURANCE → show insurance amount
+		const hasInsurance = activeCategories.indexOf('INSURANCE') !== -1;
+		$('#insuranceAmountGroup').toggle(hasInsurance);
+		if (!hasInsurance) { $('#insuranceAmountInput').val(''); }
+		// International → declared value + purpose when receiver ISO != PL
+		const receiverIso = (s.receiver && s.receiver.country && (s.receiver.country.isoCode || s.receiver.country.code || s.receiver.country.iso)) || (window.InitialValues && window.InitialValues.receiver && window.InitialValues.receiver.countryCode) || null;
+		const isInternational = receiverIso && (receiverIso.toUpperCase() !== 'PL');
+		$('#declaredValueGroup, #purposeGroup').toggle(!!isInternational);
+		if (!isInternational) { $('#declaredValueInput').val(''); $('#purposeSelect').val(''); }
+	}
+
+function showOrderPlaced(order) {
+		GK.state.orderPlaced = order;
+		$('#mainFormBox').hide();
+		$('#orderPlacedBox').show();
+	}
+
+	function clearErrors() {
+		$('#orderErrorList').empty();
+		$('#orderErrorBox').hide();
+		$('#validationErrorBox').hide();
+		$('#valErrSenderPhone').hide();
+		$('#valErrReceiverPhone').hide();
+	}
+
+	function showValidationErrors(err) {
+		if (err.noSenderPhone) $('#valErrSenderPhone').show();
+		if (err.noReceiverPhone) $('#valErrReceiverPhone').show();
+		$('#validationErrorBox').show();
+	}
+
+function showOrderErrors(obj) {
+    const $ul = $('#orderErrorList');
+		Object.keys(obj || {}).forEach(function(k) {
+			$ul.append('<li>' + k + ': ' + obj[k] + '</li>');
+		});
+		$('#orderErrorBox').show();
+	}
+
+	function validate() {
+		const r = {};
+		if (!GK.state.sender.phone) r.noSenderPhone = true;
+		if (!GK.state.receiver.phone) r.noReceiverPhone = true;
+		return Object.keys(r).length ? r : null;
+	}
+
+	function buildOrderData() {
+		const s = GK.state;
+		const data = {
+			shipment: {
+				length: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.length : null,
+				width: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.width : null,
+				height: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.height : null,
+				weight: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.weight : null,
+				productId: s.pickedService ? s.pickedService.id : null,
+				quantity: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.count : 1
+			},
+			senderAddress: {},
+			receiverAddress: {},
+			content: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.content : '',
+			paymentId: s.additionalInfo.paymentType,
+			addons: (s.serviceOptions || []).map(function(o){ return { id: o.id, value: o.value }; }),
+			collectionType: $('input[name=pickup_type]:checked').val() || 'PICKUP'
+		};
+		// map sender/receiver
+		['sender','receiver'].forEach(function(role){
+			const src = s[role] || {};
+			const dst = (role === 'sender') ? data.senderAddress : data.receiverAddress;
+			dst.name = src.name;
+			dst.city = src.city;
+			dst.street = src.street;
+			dst.houseNumber = src.houseNumber;
+			dst.postCode = src.postalCode;
+			dst.countryId = src.country && src.country.id;
+			dst.phone = src.phone;
+			dst.email = src.email;
+			dst.contactPerson = src.contactPerson;
+			if (src.terminal) dst.pointId = src.terminal;
+		});
+		return data;
+	}
+
+	function placeOrder() {
+		clearErrors();
+		const err = validate();
+		if (err) { showValidationErrors(err); return; }
+		if (!GK.state.pickedService) return;
+		setProcessing(true);
+		const orderData = buildOrderData();
+		const token = window.InitialValues && window.InitialValues.token;
+		fetch('https://api.globkurier.pl/v1/order', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'accept-language': (window.InitialValues && window.InitialValues.isoCode === 'pl') ? 'pl' : 'en',
+				'x-auth-token': token || ''
+			},
+			body: JSON.stringify(orderData)
+		}).then(function(r){ return r.json(); })
+		.then(function(resp){
+			if (!resp || !resp.number) throw resp || {};
+			// Save in shop
+			const moduleApiUrl = (window.InitialValues && window.InitialValues.moduleApiUrl) || '';
+			const dataToSend = {
+				gkId: resp.number,
+				hash: resp.hash || '',
+				orderId: (window.InitialValues && window.InitialValues.prestaOrderId) || null,
+				crateDate: null,
+				receiver: GK.state.receiver && GK.state.receiver.name,
+				content: orderData.content,
+				weight: orderData.shipment.weight,
+				carrier: GK.state.pickedService ? (GK.state.pickedService.carrierName + ' - ' + GK.state.pickedService.name) : '',
+				comments: '',
+				cod: GK.state.additionalInfo && GK.state.additionalInfo.codAmount ? GK.state.additionalInfo.codAmount : 0,
+				payment: GK.state.additionalInfo && GK.state.additionalInfo.paymentType
+			};
+			const url = moduleApiUrl + '&ajax=1&action=addNewGlobOrder&data=' + encodeURIComponent(JSON.stringify(dataToSend));
+			return fetch(url).then(function(r){ return r.json(); }).then(function(){
+				showOrderPlaced({ gkId: resp.number });
+			});
+		})
+		.catch(function(e){
+			showOrderErrors(e && e.fields ? e.fields : { common: 'Błąd podczas składania zamówienia' });
+		})
+		.finally(function(){ setProcessing(false); });
+	}
+
+	function bind() {
+		$(document).on('click', '#orderErrorClose', function(){ $('#orderErrorBox').hide(); });
+		$(document).on('click', '#validationErrorClose', function(){ $('#validationErrorBox').hide(); });
+		$(document).on('click', '#sendOrderBtn', placeOrder);
+	}
+
+function initStateFromInitialValues() {
+    const iv = window.InitialValues || {};
+		GK.state.sender = {
+			name: (iv.sender && iv.sender.name) || '',
+			street: (iv.sender && iv.sender.street) || '',
+			houseNumber: (iv.sender && iv.sender.houseNumber) || '',
+			postalCode: (iv.sender && iv.sender.postCode) || '',
+			city: (iv.sender && iv.sender.city) || '',
+			country: iv.sender && iv.sender.countryId ? { id: iv.sender.countryId } : null,
+			contactPerson: (iv.sender && iv.sender.personName) || '',
+			phone: (iv.sender && iv.sender.phone) || '',
+			email: (iv.sender && iv.sender.email) || ''
+		};
+        const rv = iv.receiver || {};
+		GK.state.receiver = {
+			name: rv.personName || rv.name || '',
+			street: rv.street || '',
+			houseNumber: rv.houseNumber || '',
+			postalCode: rv.postCode || rv.postalCode || '',
+			city: rv.city || '',
+			country: rv.countryId ? { id: rv.countryId, isoCode: (rv.countryCode || rv.countryIso || rv.isoCode || null) } : (rv.countryCode ? { id: null, isoCode: rv.countryCode } : null),
+			contactPerson: rv.personName || '',
+			phone: rv.phone || '',
+			email: rv.email || ''
+		};
+		if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
+		// make sure UI reflects current international rules immediately
+        try { updateEnabledOptionsUI(); } catch(e) {}
+        try { preloadCountriesMap().then(ensureCountryIdsFromIso); } catch(e) { ensureCountryIdsFromIso(); }
+	}
+
+// Mapuje country.id po isoCode na podstawie listy z /countries (bez twardych wyjątków)
+// Maps country.id by isoCode using /countries list (no hardcoded exceptions)
+function ensureCountryIdsFromIso() {
+    const s = GK.state;
+    if (!s) return;
+    const map = (window.GK && window.GK.countriesMap) ? window.GK.countriesMap : null;
+    function normalizeCountry(country, fallbackId) {
+        if (!country) return null;
+        const iso = (country.isoCode || country.code || country.iso || '').toUpperCase();
+        // if we have a countries map, override id based on ISO
+        if (map && map[iso]) { country.id = map[iso]; return country; }
+        // fallback: use id from InitialValues (if provided)
+        if (fallbackId) { country.id = fallbackId; return country; }
+        // if id already set and no map/fallback, keep as is
+        if (country.id) return country;
+        // no reliable source → leave unchanged
+        return country;
+    }
+    if (s.sender && s.sender.country) s.sender.country = normalizeCountry(s.sender.country, (window.InitialValues && window.InitialValues.senderCountryIdNew));
+    if (s.receiver && s.receiver.country) s.receiver.country = normalizeCountry(s.receiver.country, (window.InitialValues && window.InitialValues.receiverCountryIdNew));
+}
+
+// Fetch countries once and build ISO -> ID map
+function preloadCountriesMap() {
+    if (!window.GK) window.GK = {};
+    if (window.GK.countriesMapLoaded) return Promise.resolve(window.GK.countriesMap || {});
+    const url = 'https://api.globkurier.pl/v1/countries';
+    return fetch(url, { headers: buildHeaders() })
+        .then(function(r){ return r.json(); })
+        .then(function(list){
+            const map = {};
+            if (Array.isArray(list)) {
+                list.forEach(function(c){ if (c && c.isoCode) { map[(c.isoCode + '').toUpperCase()] = c.id; } });
+            }
+            window.GK.countriesMap = map;
+            window.GK.countriesMapLoaded = true;
+            return map;
+        })
+        .catch(function(){ window.GK.countriesMapLoaded = true; return {}; });
+}
+
+function renderAddressBoxes() {
+    // populate sender
+    $('#sender_name').val(GK.state.sender.name);
+    $('#sender_street').val(GK.state.sender.street);
+    $('#sender_houseNumber').val(GK.state.sender.houseNumber);
+    $('#sender_postalCode').val(GK.state.sender.postalCode);
+    $('#sender_city').val(GK.state.sender.city);
+    $('#sender_phone').val(GK.state.sender.phone);
+    $('#sender_email').val(GK.state.sender.email);
+    // populate receiver
+    $('#receiver_name').val(GK.state.receiver.name);
+    $('#receiver_street').val(GK.state.receiver.street);
+    $('#receiver_houseNumber').val(GK.state.receiver.houseNumber);
+    $('#receiver_postalCode').val(GK.state.receiver.postalCode);
+    $('#receiver_city').val(GK.state.receiver.city);
+    $('#receiver_phone').val(GK.state.receiver.phone);
+    $('#receiver_email').val(GK.state.receiver.email);
+
+    // bind
+    $(document).on('input change', '#sender_name,#sender_street,#sender_houseNumber,#sender_postalCode,#sender_city,#sender_phone,#sender_email', function(){
+        const id = this.id.replace('sender_','');
+        GK.state.sender[id] = $(this).val();
+        if (GK.state.sender.phone && GK.state.receiver.phone) { $('#validationErrorBox').hide(); }
+    });
+    $(document).on('input change', '#receiver_name,#receiver_street,#receiver_houseNumber,#receiver_postalCode,#receiver_city,#receiver_phone,#receiver_email', function(){
+        const id = this.id.replace('receiver_','');
+        GK.state.receiver[id] = $(this).val();
+        if (GK.state.sender.phone && GK.state.receiver.phone) { $('#validationErrorBox').hide(); }
+    });
+}
+
+function populateDisplayPanels() {
+    // Sender display
+    if ($('#sender_display_name').length) {
+        $('#sender_display_name').text(GK.state.sender.name || '');
+        $('#sender_display_street').text(GK.state.sender.street || '');
+        $('#sender_display_houseNumber').text(GK.state.sender.houseNumber || '');
+        $('#sender_display_postalCode').text(GK.state.sender.postalCode || '');
+        $('#sender_display_city').text(GK.state.sender.city || '');
+        $('#sender_display_countryIso').text((window.InitialValues && window.InitialValues.sender && window.InitialValues.sender.countryCode) || '');
+        $('#sender_display_contact').text(GK.state.sender.contactPerson || '');
+        $('#sender_display_phone').text(GK.state.sender.phone || '');
+        $('#sender_display_email').text(GK.state.sender.email || '');
+    }
+    // Receiver display
+    if ($('#receiver_display_name').length) {
+        $('#receiver_display_name').text(GK.state.receiver.name || '');
+        $('#receiver_display_street').text(GK.state.receiver.street || '');
+        $('#receiver_display_houseNumber').text(GK.state.receiver.houseNumber || '');
+        $('#receiver_display_postalCode').text(GK.state.receiver.postalCode || '');
+        $('#receiver_display_city').text(GK.state.receiver.city || '');
+        $('#receiver_display_countryIso').text((window.InitialValues && window.InitialValues.receiver && window.InitialValues.receiver.countryCode) || '');
+        $('#receiver_display_contact').text(GK.state.receiver.contactPerson || '');
+        $('#receiver_display_phone').text(GK.state.receiver.phone || '');
+        $('#receiver_display_email').text(GK.state.receiver.email || '');
+    }
+}
+
+function bindEditModals() {
+    // Open Sender edit
+    $(document).off('click', '#senderChangeLink').on('click', '#senderChangeLink', function(e){
+        e.preventDefault();
+        if (!$('#senderEditModal').length) return;
+        $('#sender_edit_name').val(GK.state.sender.name || '');
+        $('#sender_edit_street').val(GK.state.sender.street || '');
+        $('#sender_edit_houseNumber').val(GK.state.sender.houseNumber || '');
+        $('#sender_edit_postalCode').val(GK.state.sender.postalCode || '');
+        $('#sender_edit_city').val(GK.state.sender.city || '');
+        $('#sender_edit_contact').val(GK.state.sender.contactPerson || '');
+        $('#sender_edit_phone').val(GK.state.sender.phone || '');
+        $('#sender_edit_email').val(GK.state.sender.email || '');
+        $('#senderEditModal').modal('show');
+    });
+    // Save Sender edit
+    $(document).off('click', '#saveSenderEdit').on('click', '#saveSenderEdit', function(){
+        GK.state.sender.name = $('#sender_edit_name').val();
+        GK.state.sender.street = $('#sender_edit_street').val();
+        GK.state.sender.houseNumber = $('#sender_edit_houseNumber').val();
+        GK.state.sender.postalCode = $('#sender_edit_postalCode').val();
+        GK.state.sender.city = $('#sender_edit_city').val();
+        GK.state.sender.contactPerson = $('#sender_edit_contact').val();
+        GK.state.sender.phone = $('#sender_edit_phone').val();
+        GK.state.sender.email = $('#sender_edit_email').val();
+        populateDisplayPanels();
+        if (GK.state.sender.phone && GK.state.receiver.phone) { $('#validationErrorBox').hide(); }
+    });
+
+    // Open Receiver edit
+    $(document).off('click', '#receiverChangeLink').on('click', '#receiverChangeLink', function(e){
+        e.preventDefault();
+        if (!$('#receiverEditModal').length) return;
+        $('#receiver_edit_name').val(GK.state.receiver.name || '');
+        $('#receiver_edit_street').val(GK.state.receiver.street || '');
+        $('#receiver_edit_houseNumber').val(GK.state.receiver.houseNumber || '');
+        $('#receiver_edit_postalCode').val(GK.state.receiver.postalCode || '');
+        $('#receiver_edit_city').val(GK.state.receiver.city || '');
+        $('#receiver_edit_contact').val(GK.state.receiver.contactPerson || '');
+        $('#receiver_edit_phone').val(GK.state.receiver.phone || '');
+        $('#receiver_edit_email').val(GK.state.receiver.email || '');
+        $('#receiverEditModal').modal('show');
+    });
+    // Save Receiver edit
+    $(document).off('click', '#saveReceiverEdit').on('click', '#saveReceiverEdit', function(){
+        GK.state.receiver.name = $('#receiver_edit_name').val();
+        GK.state.receiver.street = $('#receiver_edit_street').val();
+        GK.state.receiver.houseNumber = $('#receiver_edit_houseNumber').val();
+        GK.state.receiver.postalCode = $('#receiver_edit_postalCode').val();
+        GK.state.receiver.city = $('#receiver_edit_city').val();
+        GK.state.receiver.contactPerson = $('#receiver_edit_contact').val();
+        GK.state.receiver.phone = $('#receiver_edit_phone').val();
+        GK.state.receiver.email = $('#receiver_edit_email').val();
+        populateDisplayPanels();
+        if (GK.state.sender.phone && GK.state.receiver.phone) { $('#validationErrorBox').hide(); }
+    });
+}
+	// ============ Services and Options (MVP) ============
+
+function templateServicesPanel() { return ''; }
+
+	function setPackageInfoFromInputs() {
+		GK.state.packageInfo = {
+			content: $('#pkg-content').val() || '',
+			length: parseFloat($('#pkg-length').val()) || null,
+			width: parseFloat($('#pkg-width').val()) || null,
+			height: parseFloat($('#pkg-height').val()) || null,
+			weight: parseFloat($('#pkg-weight').val()) || null,
+			count: parseInt($('#pkg-count').val(), 10) || 1
+		};
+	}
+
+function populatePackageInputs() {
+    const pi = GK.state.packageInfo || (window.InitialValues && window.InitialValues.defaultPackageInfo) || {};
+    if ($('#pkg-content').length) {
+        if (pi.content != null) $('#pkg-content').val(pi.content);
+        if (pi.length != null) $('#pkg-length').val(pi.length);
+        if (pi.width != null) $('#pkg-width').val(pi.width);
+        if (pi.height != null) $('#pkg-height').val(pi.height);
+        if (pi.weight != null) $('#pkg-weight').val(pi.weight);
+        if (pi.count != null) $('#pkg-count').val(pi.count);
+    }
+}
+
+function buildProductsParams() {
+    const s = GK.state;
+    try { ensureCountryIdsFromIso(); } catch(e) {}
+    const p = s.packageInfo || {};
+    const params = {
+			length: p.length,
+			width: p.width,
+			height: p.height,
+			weight: p.weight,
+			quantity: p.count || 1
+		};
+		if (s.sender && s.sender.postalCode) params.senderPostCode = s.sender.postalCode;
+		if (s.receiver && s.receiver.postalCode) params.receiverPostCode = s.receiver.postalCode;
+		if (s.sender && s.sender.country && s.sender.country.id) params.senderCountryId = s.sender.country.id;
+		if (s.receiver && s.receiver.country && s.receiver.country.id) params.receiverCountryId = s.receiver.country.id;
+		return params;
+	}
+
+function buildHeaders() {
+    const headers = {};
+	if (window.InitialValues && window.InitialValues.token) headers['x-auth-token'] = window.InitialValues.token;
+	headers['accept-language'] = (window.InitialValues && window.InitialValues.isoCode === 'pl') ? 'pl' : 'en';
+		return headers;
+	}
+
+function cardForProduct(product) {
+    const logo = product.carrierLogoLink ? '<img src="' + product.carrierLogoLink + '" alt="' + (product.carrierName || '') + '" />' : '';
+    const price = (product.netPrice != null) ? (product.netPrice + ' net') : '';
+		return (
+			'<div class="col-lg-4 glob-product-block text-center">' +
+				'<div class="glob-product-wrapper">' +
+				'<div class="glob-product-logo">' + logo + '</div>' +
+				'<strong>' + (product.carrierName || '') + '</strong><br/>' +
+				'<span>' + (product.name || '') + '</span><br/><br/>' +
+				'<strong>' + price + '</strong><br/><br/>' +
+				'<button class="btn btn-sm btn-success pick-product" data-id="' + product.id + '">Wybierz</button>' +
+				'</div>' +
+			'</div>'
+		);
+	}
+
+function fetchProducts() {
+		setPackageInfoFromInputs();
+		const params = buildProductsParams();
+		// Filter by terminal type if showAllCarriers is false
+    // determine current filter state
+    const showAllFromDom = $('#service_filters_on').is(':checked');
+    GK.state.showAllCarriers = !!showAllFromDom;
+    const terminalType = GK.state.terminalType || (window.InitialValues && window.InitialValues.terminalType) || null;
+		const url = 'https://api.globkurier.pl/v1/products?' + new URLSearchParams(params).toString();
+		$('#servicesListBox').html('<div class="col-lg-12 text-center"><i class="icon-cog icon-spin"></i></div>');
+		$('#servicesContainer').addClass('loading');
+		const $btn = $('#getServicesBtn');
+		$btn.prop('disabled', true);
+		$btn.find('i.icon-cog').show();
+		return fetch(url, { headers: buildHeaders() })
+			.then(function(r){ return r.json(); })
+			.then(function(data){
+				let list = [];
+				if (data) {
+					['standard','fast','superfast','noon','morning'].forEach(function(bucket){
+						if (Array.isArray(data[bucket])) list = list.concat(data[bucket]);
+					});
+				}
+                GK.state.products = list;
+
+                if (!GK.state.showAllCarriers && terminalType) {
+					let map = {
+						inpost: function(p){ return (p.carrierName || '').toLowerCase().indexOf('inpost') > -1; },
+						ruch: function(p){ return (p.carrierName || '').toLowerCase().indexOf('orlen') > -1 || (p.carrierName || '').toLowerCase().indexOf('ruch') > -1; },
+						pocztex48owp: function(p){ return (p.carrierName || '').toLowerCase().indexOf('poczta') > -1; },
+						dhlparcel: function(p){ return (p.carrierName || '').toLowerCase().indexOf('dhl') > -1; },
+						dpdpickup: function(p){ return (p.carrierName || '').toLowerCase().indexOf('dpd') > -1; }
+					};
+					let fn = map[(terminalType + '').toLowerCase()];
+					if (fn) list = list.filter(fn);
+				}
+               const html = list.map(cardForProduct).join('');
+               if (GK.state.forModal) {
+                   $('#servicesModalList').html(html);
+                   if (!html) {
+                       $('#servicesModalEmpty').show();
+                   } else {
+                       $('#servicesModalEmpty').hide();
+                   }
+               }
+                // no-op
+			})
+			.finally(function(){
+				$('#servicesContainer').removeClass('loading');
+				const $btn = $('#getServicesBtn');
+				$btn.prop('disabled', false);
+				$btn.find('i.icon-cog').hide();
+			});
+	}
+
+function renderServiceOptionsContainer() {
+    // Use existing markup in TPL; just initialize widgets and bind events
+    $('#serviceOptionsContainer').show();
+    try { $('#sendDateInput').datepicker({ dateFormat: 'yy-mm-dd' }); } catch(e) {}
+    if (window.InitialValues && window.InitialValues.todayDate) {
+        $('#sendDateInput').val(window.InitialValues.todayDate);
+    }
+    $('#sendDateInput').off('change').on('change', function(){ fetchTimeRanges(); });
+    // bind new inputs to state
+    $(document)
+      .off('input change', '#codAmountInput')
+      .on('input change', '#codAmountInput', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.codAmount = $(this).val(); recalcOrderPrice(); });
+    $(document)
+      .off('input change', '#codAccountInput')
+      .on('input change', '#codAccountInput', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.codAccount = $(this).val(); });
+    $(document)
+      .off('input change', '#codAccountHolderInput')
+      .on('input change', '#codAccountHolderInput', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.codAccountHolder = $(this).val(); });
+    $(document)
+      .off('input change', '#codAccountAddr1Input')
+      .on('input change', '#codAccountAddr1Input', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.codAccountAddr1 = $(this).val(); });
+    $(document)
+      .off('input change', '#codAccountAddr2Input')
+      .on('input change', '#codAccountAddr2Input', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.codAccountAddr2 = $(this).val(); });
+    $(document)
+      .off('input change', '#insuranceAmountInput')
+      .on('input change', '#insuranceAmountInput', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.insuranceAmount = $(this).val(); recalcOrderPrice(); });
+    $(document)
+      .off('change', '#purposeSelect')
+      .on('change', '#purposeSelect', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.purpose = $(this).val(); });
+    $(document)
+      .off('input change', '#declaredValueInput')
+      .on('input change', '#declaredValueInput', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.declaredValue = $(this).val(); });
+    $(document)
+      .off('input change', '#commentsInput')
+      .on('input change', '#commentsInput', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.notes = $(this).val(); });
+    $('input[name=pickup_type]').off('change').on('change', function(){
+        fetchTimeRanges();
+        refreshAddons();
+        refreshPayments();
+        recalcOrderPrice();
+        updateCarrierDependentUI();
+        updateEnabledOptionsUI();
+        fetchCustomRequiredFields();
+    });
+}
+
+	function fetchAddonsAndPayments() {
+		const s = GK.state;
+		if (!s.pickedService) return;
+		renderServiceOptionsContainer();
+		// Addons
+		$('#addonsList').empty();
+		$('#addonsListContainer').hide();
+		const params = buildProductsParams();
+		params.productId = s.pickedService.id;
+		const addonsUrl = 'https://api.globkurier.pl/v1/product/addons?' + new URLSearchParams(params).toString();
+		fetch(addonsUrl, { headers: buildHeaders() })
+			.then(function(r){ return r.json(); })
+			.then(function(data){
+				const list = (data && Array.isArray(data.addons)) ? data.addons : (Array.isArray(data) ? data : []);
+				const html = list.map(function(opt){
+					const p = (opt.priceGross != null ? opt.priceGross : opt.price);
+					const curr = (opt.currency || '').trim();
+					const priceTxt = (p != null) ? (' <span class="text-muted">(+' + p + (curr ? (' ' + curr) : '') + ')</span>') : '';
+					const label = opt.addonName || opt.name || opt.symbol || ('#' + opt.id);
+					return '<div class="col-lg-12"><label><input type="checkbox" class="addon-checkbox" data-id="' + opt.id + '" data-category="' + (opt.category || '') + '" data-price="' + (p != null ? p : '') + '"> ' + label + priceTxt + '</label></div>';
+				}).join('');
+				$('#addonsList').html(html);
+				if (html) { $('#addonsListContainer').show(); } else { $('#addonsListContainer').hide(); }
+				refreshPayments();
+			});
+		// Payments (requires grossOrderPrice in some cases)
+		refreshPayments();
+		// Prefill UI for picked service summary
+		$('#pickedServiceName').text((s.pickedService.carrierName || '') + (s.pickedService.name ? (' – ' + s.pickedService.name) : ''));
+		$('#pickedServicePanel').show();
+        $('#summaryServiceName').text((s.pickedService.carrierName || '') + (s.pickedService.name ? (' – ' + s.pickedService.name) : ''));
+        $('#changeServiceBtn').off('click').on('click', function(){ GK.state.forceShowAll = true; GK.state.forModal = true; fetchProducts().then(function(){ $('#servicesPickModal').modal('show'); }); });
+        // Always show terminal info block; fill defaults if available
+        $('#terminalInfo').show();
+        if (window.InitialValues && window.InitialValues.terminalCode) {
+            $('#terminalCode').text(window.InitialValues.terminalCode);
+        }
+        $('.terminalLabel').hide();
+        if (window.InitialValues && window.InitialValues.terminalType) {
+            $('.terminalLabel[data-type="' + (window.InitialValues.terminalType || '') + '"]').show();
+        }
+		// Initial dependent UI and requirements
+		updateCarrierDependentUI();
+		enforceCollectionTypeRadios();
+		setTimeout(function(){ fetchTimeRanges(); fetchCustomRequiredFields(); }, 0);
+	}
+
+function updateCarrierDependentUI() {
+    const s = GK.state;
+    if (!s.pickedService) return;
+    const name = (s.pickedService.carrierName || '').toLowerCase();
+    const sendingType = $('input[name=pickup_type]:checked').val();
+    // hide all
+    $('.receiverAddressPointId').hide();
+    $('.senderAddressPointId').hide();
+    // Toggle pickup meta only for courier pickup
+    if (sendingType === 'PICKUP') { $('#pickupMeta').show(); } else { $('#pickupMeta').hide(); }
+    // Receiver point selection only for POINT shipments
+    const showReceiver = (sendingType === 'POINT');
+    if (showReceiver && name.indexOf('inpost') > -1) {
+        $('.receiverAddressPointIdinpost').show();
+    } else if (showReceiver && (name.indexOf('orlen') > -1 || name.indexOf('ruch') > -1)) {
+        $('.receiverAddressPointIdorlen').show();
+    } else if (showReceiver && name.indexOf('poczta') > -1) {
+        $('.receiverAddressPointIdpocztex48').show();
+    } else if (showReceiver && name.indexOf('dhl') > -1) {
+        $('.receiverAddressPointIddhl').show();
+    } else if (showReceiver && name.indexOf('dpd') > -1) {
+        $('.receiverAddressPointIddpd').show();
+    }
+    updateEnabledOptionsUI();
+}
+
+function enforceCollectionTypeRadios() {
+    const ps = GK.state.pickedService || {};
+    const allowed = Array.isArray(ps.collectionTypes) ? ps.collectionTypes : [];
+    const allowPickup = allowed.indexOf('PICKUP') > -1;
+    const allowPoint = allowed.indexOf('POINT') > -1;
+    // Enable/disable radios like Angular checkPickedServiceType
+    $('#pickup').prop('disabled', !allowPickup).closest('.radio')[allowPickup ? 'removeClass' : 'addClass']('disabled');
+    $('#point').prop('disabled', !allowPoint).closest('.radio')[allowPoint ? 'removeClass' : 'addClass']('disabled');
+    // Ensure a valid selection
+    const current = $('input[name=pickup_type]:checked').val();
+    let selected = current;
+    if (current === 'PICKUP' && !allowPickup) selected = allowPoint ? 'POINT' : current;
+    if (current === 'POINT' && !allowPoint) selected = allowPickup ? 'PICKUP' : current;
+    if (!selected) selected = allowPickup ? 'PICKUP' : (allowPoint ? 'POINT' : 'PICKUP');
+    if (selected !== current) {
+        $('input[name=pickup_type][value="' + selected + '"]').prop('checked', true).trigger('change');
+    }
+}
+
+function updateChosenServiceUI() {
+    const ps = GK.state.pickedService;
+    if (!ps) return;
+    if (ps.carrierLogoLink) {
+        $('#chosenServiceLogo').attr('src', ps.carrierLogoLink).show();
+    }
+    $('#chosenServiceCarrier').text(ps.carrierName || '');
+    $('#chosenServiceName').text(ps.name || '');
+    // render labels (if any)
+    try {
+        const labels = Array.isArray(ps.labels) ? ps.labels : [];
+        const html = labels.length ? ('<ul style="margin:0 0 10px 18px;">' + labels.map(function(l){ return '<li>' + l + '</li>'; }).join('') + '</ul>') : '';
+        $('#summaryServiceLabels').html(html);
+        if (html) { $('#summaryServiceLabels').show(); } else { $('#summaryServiceLabels').hide(); }
+    } catch(e) { $('#summaryServiceLabels').hide(); }
+}
+
+	function refreshAddons() {
+		const s = GK.state;
+		if (!s.pickedService) return Promise.resolve();
+		const params = buildProductsParams();
+		params.productId = s.pickedService.id;
+		const addonsUrl = 'https://api.globkurier.pl/v1/product/addons?' + new URLSearchParams(params).toString();
+		$('#addonsList').empty();
+		$('#addonsListContainer').hide();
+		return fetch(addonsUrl, { headers: buildHeaders() })
+			.then(function(r){ return r.json(); })
+			.then(function(data){
+				const list = (data && Array.isArray(data.addons)) ? data.addons : (Array.isArray(data) ? data : []);
+				const html = list.map(function(opt){
+					const price = (opt.price != null) ? (' <span class="text-muted">(+' + opt.price + ')</span>') : '';
+					const label = opt.addonName || opt.name || opt.symbol || ('#' + opt.id);
+					return '<div class="col-lg-12"><label><input type="checkbox" class="addon-checkbox" data-id="' + opt.id + '" data-category="' + (opt.category || '') + '" data-price="' + (opt.price != null ? opt.price : '') + '"> ' + label + price + '</label></div>';
+				}).join('');
+				$('#addonsList').html(html);
+				if (html) { $('#addonsListContainer').show(); } else { $('#addonsListContainer').hide(); }
+			});
+	}
+
+	function computeGrossPrice() {
+		const s = GK.state;
+		let base = 0;
+		if (s.pickedService) {
+			base = parseFloat(
+				s.pickedService.grossPrice != null ? s.pickedService.grossPrice :
+				s.pickedService.totalGrossPrice != null ? s.pickedService.totalGrossPrice :
+				s.pickedService.price_gross != null ? s.pickedService.price_gross :
+				s.pickedService.netPrice != null ? s.pickedService.netPrice : 0
+			);
+			if (isNaN(base)) base = 0;
+		}
+		let addons = 0;
+		if (Array.isArray(s.serviceOptions)) {
+			addons = s.serviceOptions.reduce(function(sum, o){
+				const p = o && o.price != null ? parseFloat(o.price) : 0;
+				return sum + (isNaN(p) ? 0 : p);
+			}, 0);
+		}
+		const total = base + addons;
+		return isNaN(total) ? undefined : total;
+	}
+
+	function refreshPayments() {
+		const s = GK.state;
+        try { ensureCountryIdsFromIso(); } catch(e) {}
+		if (!s.pickedService) return Promise.resolve();
+		const payParams = { productId: s.pickedService.id, isFreightForwardAddonSelected: false };
+		const gross = computeGrossPrice();
+		if (gross != null) payParams.grossOrderPrice = gross.toFixed(2);
+		const paymentsUrl = 'https://api.globkurier.pl/v1/order/payments?' + new URLSearchParams(payParams).toString();
+		const prev = s.additionalInfo && s.additionalInfo.paymentType ? (s.additionalInfo.paymentType + '') : '';
+		return fetch(paymentsUrl, { headers: buildHeaders() })
+			.then(function(r){ return r.json(); })
+			.then(function(data){
+				const list = Array.isArray(data) ? data : (data && Array.isArray(data.payments) ? data.payments : []);
+				GK.state.availablePayments = list.filter(function(p){ return p.enabled !== false; });
+				const html = '<option value="">-- wybierz --</option>' + GK.state.availablePayments.map(function(p){
+					return '<option value="' + p.id + '">' + (p.name || ('ID ' + p.id)) + '</option>';
+				}).join('');
+				$('#paymentSelect').html(html);
+				if (prev && GK.state.availablePayments.some(function(p){ return (p.id + '') === prev; })) {
+					$('#paymentSelect').val(prev);
+					if (!s.additionalInfo) s.additionalInfo = {};
+					s.additionalInfo.paymentType = prev;
+				}
+				$('#paymentSelect').off('change').on('change', function(){
+					GK.state.additionalInfo.paymentType = $(this).val();
+					recalcOrderPrice();
+			updateEnabledOptionsUI();
+				});
+				recalcOrderPrice();
+			});
+	}
+
+	function fetchTimeRanges() {
+		const s = GK.state;
+    try { ensureCountryIdsFromIso(); } catch(e) {}
+		if (!s.pickedService) return;
+		const date = $('#sendDateInput').val();
+		if (!date) return; // wait until date is chosen
+	// Only required parameters for this endpoint
+	const params = {
+		productId: s.pickedService.id,
+		date: date
+	};
+	const p = s.packageInfo || {};
+	if (p.weight != null) params.weight = p.weight;
+	params.quantity = p.count || 1;
+	if (s.sender && s.sender.country && s.sender.country.id) params.senderCountryId = s.sender.country.id;
+	if (s.receiver && s.receiver.country && s.receiver.country.id) params.receiverCountryId = s.receiver.country.id;
+	if (s.sender && s.sender.postalCode) params.senderPostCode = s.sender.postalCode;
+	if (s.receiver && s.receiver.postalCode) params.receiverPostCode = s.receiver.postalCode;
+		const url = 'https://api.globkurier.pl/v1/order/pickupTimeRanges?' + new URLSearchParams(params).toString();
+		return fetch(url, { headers: buildHeaders() })
+			.then(function(r){ return r.json(); })
+			.then(function(data){
+				const list = Array.isArray(data) ? data : (data && Array.isArray(data.timeRanges) ? data.timeRanges : []);
+				const html = '<option value="">-- wybierz --</option>' + list.map(function(t){
+					const label = (t.timeFrom && t.timeTo) ? (t.timeFrom + ' - ' + t.timeTo) : (t.name || '');
+					const value = JSON.stringify(t);
+					return '<option value="' + encodeURIComponent(value) + '">' + label + '</option>';
+				}).join('');
+				$('#pickupTimeSelect').html(html);
+			});
+	}
+
+function fetchStates(countryId, opts) {
+    opts = opts || {}; // { targetGroup: '#statesGroup', targetSelect: '#statesSelect' }
+    const targetGroup = opts.targetGroup || '#statesGroup';
+    const targetSelect = opts.targetSelect || '#statesSelect';
+    if (!countryId) { $(targetGroup).hide(); return Promise.resolve([]); }
+    const url = 'https://api.globkurier.pl/v1/states?countryId=' + encodeURIComponent(countryId);
+    return fetch(url, { headers: buildHeaders() })
+        .then(function(r){ return r.json(); })
+        .then(function(list){
+            if (!Array.isArray(list) || !list.length) { $(targetGroup).hide(); return []; }
+            const html = '<option value="">-- wybierz --</option>' + list.map(function(s){ return '<option value="' + s.id + '">' + (s.name || ('ID ' + s.id)) + '</option>'; }).join('');
+            $(targetSelect).html(html);
+            $(targetGroup).show();
+            return list;
+        });
+}
+
+	function fetchCustomRequiredFields() {
+		const s = GK.state;
+    try { ensureCountryIdsFromIso(); } catch(e) {}
+		if (!s.pickedService) return;
+		const collectionType = $('input[name=pickup_type]:checked').val() || 'PICKUP';
+		const receiverCountryId = s.receiver && s.receiver.country && s.receiver.country.id;
+		const senderCountryId = s.sender && s.sender.country && s.sender.country.id;
+		if (!receiverCountryId || !senderCountryId) return;
+		const url = 'https://api.globkurier.pl/v1/order/customRequiredFields?' + new URLSearchParams({
+			productId: s.pickedService.id,
+			senderCountryId: senderCountryId,
+			receiverCountryId: receiverCountryId,
+			collectionType: collectionType
+		}).toString();
+		// UI loading state could be added if needed
+		return fetch(url, { headers: buildHeaders() })
+			.then(function(r){ return r.json(); })
+			.then(function(json){
+				GK.state.customRequired = json || {};
+				// declared value and purpose
+				$('#declaredValueGroup').toggle(!!json.declaredValue);
+				$('#purposeGroup').toggle(!!json.purpose);
+				// pickup date/time
+				const showPickupMeta = !!(json.pickupDate || json.pickupTimeFrom || json.pickupTimeTo);
+				$('#pickupMeta').toggle(showPickupMeta);
+				// receiver/sender point blocks
+				if (json.receiverAddressPointId === true) {
+					// ensure only the matching receiver block is visible; updateCarrierDependentUI already bases on carrier
+					// we just make sure at least one group is visible if POINT
+					if ($('input[name=pickup_type]:checked').val() === 'POINT') {
+						// show/hide handled in updateCarrierDependentUI
+					}
+				} else {
+					$('.receiverAddressPointId').hide();
+				}
+				if (json.senderAddressPointId === true) {
+					// we currently only have InPost sender block; let carrier UI handle it when applicable
+				} else {
+					$('.senderAddressPointId').hide();
+				}
+				// states
+                if (json.receiverStateId === true) {
+                    fetchStates(receiverCountryId, { targetGroup: '#statesGroup', targetSelect: '#statesSelect' });
+                } else {
+                    $('#statesGroup').hide();
+                }
+                if (json.senderStateId === true) {
+                    fetchStates(senderCountryId, { targetGroup: '#senderStatesGroup', targetSelect: '#senderStatesSelect' });
+                } else {
+                    $('#senderStatesGroup').hide();
+                }
+				updateCarrierDependentUI();
+			});
+	}
+
+function renderSummaryContainer() {
+    $('#summaryContainer').show();
+    const $box = $('#discountAndSummary');
+    $(document).off('click', '#applyDiscountBtn').on('click', '#applyDiscountBtn', function(){
+        GK.state.discountCode = ($('#discountCodeInput').val() || '').trim();
+        recalcOrderPrice();
+    });
+    $(document).off('click', '#clearDiscountBtn').on('click', '#clearDiscountBtn', function(){
+        GK.state.discountCode = '';
+        $('#discountCodeInput').val('');
+        recalcOrderPrice();
+    });
+}
+
+	function updateSendButtonDisabled() {
+		const disabled = (!GK.state.pickedService) || (!GK.state.additionalInfo || !GK.state.additionalInfo.paymentType) || !!GK.state.priceError;
+		$('#sendOrderBtn').prop('disabled', disabled);
+	}
+
+	function recalcOrderPrice() {
+		updateSendButtonDisabled();
+		const s = GK.state;
+		try { ensureCountryIdsFromIso(); } catch(e) {}
+		if (!s.pickedService || !s.additionalInfo || !s.additionalInfo.paymentType) return;
+		const p = s.packageInfo || {};
+		const usp = new URLSearchParams();
+		usp.append('productId', s.pickedService.id);
+		usp.append('length', p.length || 0);
+		usp.append('width', p.width || 0);
+		usp.append('height', p.height || 0);
+		usp.append('weight', p.weight || 0);
+		usp.append('quantity', p.count || 1);
+		usp.append('senderCountryId', (s.sender && s.sender.country && s.sender.country.id) || (window.InitialValues && window.InitialValues.senderCountryIdNew) || 1);
+		usp.append('receiverCountryId', (s.receiver && s.receiver.country && s.receiver.country.id) || (window.InitialValues && window.InitialValues.receiverCountryIdNew) || 1);
+		usp.append('senderPostCode', (s.sender && s.sender.postalCode) || (window.InitialValues && window.InitialValues.sender && window.InitialValues.sender.postCode) || '');
+		usp.append('receiverPostCode', (s.receiver && s.receiver.postalCode) || (window.InitialValues && window.InitialValues.receiver && window.InitialValues.receiver.postCode) || '');
+		usp.append('paymentId', parseInt(s.additionalInfo.paymentType, 10) || s.additionalInfo.paymentType);
+		if (Array.isArray(s.serviceOptions) && s.serviceOptions.length) {
+			s.serviceOptions.forEach(function(opt){
+				const id = parseInt(opt.id, 10) || opt.id;
+				usp.append('addonIds[]', id);
+			});
+		}
+		if (s.additionalInfo && s.additionalInfo.insuranceAmount) usp.append('insuranceValue', s.additionalInfo.insuranceAmount);
+		if (s.additionalInfo && s.additionalInfo.codAmount) usp.append('cashOnDeliveryValue', s.additionalInfo.codAmount);
+		if (s.discountCode) usp.append('discountCode', s.discountCode);
+
+		const url = 'https://api.globkurier.pl/v1/order/price?' + usp.toString();
+		$('#priceErrorBox').hide().text('');
+		return fetch(url, { headers: buildHeaders() })
+			.then(function(r){ return r.json(); })
+			.then(function(resp){
+                if (resp && resp.totalNetPrice != null) {
+					GK.state.orderSummary = resp;
+					GK.state.priceError = null;
+					const cur = resp.currency ? (' ' + resp.currency) : ' PLN';
+                    const fuel = (resp.fuelSurchargeGrossPrice != null ? resp.fuelSurchargeGrossPrice : resp.fuelSurcharge);
+                    const baseNet = (resp.totalNetPrice != null ? resp.totalNetPrice : null);
+                    const addonsNet = (resp.addonsNetPrice != null ? resp.addonsNetPrice : 0);
+                    const netWithFuel = (resp.productsGrossPrice != null ? resp.productsGrossPrice : null);
+                    const gross = (resp.totalGrossPrice != null ? resp.totalGrossPrice : null);
+                    const discount = (resp.discountNetPrice != null ? resp.discountNetPrice : 0);
+
+					$('#summaryBaseNet').text(baseNet != null ? (baseNet + cur) : '-');
+                    $('#summaryRowBaseNet').toggle(baseNet != null);
+
+                    $('#summaryAddonsNet').text(addonsNet ? (addonsNet + cur) : ('0' + cur));
+                    $('#summaryRowAddons').toggle(!!addonsNet);
+                    $('#summaryDiscount').text(discount ? ('-' + discount + cur) : ('0' + cur));
+                    $('#summaryRowDiscount').toggle(!!discount);
+
+					$('#summaryNetWithFuel').text(netWithFuel != null ? (netWithFuel + cur) : '-');
+                    $('#summaryRowNetWithFuel').toggle(netWithFuel != null);
+
+					$('#summaryGross').text(gross != null ? (gross + cur) : '-');
+                    $('#summaryRowGross').toggle(gross != null);
+
+                    $('#summaryFuel').text(fuel != null ? (fuel + cur) : '-');
+                    $('#summaryRowFuel').toggle(fuel != null);
+                    // VAT: prefer explicit vatPercent; fall back to taxType like "VAT23"
+                    let parsedVat = null;
+                    if (resp && !resp.vatPercent && resp.taxType && /^VAT(\d+)/.test(resp.taxType)) {
+                        parsedVat = parseInt(RegExp.$1, 10);
+                    }
+                    const effectiveVatPercent = (resp && resp.vatPercent != null) ? resp.vatPercent : parsedVat;
+                    const vatVal = (resp.totalGrossPrice != null && resp.totalNetPrice != null)
+                        ? (resp.totalGrossPrice - resp.totalNetPrice)
+                        : null;
+                    if (effectiveVatPercent != null || (vatVal != null && !isNaN(vatVal))) {
+                        if (effectiveVatPercent != null) {
+                            $('#summaryVatLabel').text('(' + effectiveVatPercent + '%)');
+                        } else {
+                            $('#summaryVatLabel').text('');
+                        }
+                        const vatText = (vatVal != null && !isNaN(vatVal)) ? vatVal.toFixed(2) + cur : ('0' + cur);
+                        $('#summaryVat').text(vatText);
+                        $('#summaryRowVat').show();
+                    } else {
+                        $('#summaryVatLabel').text('');
+                        $('#summaryVat').text('-');
+                        $('#summaryRowVat').hide();
+                    }
+				} else {
+					let msg = 'Błąd kalkulacji ceny';
+					if (resp && resp.fields && typeof resp.fields === 'object') {
+						try {
+							msg = Object.keys(resp.fields).map(function(k){ return k + ': ' + resp.fields[k]; }).join('\n');
+						} catch(e) {}
+					} else if (resp && resp.message) {
+						msg = resp.message;
+					}
+					GK.state.priceError = msg;
+					$('#priceErrorBox').text(msg).show();
+					// If the error concerns discountCode, recalc without code to zero the discount in summary
+					if (resp && resp.fields && resp.fields.discountCode) {
+						try {
+							const usp2 = new URLSearchParams(usp.toString());
+							usp2.delete('discountCode');
+							const url2 = 'https://api.globkurier.pl/v1/order/price?' + usp2.toString();
+							return fetch(url2, { headers: buildHeaders() })
+								.then(function(r){ return r.json(); })
+								.then(function(r2){
+									if (!r2 || r2.totalNetPrice == null) { return; }
+									GK.state.orderSummary = r2;
+									const cur2 = r2.currency ? (' ' + r2.currency) : ' PLN';
+									const fuel2 = (r2.fuelSurchargeGrossPrice != null ? r2.fuelSurchargeGrossPrice : r2.fuelSurcharge);
+									const baseNet2 = (r2.totalNetPrice != null ? r2.totalNetPrice : null);
+									const addonsNet2 = (r2.addonsNetPrice != null ? r2.addonsNetPrice : 0);
+									const netWithFuel2 = (r2.productsGrossPrice != null ? r2.productsGrossPrice : null);
+									const gross2 = (r2.totalGrossPrice != null ? r2.totalGrossPrice : null);
+									const discount2 = 0; // wyzerowany rabat
+									$('#summaryBaseNet').text(baseNet2 != null ? (baseNet2 + cur2) : '-');
+									$('#summaryRowBaseNet').toggle(baseNet2 != null);
+									$('#summaryAddonsNet').text(addonsNet2 ? (addonsNet2 + cur2) : ('0' + cur2));
+									$('#summaryRowAddons').toggle(!!addonsNet2);
+									$('#summaryDiscount').text('0' + cur2);
+									$('#summaryRowDiscount').toggle(false);
+									$('#summaryNetWithFuel').text(netWithFuel2 != null ? (netWithFuel2 + cur2) : '-');
+									$('#summaryRowNetWithFuel').toggle(netWithFuel2 != null);
+									$('#summaryGross').text(gross2 != null ? (gross2 + cur2) : '-');
+									$('#summaryRowGross').toggle(gross2 != null);
+									$('#summaryFuel').text(fuel2 != null ? (fuel2 + cur2) : '-');
+									$('#summaryRowFuel').toggle(fuel2 != null);
+									let parsedVat2 = null;
+									if (r2 && !r2.vatPercent && r2.taxType && /^VAT(\d+)/.test(r2.taxType)) { parsedVat2 = parseInt(RegExp.$1, 10); }
+									const effVat2 = (r2 && r2.vatPercent != null) ? r2.vatPercent : parsedVat2;
+									const vatVal2 = (r2.totalGrossPrice != null && r2.totalNetPrice != null) ? (r2.totalGrossPrice - r2.totalNetPrice) : null;
+									if (effVat2 != null || (vatVal2 != null && !isNaN(vatVal2))) {
+										$('#summaryVatLabel').text(effVat2 != null ? ('(' + effVat2 + '%)') : '');
+										$('#summaryVat').text(vatVal2 != null ? vatVal2.toFixed(2) + cur2 : ('0' + cur2));
+										$('#summaryRowVat').show();
+									} else {
+										$('#summaryVatLabel').text('');
+										$('#summaryVat').text('-');
+										$('#summaryRowVat').hide();
+									}
+									updateSendButtonDisabled();
+								});
+						} catch(e) {}
+					}
+				}
+				updateSendButtonDisabled();
+			});
+	}
+
+function renderServicesAndBind() {
+    // Keep TPL markup; only bind events here
+    populatePackageInputs();
+    $('#getServicesBtn').off('click').on('click', function(){
+            const $btn = $(this);
+            $btn.prop('disabled', true);
+            $btn.find('i.icon-cog').show();
+            GK.state.forceShowAll = true;
+            GK.state.forModal = true;
+            fetchProducts().then(function(){ $('#servicesPickModal').modal('show'); })
+            .finally(function(){ $btn.prop('disabled', false); $btn.find('i.icon-cog').hide(); });
+        });
+    // Also handle top Change button
+    $(document).off('click', '#openServicesModal').on('click', '#openServicesModal', function(){
+        GK.state.forceShowAll = $('#service_filters_on').is(':checked');
+        GK.state.forModal = true;
+        fetchProducts().then(function(){ $('#servicesPickModal').modal('show'); });
+    });
+		$(document).off('click', '.pick-product').on('click', '.pick-product', function(){
+			const productId = $(this).data('id');
+			// find selected product in last list
+			const found = (GK.state.products || []).find(function(p){ return (p.id + '') === (productId + ''); });
+			if (found) {
+				GK.state.pickedService = Object.assign({}, found);
+				GK.state.pickedService.packageInfo = GK.state.packageInfo;
+			} else {
+				const $card = $(this).closest('.glob-product-block');
+				const name = $card.find('strong').first().text();
+				GK.state.pickedService = { id: productId, carrierName: name, name: $card.find('span').first().text(), packageInfo: GK.state.packageInfo };
+			}
+			// reset previously selected addons/options when changing service
+			GK.state.serviceOptions = [];
+			fetchAddonsAndPayments();
+			renderSummaryContainer();
+			updateSendButtonDisabled();
+            $('#servicesPickModal').modal('hide');
+            GK.state.forModal = false;
+            // show top service card and options sections
+            updateChosenServiceUI();
+			$('#openServicesModal').show();
+            $('#servicesContainer').show();
+            $('#servicesListContainer').show();
+            $('#serviceOptionsContainer').show();
+			$('#getServicesBtn').hide();
+            updateCarrierDependentUI();
+            // preload time ranges if courier pickup selected
+            if ($('input[name=pickup_type]:checked').val() === 'PICKUP') { fetchTimeRanges(); }
+		fetchCustomRequiredFields();
+		});
+		$(document).on('change', '.addon-checkbox', function(){
+			const id = $(this).data('id');
+			const price = $(this).data('price');
+			const category = $(this).data('category');
+			if ($(this).is(':checked')) {
+				if (!Array.isArray(GK.state.serviceOptions)) GK.state.serviceOptions = [];
+				if (!GK.state.serviceOptions.some(function(o){ return (o.id + '') === (id + ''); })) {
+					GK.state.serviceOptions.push({ id: id, price: price, category: category });
+				}
+			} else {
+				GK.state.serviceOptions = (GK.state.serviceOptions || []).filter(function(o){ return (o.id + '') !== (id + ''); });
+			}
+			updateEnabledOptionsUI();
+			refreshPayments();
+			recalcOrderPrice();
+		});
+		// show all carriers toggle
+	GK.state.showAllCarriers = false;
+	$('#disableServiceFilters').off('click').on('click', function(){
+		GK.state.showAllCarriers = true;
+		GK.state.forceShowAll = true;
+		fetchProducts().then(function(){ $('#servicesPickModal').modal('show'); });
+	});
+	$('#enableServiceFilters').off('click').on('click', function(){
+		GK.state.showAllCarriers = false;
+		GK.state.forceShowAll = false;
+		fetchProducts().then(function(){ $('#servicesPickModal').modal('show'); });
+	});
+	}
+
+	// ============ Terminal picker (jQuery rebuild of Angular globTerminalPicker) ============
+	function fetchTerminals(query) {
+		const s = GK.state;
+		if (!s.pickedService) return Promise.resolve();
+		const params = { productId: s.pickedService.id };
+		if (query) params.filter = query;
+		params.isCashOnDeliveryAddonSelected = !!(s.additionalInfo && s.additionalInfo.codAmount);
+		const url = 'https://api.globkurier.pl/v1/points?' + new URLSearchParams(params).toString();
+		return fetch(url, { headers: buildHeaders() })
+			.then(function(r){ return r.json(); })
+			.then(function(resp){
+				// Hide error box first
+				$('#terminalErrorBox').hide();
+
+				// Check if response contains error fields
+				if (resp && resp.fields && typeof resp.fields === 'object') {
+					const errorMessages = Object.keys(resp.fields).map(function(k) {
+						return k + ': ' + resp.fields[k];
+					}).join('\n');
+					$('#terminalErrorBox').text(errorMessages).show();
+					$('#terminalSelect').html('');
+					$('#terminalHint').hide();
+					return;
+				}
+
+				// Handle normal list response
+				let list = resp;
+				if (!Array.isArray(list)) list = [];
+				if (!list.length) {
+					$('#terminalSelect').html('');
+					$('#terminalHint').show();
+					return;
+				}
+				const html = list.map(function(t, i){
+					const label = (t.city ? t.city + ', ' : '') + (t.address || '');
+					const id = t.id || t.code || ('pt_' + i);
+					return '<option value="' + id + '" data-json="' + encodeURIComponent(JSON.stringify({ id: id, city: t.city, address: t.address })) + '">' + label + '</option>';
+				}).join('');
+				$('#terminalSelect').html(html);
+				$('#terminalHint').hide();
+			})
+			.catch(function(e){
+				// Handle network/parsing errors
+				const errorMsg = e && e.message ? e.message : 'Error fetching terminals';
+				$('#terminalErrorBox').text(errorMsg).show();
+				$('#terminalSelect').html('');
+				$('#terminalHint').hide();
+			});
+	}
+
+	// open picker
+	$(document).on('click', '.open-terminal-picker', function(){
+		GK.state.terminalTarget = $(this).data('target') || 'inPostReceiverPoint';
+		$('#terminalQuery').val('');
+		$('#terminalSelect').html('');
+		$('#terminalHint').show();
+		$('#terminalErrorBox').hide(); // Clear error on modal open
+		$('#terminalPickerModal').modal('show');
+	});
+
+	// search points
+	$(document).on('click', '#terminalSearchBtn', function(){
+		const q = $('#terminalQuery').val();
+		fetchTerminals(q);
+	});
+
+	// save selected point
+	$(document).on('click', '#terminalSaveBtn', function(){
+		const opt = $('#terminalSelect option:selected');
+		if (!opt.length) return;
+		let data = opt.attr('data-json');
+		try { data = JSON.parse(decodeURIComponent(data)); } catch(e) { data = {}; }
+		const code = data.id || '';
+		const label = (data.city ? data.city + ', ' : '') + (data.address || '');
+		if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
+		const target = GK.state.terminalTarget || 'inPostReceiverPoint';
+		if (target === 'inPostReceiverPoint') {
+			GK.state.additionalInfo.inPostReceiverPoint = { id: code };
+			GK.state.receiver = GK.state.receiver || {};
+			GK.state.receiver.terminal = code;
+			$('#inpostReceiverLabel').text('[' + code + '] ' + label);
+			$('#terminalCode').text(code);
+			$('.terminalLabel').hide();
+			$('.terminalLabel[data-type="inpost"]').show();
+		} else if (target === 'inPostSenderPoint') {
+			GK.state.additionalInfo.inPostSenderPoint = { id: code };
+			GK.state.sender = GK.state.sender || {};
+			GK.state.sender.terminal = code;
+			$('#inpostSenderLabel').text('[' + code + '] ' + label);
+		} else if (target === 'paczkaRuchReceiverPoint') {
+			GK.state.additionalInfo.paczkaRuchReceiverPoint = { id: code };
+			GK.state.receiver.terminal = code;
+			$('#orlenReceiverLabel').text('[' + code + '] ' + label);
+			$('#terminalCode').text(code);
+			$('.terminalLabel').hide();
+			$('.terminalLabel[data-type="ruch"]').show();
+		} else if (target === 'pocztex48owpReceiverPoint') {
+			GK.state.additionalInfo.pocztex48owpReceiverPoint = { id: code };
+			GK.state.receiver.terminal = code;
+			$('#pocztexReceiverLabel').text('[' + code + '] ' + label);
+			$('#terminalCode').text(code);
+			$('.terminalLabel').hide();
+			$('.terminalLabel[data-type="pocztex48owp"]').show();
+		} else if (target === 'dhlparcelReceiverPoint') {
+			GK.state.additionalInfo.dhlparcelReceiverPoint = { id: code };
+			GK.state.receiver.terminal = code;
+			$('#dhlReceiverLabel').text('[' + code + '] ' + label);
+			$('#terminalCode').text(code);
+			$('.terminalLabel').hide();
+			$('.terminalLabel[data-type="dhlparcel"]').show();
+		} else if (target === 'dpdpickupReceiverPoint') {
+			GK.state.additionalInfo.dpdpickupReceiverPoint = { id: code };
+			GK.state.receiver.terminal = code;
+			$('#dpdReceiverLabel').text('[' + code + '] ' + label);
+			$('#terminalCode').text(code);
+			$('.terminalLabel').hide();
+			$('.terminalLabel[data-type="dpdpickup"]').show();
+		}
+		recalcOrderPrice();
+	});
+
+	$(function(){
+		initStateFromInitialValues();
+		GK.state.packageInfo = (window.InitialValues && window.InitialValues.defaultPackageInfo) ? window.InitialValues.defaultPackageInfo : { count: 1 };
+		renderAddressBoxes();
+        populateDisplayPanels();
+        bindEditModals();
+		renderServicesAndBind();
+		bind();
+	});
+
+	$(bind);
+})();
+
+

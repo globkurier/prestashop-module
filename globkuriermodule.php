@@ -138,8 +138,8 @@ class Globkuriermodule extends Module
             'tokenAPI' => $api->getToken(),
             'moduleVersion' => $this->version,
         ]);
-        $this->context->controller->addJS($this->_path . '/views/js/angular.min.js');
-        $this->context->controller->addJS($this->_path . '/views/js/configApp.261.js');
+        // Load jQuery-based config page script (Angular removed)
+        $this->context->controller->addJS($this->_path . '/views/js/configApp.jquery.js');
         if (version_compare(_PS_VERSION_, '1.6.0', '>=') === true) {
             return $this->display(__FILE__, 'views/templates/admin/config_page_v16.tpl');
         } else {
@@ -258,7 +258,7 @@ class Globkuriermodule extends Module
             'rest_endpoint' => $this->context->link->getModuleLink($this->name, 'restinterface', [], true),
             'gk_token' => $this->encryptCartId($params['cart']->id),
             'address_all' => json_encode($params),
-            'baseurl' => 'htts://' . $this->context->shop->domain . $this->context->shop->physical_uri,
+            'baseurl' => 'https://' . $this->context->shop->domain . $this->context->shop->physical_uri,
             'city' => $address->city,
             'postcode' => $address->postcode,
         ]);
@@ -327,6 +327,53 @@ class Globkuriermodule extends Module
                 [
                     'media' => 'all',
                     'priority' => 200,
+                ]
+            );
+
+            // Load Google Maps API if configured
+            $goolgeMapsApiKeyFromConfiguration = $config->googleMapsApiKey;
+            if ($goolgeMapsApiKeyFromConfiguration) {
+                $this->context->controller->registerJavascript(
+                    'google-maps-api',
+                    'https://maps.google.com/maps/api/js?key=' . $goolgeMapsApiKeyFromConfiguration,
+                    [
+                        'server' => 'remote',
+                        'position' => 'bottom',
+                        'priority' => 200,
+                        'attribute' => 'defer',
+                    ]
+                );
+                $this->context->controller->registerJavascript(
+                    'google-maps-clusterer',
+                    'https://unpkg.com/@googlemaps/markerclustererplus/dist/index.min.js',
+                    [
+                        'server' => 'remote',
+                        'position' => 'bottom',
+                        'priority' => 200,
+                        'attribute' => 'defer',
+                    ]
+                );
+            }
+
+            // Load Select2 JavaScript
+            $this->context->controller->registerJavascript(
+                'select-select2',
+                'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js',
+                [
+                    'server' => 'remote',
+                    'position' => 'bottom',
+                    'priority' => 200,
+                    'attribute' => 'defer',
+                ]
+            );
+
+            // Load main module JavaScript
+            $this->context->controller->registerJavascript(
+                'modules-globkuriermodule',
+                'modules/' . $this->name . '/views/js/inpost-front-17.js',
+                [
+                    'position' => 'bottom',
+                    'priority' => 250,
                 ]
             );
         } elseif (version_compare(_PS_VERSION_, '1.7.0', '>=') === true) {

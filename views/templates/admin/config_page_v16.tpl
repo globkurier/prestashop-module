@@ -39,7 +39,7 @@
 </style>
 
 <form method="post">
-<div class="panel" ng-app="configApp" ng-controller="mainController">
+<div class="panel" id="gk-config-app">
     <div class="panel-heading">
         <i class="icon-cogs"></i> {l s='Settings' mod='globkuriermodule'}
         <span class="panel-heading-action">
@@ -205,15 +205,12 @@
 
                     <div class="form-group">
                         <label class="col-lg-4 control-label">{l s='Carrier' mod='globkuriermodule'}:</label>
-                        <label
-                        class="col-lg-6 control-label"
-                        style="text-align: right;"
-                        default-service-selector
-                        init-id="{$config->defaultServiceCode|escape:'htmlall':'UTF-8'}"
-                        init-name="{$config->defaultServiceName|escape:'htmlall':'UTF-8'}"
-                        ng-model="service"></label>
-                        <input type="hidden" name="config_defaultServiceCode" value="" />
-                        <input type="hidden" name="config_defaultServiceName" value="" />
+                        <div class="col-lg-6" style="text-align: right;">
+                            <button type="button" id="openServicesModal" class="btn btn-default">{l s='Choose' mod='globkuriermodule'}</button>
+                            <span id="selectedServiceName" style="margin-left:10px; font-weight:bold;">{$config->defaultServiceName|escape:'htmlall':'UTF-8'}</span>
+                        </div>
+                        <input type="hidden" name="config_defaultServiceCode" value="{$config->defaultServiceCode|escape:'htmlall':'UTF-8'}" />
+                        <input type="hidden" name="config_defaultServiceName" value="{$config->defaultServiceName|escape:'htmlall':'UTF-8'}" />
                     </div>
 
                     <div class="form-group">
@@ -269,9 +266,9 @@
             </div>
         </div>
         <div class="row form-group text-center" style="margin-top:10px">
-            <button type="button" ng-click="updateCacheWithPickupPoints('{html_entity_decode($getCachePointsLink|escape:'htmlall':'UTF-8')}')" class="btn btn-primary">
+            <button type="button" id="updateCacheBtn" data-url="{html_entity_decode($getCachePointsLink|escape:'htmlall':'UTF-8')}" class="btn btn-primary">
             {l s='Cache points for whole country' mod='globkuriermodule'}</button>
-          <span ng-if="isAjaxCacheLoad"><i class="icon-cog icon-spin"></i></span>
+          <span id="cacheLoading" style="display:none;"><i class="icon-cog icon-spin"></i></span>
         </div>
 
         <div class="row" style="margin-top: 50px;">
@@ -550,20 +547,14 @@
 </div>
 </form>
 {literal}
-<div class="modal fade" id="allProducts" tabindex="-1" role="dialog">
+<div class="modal fade" id="servicesModal" tabindex="-1" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title">{l s='Select carrier' mod='globkuriermodule'}</h4>
       </div>
-      <div class="modal-body row" style="display: flex;flex-wrap: wrap;">
-          <div class="col-lg-4 glob-product-block" ng-repeat="product in products | orderBy:price_gross">
-            <img ng-if="product.courier_img" ng-src="{{ product.courier_img }}" alt="{{ product.courier }}" /><br/>
-            <strong ng-bind="product.courier"></strong><br/>
-            <span ng-bind="product.product"></span><br/><br/>
-            <strong>{{ product.price_gross }}zł</strong><br/><br/>
-            <button class="btn btn-sm btn-success" ng-click="pickProduct(product);" data-dismiss="modal">{l s='Pick' mod='globkuriermodule'}</button>
-          </div>
+      <div class="modal-body row" id="servicesList" style="display: flex;flex-wrap: wrap;">
+        <!-- Filled dynamically by JS -->
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">{l s='Cancel' mod='globkuriermodule'}</button>

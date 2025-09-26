@@ -53,18 +53,18 @@
     <div class="no_pickup_point_selected" style="display: none;">
         <p><i class="icon-warning"></i> {l s='Please pick parcel point' mod='globkuriermodule'}</p>
     </div>
-    
+
 </div>
 
 <script type="text/javascript">
-    var inpost_carrier_id = {if $globConfig->inPostEnabled}{$globConfig->inPostCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    var inpost_cod_carrier_id = {if $globConfig->inPostCODEnabled}{$globConfig->inPostCODCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    var paczkaruch_carrier_id = {if $globConfig->paczkaRuchEnabled}{$globConfig->paczkaRuchCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    var pocztex48owp_carrier_id = {if $globConfig->pocztex48owpEnabled}{$globConfig->pocztex48owpCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    var dhlparcel_carrier_id = null; {*{if $globConfig->dhlparcelEnabled}{$globConfig->dhlparcelCarrier|escape:'javascript':'UTF-8'}{else}null{/if};*}
-    var cart_id = {$cart_id|escape:'javascript':'UTF-8'};
-    var gk_token = '{$gk_token|escape:'javascript':'UTF-8'}';
-    var rest_endpoint = '{$rest_endpoint|escape:'javascript':'UTF-8'}';
+    const inpost_carrier_id = {if $globConfig->inPostEnabled}{$globConfig->inPostCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
+    const inpost_cod_carrier_id = {if $globConfig->inPostCODEnabled}{$globConfig->inPostCODCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
+    const paczkaruch_carrier_id = {if $globConfig->paczkaRuchEnabled}{$globConfig->paczkaRuchCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
+    const pocztex48owp_carrier_id = {if $globConfig->pocztex48owpEnabled}{$globConfig->pocztex48owpCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
+    const dhlparcel_carrier_id = null; {*{if $globConfig->dhlparcelEnabled}{$globConfig->dhlparcelCarrier|escape:'javascript':'UTF-8'}{else}null{/if};*}
+    const cart_id = {$cart_id|escape:'javascript':'UTF-8'};
+    const gk_token = '{$gk_token|escape:'javascript':'UTF-8'}';
+    const rest_endpoint = '{$rest_endpoint|escape:'javascript':'UTF-8'}';
 
     $(function(){
         /**

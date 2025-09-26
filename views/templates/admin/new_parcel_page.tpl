@@ -36,37 +36,35 @@
     }
 </style>
 
-<div class="panel" ng-app="newParcelApp" ng-controller="mainController">
+<div class="panel" id="gk-parcel-app">
     <div class="panel-heading">
         <i class="icon-cogs"></i> {l s='Ship parcel with Globkurier' mod='globkuriermodule'}
         {if $orderId}{l s='Based on order' mod='globkuriermodule'} #{$orderId|escape:'htmlall':'UTF-8'}{/if}
     </div>
 
-    <div class="bootstrap" ng-cloak ng-show="orderError">
+    <div class="bootstrap" id="orderErrorBox" style="display:none;">
         <div class="alert alert-danger">
             <h4>{l s='We\'ve try to send you request but there was an error' mod='globkuriermodule'}</h4>
-            <ul>
-                <li ng-repeat="(key, msg) in orderError"><span ng-bind="key"></span>: <span ng-bind="msg"></span></li>
-            </ul>
-            <button type="button" class="close" ng-click="orderError = null;">×</button>
+            <ul id="orderErrorList"></ul>
+            <button type="button" class="close" id="orderErrorClose">×</button>
         </div>
     </div>
 
-    <div class="bootstrap" ng-cloak ng-show="validationError">
+    <div class="bootstrap" id="validationErrorBox" style="display:none;">
         <div class="alert alert-danger">
             <h4>{l s='There is some validation errors. Please fix them before you can continue' mod='globkuriermodule'}</h4>
-            <span ng-show="validationError.noSenderPhone">{l s='Please provide sender phone number' mod='globkuriermodule'}</span>
-            <span ng-show="validationError.noReceiverPhone">{l s='Please provide receiver phone number' mod='globkuriermodule'}</span>
-            <button type="button" class="close" ng-click="validationError = null;">×</button>
+            <span id="valErrSenderPhone" style="display:none;">{l s='Please provide sender phone number' mod='globkuriermodule'}</span>
+            <span id="valErrReceiverPhone" style="display:none;">{l s='Please provide receiver phone number' mod='globkuriermodule'}</span>
+            <button type="button" class="close" id="validationErrorClose">×</button>
         </div>
     </div>
 
-    <div class="panel-body" ng-cloak ng-show="isProcessing">
+    <div class="panel-body" id="processingBox" style="display:none;">
         <div class="page-loader" style="text-align: center; font-size: 25px!important; color: #ccc;">
             <i class="icon-cog icon-spin"></i>
         </div>
     </div>
-    <div class="panel-body order-placed" ng-cloak ng-show="!isProcessing && orderPlaced">
+    <div class="panel-body order-placed" id="orderPlacedBox" style="display:none;">
         <div class="col-lg-12" style="text-align: center;">
             <h2><i class="icon-check" style="font-size: 50px!important; color:#72C279;"></i></h2>
             <h2>{l s='Carrier was succesfully ordered' mod='globkuriermodule'}</h2>
@@ -75,24 +73,58 @@
             <small>{l s='Powrót za 2 sekundy' mod='globkuriermodule'}</small>
         </div>
     </div>
-    <div class="panel-body" ng-cloak ng-show="!isProcessing && !orderPlaced">
+    <div class="panel-body" id="mainFormBox">
         <div class="col-lg-4">
             <div class="row">
-                <div class="col-lg-6" glob-address ng-model="sender" address-title="{l s='Sender' mod='globkuriermodule'}"></div>
-                <div class="col-lg-6 receiverAddressBox" glob-address ng-model="receiver" address-title="{l s='Receiver' mod='globkuriermodule'}"></div>
+                <div class="col-lg-6" id="senderBox">
+                    <div class="panel">
+                        <div class="panel-heading">{l s='Sender' mod='globkuriermodule'} <button class="btn btn-primary btn-xs pull-right" href="#" id="senderChangeLink">{l s='change' mod='globkuriermodule'}</button></div>
+                        <div class="panel-body">
+                            <div id="senderDisplay">
+                                <div><strong id="sender_display_name"></strong></div>
+                                <div><span id="sender_display_street"></span> / <span id="sender_display_houseNumber"></span></div>
+                                <div><span id="sender_display_postalCode"></span> <span id="sender_display_city"></span></div>
+                                <div>(<span id="sender_display_countryIso"></span>)</div>
+                                <br/>
+                                <div><a href="#">{l s='Contact person' mod='globkuriermodule'}</a></div>
+                                <div id="sender_display_contact"></div>
+                                <div id="sender_display_phone"></div>
+                                <div id="sender_display_email"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 receiverAddressBox" id="receiverBox">
+                    <div class="panel">
+                        <div class="panel-heading">{l s='Receiver' mod='globkuriermodule'} <button class="btn btn-primary btn-xs pull-right" href="#" id="receiverChangeLink">{l s='change' mod='globkuriermodule'}</button></div>
+                        <div class="panel-body">
+                            <div id="receiverDisplay">
+                                <div><strong id="receiver_display_name"></strong></div>
+                                <div><span id="receiver_display_street"></span> / <span id="receiver_display_houseNumber"></span></div>
+                                <div><span id="receiver_display_postalCode"></span> <span id="receiver_display_city"></span></div>
+                                <div>(<span id="receiver_display_countryIso"></span>)</div>
+                                <br/>
+                                <div><a href="#">{l s='Contact person' mod='globkuriermodule'}</a></div>
+                                <div id="receiver_display_contact"></div>
+                                <div id="receiver_display_phone"></div>
+                                <div id="receiver_display_email"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="row" ng-show="terminalCode" style="margin-top: 10px;" data-service="{$service}">
+            <div class="row" id="terminalInfo" style="margin-top: 10px;" data-service="{$service}">
                 <div class="col-lg-12">
-                    <div class="panel" style="border: 3px dashed rgb(227, 176, 0);">
+                    <div class="panel" style="border: 3px dashed #79a600;">
                         <div class="panel-heading">{l s='Pick point' mod='globkuriermodule'}</div>
                         <div class="panel-body">
                             {l s='Your client wants to pick parcel in parcel point:' mod='globkuriermodule'}<br/>
-                            [<strong ng-bind="terminalCode"></strong>]
-                            <span ng-if="terminalType == 'ruch'">{l s='ORLEN Paczka' mod='globkuriermodule'}</span>
-                            <span ng-if="terminalType == 'inpost'">{l s='Paczkomat InPost' mod='globkuriermodule'}</span>
-                            <span ng-if="terminalType == 'pocztex48owp'">{l s='Pocztex48 Odbiór w punkcie' mod='globkuriermodule'}</span>
-                            <span ng-if="terminalType == 'dhlparcel'">{l s='DHL ParcelShop' mod='globkuriermodule'}</span>
-                            <span ng-if="terminalType == 'dpdpickup'">{l s='DPD Pickup' mod='globkuriermodule'}</span>
+                            [<strong id="terminalCode"></strong>]
+                            <span class="terminalLabel" data-type="ruch" style="display:none;">{l s='ORLEN Paczka' mod='globkuriermodule'}</span>
+                            <span class="terminalLabel" data-type="inpost" style="display:none;">{l s='Paczkomat InPost' mod='globkuriermodule'}</span>
+                            <span class="terminalLabel" data-type="pocztex48owp" style="display:none;">{l s='Pocztex48 Odbiór w punkcie' mod='globkuriermodule'}</span>
+                            <span class="terminalLabel" data-type="dhlparcel" style="display:none;">{l s='DHL ParcelShop' mod='globkuriermodule'}</span>
+                            <span class="terminalLabel" data-type="dpdpickup" style="display:none;">{l s='DPD Pickup' mod='globkuriermodule'}</span>
                             <br/><br/>
                             {l s='In this case you will be shown only this services.' mod='globkuriermodule'}
                             {l s='If you want to get all services anyway, please click button below' mod='globkuriermodule'}
@@ -104,11 +136,11 @@
                                 <div class="col-lg-4">
                                          <span class="switch prestashop-switch fixed-width-lg">
                                             <input name="service_filters" id="service_filters_on" value="1" type="radio">
-                                            <label for="service_filters_on" class="radioCheck" ng-click="disableServiceFilters();">
+                                            <label for="service_filters_on" class="radioCheck" id="disableServiceFilters">
                                                 <i class="color_success"></i> {l s='Yes' mod='globkuriermodule'}
                                             </label>
                                             <input name="service_filters" id="service_filters_off" value="0" checked="checked" type="radio">
-                                            <label for="service_filters_off" class="radioCheck" ng-click="enableServiceFilters();">
+                                            <label for="service_filters_off" class="radioCheck" id="enableServiceFilters">
                                                 <i class="color_danger"></i> {l s='No' mod='globkuriermodule'}
                                             </label>
                                             <a class="slide-button btn"></a>
@@ -122,54 +154,321 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="col-lg-12"
-                 glob-services
-                 initial-product-symbol="{$config->defaultServiceCode|escape:'htmlall':'UTF-8'}"
-                 recevicer-address="receiver"
-                 sender-address="sender"
-                 filter-services="filterServices"
-                 picked-product="pickedService"></div>
-            <div class="col-lg-12" ng-show="pickedService" glob-service-options service-model="pickedService" ng-model="serviceOptions"></div>
+            <div class="col-lg-12" id="servicesContainer" data-initial-product-symbol="{$config->defaultServiceCode|escape:'htmlall':'UTF-8'}">
+                <div class="panel">
+                    <div class="panel-heading">
+                        {l s='Choose delivery' mod='globkuriermodule'}
+                        <button type="button" class="btn btn-primary btn-xs pull-right" id="openServicesModal" style="display: none;">{l s='Change' mod='globkuriermodule'}</button></div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-2"><img id="chosenServiceLogo" src="" alt="" style="max-width:100%; display:none;"></div>
+                            <div class="col-lg-8"><strong id="chosenServiceCarrier"></strong><br/><span id="chosenServiceName"></span></div>
+                        </div>
+                        <hr/>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="form-group"><label>{l s='Content' mod='globkuriermodule'}</label><input id="pkg-content" type="text" class="form-control"></div>
+                                <div class="form-group"><label>{l s='Length (cm)' mod='globkuriermodule'}</label><input id="pkg-length" type="number" step="1" class="form-control"></div>
+                                <div class="form-group"><label>{l s='Width (cm)' mod='globkuriermodule'}</label><input id="pkg-width" type="number" step="1" class="form-control"></div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group"><label>{l s='Height (cm)' mod='globkuriermodule'}</label><input id="pkg-height" type="number" step="1" class="form-control"></div>
+                                <div class="form-group"><label>{l s='Weight (kg)' mod='globkuriermodule'}</label><input id="pkg-weight" type="number" step="0.01" class="form-control"></div>
+                                <div class="form-group"><label>{l s='Quantity' mod='globkuriermodule'}</label><input id="pkg-count" type="number" step="1" class="form-control" value="1"></div>
+                            </div>
+                        </div>
+                        <button type="button" id="getServicesBtn" class="btn btn-primary">{l s='Get services' mod='globkuriermodule'}</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 row" id="addonsListContainer" style="display:none;">
+                <div class="panel">
+                    <div class="panel-heading">{l s='Additional options' mod='globkuriermodule'}</div>
+                    <div class="panel-body" id="addonsListBody">
+                        <div id="serviceLabels" class="well" style="display:none; margin-bottom:10px;"></div>
+                        <div id="addonsList" class="row" style="margin-bottom:10px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="col-lg-12" id="servicesListContainer" style="display:none;">
+                <div class="panel">
+                    <div class="panel-heading">{l s='Shipping' mod='globkuriermodule'}</div>
+                    <div class="panel-body form-horizontal" id="serviceOptionsBody">
+                        <div class="form-group deliverySending">
+                            <label class="radio"><input type="radio" name="pickup_type" id="pickup" value="PICKUP" checked> {l s='The parcel will be picked up by a courier' mod='globkuriermodule'}</label>
+                            <label class="radio"><input type="radio" name="pickup_type" id="point" value="POINT"> {l s='I will send the shipment at the terminal' mod='globkuriermodule'}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12" id="serviceOptionsContainer" style="display:none;">
+                <div class="panel">
+                    <div class="panel-heading">{l s='Service options' mod='globkuriermodule'}</div>
+                    <div class="panel-body additionalInfo" id="serviceOptionsBody">
+                        <div class="row" id="pickupMeta" style="margin-bottom:10px;">
+                            <div class="col-lg-6"><label>{l s='Date sending' mod='globkuriermodule'}</label><input type="text" id="sendDateInput" class="form-control" placeholder="YYYY-MM-DD"></div>
+                            <div class="col-lg-6"><label>{l s='Pickup time' mod='globkuriermodule'}</label><select id="pickupTimeSelect" class="form-control"><option value="">-- {l s='select' mod='globkuriermodule'} --</option></select></div>
+                        </div>
+                        <div class="form-group row receiverAddressPointId receiverAddressPointIdinpost" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='InPost' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="inpostReceiverLabel"></span>
+                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="inPostReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row senderAddressPointId senderAddressPointIdinpost" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='InPost' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="inpostSenderLabel"></span>
+                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="inPostSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row receiverAddressPointId receiverAddressPointIdorlen" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='ORLEN Paczka' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="orlenReceiverLabel"></span>
+                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="paczkaRuchReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row receiverAddressPointId receiverAddressPointIdpocztex48" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='Pocztex48 OWP' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="pocztexReceiverLabel"></span>
+                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="pocztex48owpReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row receiverAddressPointId receiverAddressPointIddhl" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='DHL ParcelShop' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="dhlReceiverLabel"></span>
+                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="dhlparcelReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row receiverAddressPointId receiverAddressPointIddpd" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='DPD Pickup' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="dpdReceiverLabel"></span>
+                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="dpdpickupReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-4 col-form-label">{l s='Payment' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><select id="paymentSelect" class="form-control"></select></div>
+                        </div>
+
+                        <div class="form-group row" id="codAmountGroup" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='COD amount' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><input type="text" id="codAmountInput" class="form-control" /></div>
+                        </div>
+                        <div class="form-group row" id="codAccountGroup" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='Account number to COD' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><input type="text" id="codAccountInput" class="form-control" /></div>
+                        </div>
+                        <div class="form-group row" id="codAccountHolderGroup" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='Name of account owner' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><input type="text" id="codAccountHolderInput" class="form-control" /></div>
+                        </div>
+                        <div class="form-group row" id="codAccountAddr1Group" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='Street of the account owner' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><input type="text" id="codAccountAddr1Input" class="form-control" placeholder="ulica i nr" /></div>
+                        </div>
+                        <div class="form-group row" id="codAccountAddr2Group" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='Postcode and city account owner' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><input type="text" id="codAccountAddr2Input" class="form-control" placeholder="00-000 Miasto" /></div>
+                        </div>
+                        <div class="form-group row" id="insuranceAmountGroup" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='Insurance amount' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><input type="text" id="insuranceAmountInput" class="form-control" /></div>
+                        </div>
+                        <div class="form-group row" id="declaredValueGroup" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='Declared value' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><input type="text" id="declaredValueInput" class="form-control" /></div>
+                        </div>
+                        <div class="form-group row" id="purposeGroup" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='Purpose of the shipment' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8">
+                                <select id="purposeSelect" class="form-control">
+                                    <option value="SOLD">SOLD</option>
+                                    <option value="GIFT">GIFT</option>
+                                    <option value="SAMPLE">SAMPLE</option>
+                                    <option value="NOT_SOLD">NOT_SOLD</option>
+                                    <option value="PERSONAL_EFFECTS">PERSONAL_EFFECTS</option>
+                                    <option value="REPAIR_AND_RETURN">REPAIR_AND_RETURN</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row" id="statesGroup" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='States/Regions' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><select id="statesSelect" class="form-control"></select></div>
+                        </div>
+                        <div class="form-group row" id="senderStatesGroup" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='Sender states/regions' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><select id="senderStatesSelect" class="form-control"></select></div>
+                        </div>
+                        <div class="form-group row" id="commentsGroup">
+                            <label class="col-sm-4 col-form-label">{l s='Comments' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><textarea id="commentsInput" class="form-control" rows="2"></textarea></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="col-lg-4 additionalInfo"
-             glob-additional-information
-             ng-model="additionalInfo"
-             recevicer-address="receiver"
-             service-options="serviceOptions"
-             service-model="pickedService"></div>
+
 
         <!-- Section discount code and summary -->
-        <div class="col-lg-12" ng-show="pickedService && additionalInfo && additionalInfo.paymentType" style="margin-top: 20px;">
+        <div class="col-lg-12" id="summaryContainer" style="display:none; margin-top: 20px;">
            <div class="panel">
                 <div class="panel-heading">Podsumowanie zamówienia</div>
                 <div class="panel-body">
-                    <div glob-discount-code-and-summary
-                         service-model="pickedService"
-                         service-options="serviceOptions"
-                         additional-info="additionalInfo"
-                         package-info="pickedService.packageInfo"
-                         sender-address="senderAddress"
-                         recevicer-address="recevicerAddress"
-                         discount-code="discountCode"
-                         price-error="priceError"></div>
+                    <div id="discountAndSummary">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">{l s='Selected service' mod='globkuriermodule'}</label>
+                                    <div id="summaryServiceName" class="form-control-static lead"></div>
+                                </div>
+                                <div id="summaryServiceLabels" class="well" style="display:none; margin-top:10px;"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label class="control-label">{l s='Discount code' mod='globkuriermodule'}</label>
+                                    <div class="row">
+                                        <div class="col-sm-7"><input type="text" id="discountCodeInput" class="form-control" /></div>
+                                        <div class="col-sm-5">
+                                            <button class="btn btn-primary" id="applyDiscountBtn" type="button" style="margin-right:8px;">{l s='Apply' mod='globkuriermodule'}</button>
+                                            <button class="btn btn-default" id="clearDiscountBtn" type="button">{l s='Clear' mod='globkuriermodule'}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="priceErrorBox" class="alert alert-warning" style="display:none;"></div>
+                                <div id="orderSummaryBox" class="well" style="margin-top:10px;">
+                                    <div id="summaryRowBaseNet"><strong>{l s='Base price net' mod='globkuriermodule'}</strong>: <span id="summaryBaseNet">-</span></div>
+                                    <div id="summaryRowAddons"><strong>{l s='Additional services selected' mod='globkuriermodule'}</strong>: <span id="summaryAddonsNet">-</span></div>
+                                    <div id="summaryRowDiscount"><strong>{l s='Discount net' mod='globkuriermodule'}</strong>: <span id="summaryDiscount">-</span></div>
+                                    <div id="summaryRowNetWithFuel"><strong>{l s='Total net + fuel' mod='globkuriermodule'}</strong>: <span id="summaryNetWithFuel">-</span></div>
+                                    <div id="summaryRowGross"><strong>{l s='Total gross' mod='globkuriermodule'}</strong>: <span id="summaryGross">-</span></div>
+                                    <div id="summaryRowFuel" class="text-muted" style="font-size:12px;">{l s='incl. fuel surcharge' mod='globkuriermodule'}: <span id="summaryFuel">-</span></div>
+                                    <div id="summaryRowVat" class="text-muted" style="font-size:12px;">{l s='incl. VAT' mod='globkuriermodule'} <span id="summaryVatLabel"></span>: <span id="summaryVat">-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class=" col-lg-12 panel-footer" style="text-align: center;">
             <button
-                type="submit"
+                type="button"
+                id="sendOrderBtn"
                 class="btn btn-success"
                 style="padding: 12px 40px;"
-                ng-click="send();"
-                ng-hide="orderPlaced"
-                ng-disabled="isProcessing || !pickedService || priceError"
             >
-                <i class="icon-send" ng-show="!isProcessing"></i>
-                <i class="icon-cog icon-spin" ng-show="isProcessing"></i>
+                <i class="icon-send" id="sendIcon"></i>
+                <i class="icon-cog icon-spin" id="processingIcon" style="display:none;"></i>
                 {l s='Send' mod='globkuriermodule'}
             </button>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="servicesPickModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">{l s='Select carrier' mod='globkuriermodule'}</h4>
+          </div>
+          <div class="modal-body">
+            <div id="servicesModalEmpty" class="alert alert-info" style="display:none;">
+              {l s='No services found' mod='globkuriermodule'}
+            </div>
+            <div class="row" id="servicesModalList" style="display:flex;flex-wrap:wrap;"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{l s='Cancel' mod='globkuriermodule'}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="terminalPickerModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">{l s='Find a point' mod='globkuriermodule'}</h4>
+          </div>
+          <div class="modal-body form-horizontal">
+            <div class="form-group">
+              <label class="col-lg-4 control-label">{l s='City' mod='globkuriermodule'}</label>
+              <div class="col-lg-6"><input type="text" id="terminalQuery" class="form-control"></div>
+              <div class="col-lg-2"><button class="btn btn-primary" id="terminalSearchBtn">{l s='Search' mod='globkuriermodule'}</button></div>
+            </div>
+            <div class="form-group">
+              <label class="col-lg-4 control-label">{l s='Point' mod='globkuriermodule'}</label>
+              <div class="col-lg-6">
+                <select id="terminalSelect" class="form-control"></select>
+                <span id="terminalHint" style="display:none;">{l s='Use the search above to find a point' mod='globkuriermodule'}</span>
+                <div id="terminalErrorBox" class="alert alert-warning" style="display:none; margin-top:10px;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{l s='Cancel' mod='globkuriermodule'}</button>
+            <button type="button" class="btn btn-primary" id="terminalSaveBtn" data-dismiss="modal">{l s='Save' mod='globkuriermodule'}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Edit Sender Modal -->
+    <div class="modal fade" id="senderEditModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">{l s='Edit sender' mod='globkuriermodule'}</h4>
+          </div>
+          <div class="modal-body form-horizontal">
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='Name' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="sender_edit_name" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='Street' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="sender_edit_street" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='House number' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="sender_edit_houseNumber" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='Postcode' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="sender_edit_postalCode" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='City' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="sender_edit_city" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='Contact person' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="sender_edit_contact" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='Phone' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="sender_edit_phone" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='E-mail' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="email" id="sender_edit_email" class="form-control"></div></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{l s='Cancel' mod='globkuriermodule'}</button>
+            <button type="button" class="btn btn-primary" id="saveSenderEdit" data-dismiss="modal">{l s='Save' mod='globkuriermodule'}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Receiver Modal -->
+    <div class="modal fade" id="receiverEditModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">{l s='Edit receiver' mod='globkuriermodule'}</h4>
+          </div>
+          <div class="modal-body form-horizontal">
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='Name' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="receiver_edit_name" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='Street' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="receiver_edit_street" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='House number' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="receiver_edit_houseNumber" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='Postcode' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="receiver_edit_postalCode" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='City' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="receiver_edit_city" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='Contact person' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="receiver_edit_contact" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='Phone' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="text" id="receiver_edit_phone" class="form-control"></div></div>
+            <div class="form-group"><label class="col-lg-4 control-label">{l s='E-mail' mod='globkuriermodule'}</label><div class="col-lg-6"><input type="email" id="receiver_edit_email" class="form-control"></div></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{l s='Cancel' mod='globkuriermodule'}</button>
+            <button type="button" class="btn btn-primary" id="saveReceiverEdit" data-dismiss="modal">{l s='Save' mod='globkuriermodule'}</button>
+          </div>
+        </div>
         </div>
     </div>
 
@@ -180,16 +479,7 @@
         ];
         let urlRedirect = '{$urlRedirect}';
 
-        (function () {
-            'use strict';
-
-            angular
-                .module('newParcelApp')
-                .factory('InitialValues', [InitialValuesFactory])
-            ;
-
-            function InitialValuesFactory() {
-                return {
+        window.InitialValues = {
                     sender : {
                         name: '{$config->defaultSenderName|escape:'javascript':'UTF-8'}',
                         personName: '{$config->defaultSenderPersonName|escape:'javascript':'UTF-8'}',
@@ -276,20 +566,12 @@
                     lang16: '{l s='Save' mod='globkuriermodule'}',
                     lang17: '{l s='Complete the recipients address before quoting' mod='globkuriermodule'}',
                 };
-            }
-        })();
+
         $(document).ready(function() {
-
-            console.log('npp')
-
             $(document).on('click', '.searchTerminals', function() {
-                console.log('search 1')
                 setTimeout(function() {
-                    console.log('search 2');
-
                     $('.select2').select2();
                 }, 2500)
-
                 $('.select2').select2();
             });
             $('.select2').select2();
