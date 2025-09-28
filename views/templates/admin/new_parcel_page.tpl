@@ -68,7 +68,7 @@
         <div class="col-lg-12" style="text-align: center;">
             <h2><i class="icon-check" style="font-size: 50px!important; color:#72C279;"></i></h2>
             <h2>{l s='Carrier was succesfully ordered' mod='globkuriermodule'}</h2>
-            <p>{l s='Parcel No' mod='globkuriermodule'}: <span ng-bind="orderPlaced.gkId"></span></p>
+            <p>{l s='Parcel No' mod='globkuriermodule'}: <span id="orderPlacedNumber"></span></p>
             <button class="btn btn-warning" onclick="location.reload();">{l s='Ship next' mod='globkuriermodule'}</button>
             <small>{l s='Powrót za 2 sekundy' mod='globkuriermodule'}</small>
         </div>

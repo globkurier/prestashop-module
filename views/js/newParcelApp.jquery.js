@@ -50,8 +50,26 @@ function setProcessing(on) {
 		const hasCOD = activeCategories.indexOf('CASH_ON_DELIVERY') !== -1;
 		$('#codAmountGroup, #codAccountGroup, #codAccountHolderGroup, #codAccountAddr1Group, #codAccountAddr2Group').toggle(hasCOD);
 		if (hasCOD) {
+			// Fill all COD fields with defaults like Angular does
 			if (window.InitialValues && window.InitialValues.defaultCodAccount) {
 				$('#codAccountInput').val(window.InitialValues.defaultCodAccount);
+				if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
+				GK.state.additionalInfo.codAccount = window.InitialValues.defaultCodAccount;
+			}
+			if (window.InitialValues && window.InitialValues.defaultCodAccountHolderName) {
+				$('#codAccountHolderInput').val(window.InitialValues.defaultCodAccountHolderName);
+				if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
+				GK.state.additionalInfo.codAccountHolder = window.InitialValues.defaultCodAccountHolderName;
+			}
+			if (window.InitialValues && window.InitialValues.defaultCodAccountHolderAddr1) {
+				$('#codAccountAddr1Input').val(window.InitialValues.defaultCodAccountHolderAddr1);
+				if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
+				GK.state.additionalInfo.codAccountAddr1 = window.InitialValues.defaultCodAccountHolderAddr1;
+			}
+			if (window.InitialValues && window.InitialValues.defaultCodAccountHolderAddr2) {
+				$('#codAccountAddr2Input').val(window.InitialValues.defaultCodAccountHolderAddr2);
+				if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
+				GK.state.additionalInfo.codAccountAddr2 = window.InitialValues.defaultCodAccountHolderAddr2;
 			}
 		} else {
 			$('#codAmountInput, #codAccountInput, #codAccountHolderInput, #codAccountAddr1Input, #codAccountAddr2Input').val('');
@@ -71,6 +89,13 @@ function showOrderPlaced(order) {
 		GK.state.orderPlaced = order;
 		$('#mainFormBox').hide();
 		$('#orderPlacedBox').show();
+
+		// Display the shipment number
+		if (order && order.gkId) {
+			$('#orderPlacedNumber').text(order.gkId);
+		} else {
+			$('#orderPlacedNumber').text('Brak numeru');
+		}
 	}
 
 	function clearErrors() {
@@ -104,6 +129,19 @@ function showOrderErrors(obj) {
 
 	function buildOrderData() {
 		const s = GK.state;
+		// Determine collection type like Angular does
+		let collectionType = 'PICKUP';
+		if (s.pickedService && s.pickedService.collectionTypes) {
+			if (s.pickedService.collectionTypes.length > 1) {
+				// Multiple options available, use user selection
+				collectionType = $('input[name=pickup_type]:checked').val() || 'PICKUP';
+			} else {
+				// Only one option available, use it
+				collectionType = s.pickedService.collectionTypes[0];
+			}
+		}
+		const addons = generateAdditionalServices(s.serviceOptions || [], s.additionalInfo || {});
+
 		const data = {
 			shipment: {
 				length: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.length : null,
@@ -117,9 +155,17 @@ function showOrderErrors(obj) {
 			receiverAddress: {},
 			content: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.content : '',
 			paymentId: s.additionalInfo.paymentType,
-			addons: (s.serviceOptions || []).map(function(o){ return { id: o.id, value: o.value }; }),
-			collectionType: $('input[name=pickup_type]:checked').val() || 'PICKUP'
+			addons: addons,
+			collectionType: collectionType,
+			agreements: {},
+			originId: "PRESTASHOP_API"
 		};
+
+		// Add pickup data for PICKUP collection type
+		if (collectionType === 'PICKUP') {
+			data.pickup = generatePickup(s.additionalInfo || {});
+		}
+
 		// map sender/receiver
 		['sender','receiver'].forEach(function(role){
 			const src = s[role] || {};
@@ -133,9 +179,118 @@ function showOrderErrors(obj) {
 			dst.phone = src.phone;
 			dst.email = src.email;
 			dst.contactPerson = src.contactPerson;
-			if (src.terminal) dst.pointId = src.terminal;
+
+			// Add apartment number if exists
+			if (src.apartmentNumber) {
+				dst.apartmentNumber = src.apartmentNumber;
+			}
+
+			// Add pointId for specific carrier terminal points (like Angular does in generateAddress)
+			// BUT ONLY for POINT collection type (like Angular does in generate())
+			if (role === 'receiver' && s.pickedService && collectionType === 'POINT') {
+				const carrierName = (s.pickedService.carrierName || '').toLowerCase();
+				const serviceName = (s.pickedService.name || '').toLowerCase();
+				const collectionTypes = s.pickedService.collectionTypes || [];
+
+				// Poczta Polska - only if single POINT collection type and service name contains "do Punktu"
+				if (carrierName.indexOf('poczta') > -1 && s.additionalInfo && s.additionalInfo.pocztex48owpReceiverPoint && s.additionalInfo.pocztex48owpReceiverPoint.id) {
+					if (collectionTypes.length === 1 && collectionTypes.indexOf('POINT') > -1 && serviceName.indexOf(' do punktu') > -1) {
+						dst.pointId = s.additionalInfo.pocztex48owpReceiverPoint.id;
+					}
+				}
+				// Orlen/Ruch - always if available
+				else if ((carrierName.indexOf('orlen') > -1 || carrierName.indexOf('ruch') > -1) && s.additionalInfo && s.additionalInfo.paczkaRuchReceiverPoint && s.additionalInfo.paczkaRuchReceiverPoint.id) {
+					dst.pointId = s.additionalInfo.paczkaRuchReceiverPoint.id;
+				}
+				// DHL - always if available
+				else if (carrierName.indexOf('dhl') > -1 && s.additionalInfo && s.additionalInfo.dhlparcelReceiverPoint && s.additionalInfo.dhlparcelReceiverPoint.id) {
+					dst.pointId = s.additionalInfo.dhlparcelReceiverPoint.id;
+				}
+				// DPD - always if available
+				else if (carrierName.indexOf('dpd') > -1 && s.additionalInfo && s.additionalInfo.dpdpickupReceiverPoint && s.additionalInfo.dpdpickupReceiverPoint.id) {
+					dst.pointId = s.additionalInfo.dpdpickupReceiverPoint.id;
+				}
+				// InPost - always if available (like Angular)
+				else if (carrierName.indexOf('inpost') > -1 && s.additionalInfo && s.additionalInfo.inPostReceiverPoint && s.additionalInfo.inPostReceiverPoint.id) {
+					dst.pointId = s.additionalInfo.inPostReceiverPoint.id;
+				}
+			}
+
+			// Also add terminal/point ID for POINT collection type (fallback)
+			if (collectionType === 'POINT' && src.terminal) {
+				dst.pointId = src.terminal;
+			}
+
+			// Add state ID if exists (for international shipments)
+			if (s.additionalInfo && s.additionalInfo.stateType && s.additionalInfo.stateType > 0) {
+				dst.stateId = s.additionalInfo.stateType;
+			}
 		});
+
+		// Add international shipment fields
+		if (data.senderAddress.countryId !== data.receiverAddress.countryId) {
+			if (s.additionalInfo && s.additionalInfo.declaredValue) {
+				data.declaredValue = s.additionalInfo.declaredValue;
+			}
+			if (s.additionalInfo && s.additionalInfo.purpose) {
+				data.purpose = s.additionalInfo.purpose;
+			}
+		}
+
+		// Add declared value if exists (regardless of international)
+		if (s.additionalInfo && s.additionalInfo.declaredValue) {
+			data.declaredValue = s.additionalInfo.declaredValue;
+		}
+
 		return data;
+	}
+
+	function generatePickup(additionalInfo) {
+		const pickup = {
+			date: additionalInfo.sendDate || (window.InitialValues && window.InitialValues.todayDate) || new Date().toISOString().split('T')[0]
+		};
+
+		if (additionalInfo.timeRange && additionalInfo.timeRange.timeFrom) {
+			pickup.timeFrom = additionalInfo.timeRange.timeFrom;
+		}
+		if (additionalInfo.timeRange && additionalInfo.timeRange.timeTo) {
+			pickup.timeTo = additionalInfo.timeRange.timeTo;
+		}
+
+		return pickup;
+	}
+
+	function generateAdditionalServices(serviceOptions, additionalInfo) {
+		if (!Array.isArray(serviceOptions)) return [];
+
+		const addons = [];
+		serviceOptions.forEach(function(option) {
+			const addon = { id: option.id };
+
+			// Only add value field for specific categories (like Angular does)
+			if (option.category === 'CASH_ON_DELIVERY') {
+				addon.value = additionalInfo.codAmount || '';
+				if (additionalInfo.codAccount) addon.bankAccountNumber = additionalInfo.codAccount.replace(/\s/g, '');
+				if (additionalInfo.codAccountHolder) addon.name = additionalInfo.codAccountHolder;
+				if (additionalInfo.codAccountAddr1) addon.addressLine1 = additionalInfo.codAccountAddr1;
+				if (additionalInfo.codAccountAddr2) addon.addressLine2 = additionalInfo.codAccountAddr2;
+				// Add missing fields that API expects
+				if (additionalInfo.codAccountHolder) addon.countryId = 1; // Default to Poland
+				if (additionalInfo.codAccountAddr2) {
+					// Extract city from address line 2 (format: "00-000 Miasto")
+					const addr2 = additionalInfo.codAccountAddr2;
+					const cityMatch = addr2.match(/\d{2}-\d{3}\s+(.+)/);
+					if (cityMatch) addon.city = cityMatch[1];
+				}
+			} else if (option.category === 'INSURANCE') {
+				addon.value = additionalInfo.insuranceAmount || '';
+			}
+			// For other addons, don't add value field unless explicitly provided
+
+			addons.push(addon);
+		});
+
+		return addons;
 	}
 
 	function placeOrder() {
@@ -143,6 +298,41 @@ function showOrderErrors(obj) {
 		const err = validate();
 		if (err) { showValidationErrors(err); return; }
 		if (!GK.state.pickedService) return;
+
+		// Validate pickup date and time
+		const collectionType = $('input[name=pickup_type]:checked').val() || 'PICKUP';
+		if (collectionType === 'PICKUP') {
+			const sendDate = $('#sendDateInput').val();
+			const timeRange = $('#pickupTimeSelect').val();
+			if (!sendDate) {
+				showOrderErrors({ pickup: 'Please select pickup date' });
+				return;
+			}
+			if (!timeRange) {
+				showOrderErrors({ pickup: 'Please select pickup time range' });
+				return;
+			}
+			// Validate that the date is not in the past
+			const today = new Date().toISOString().split('T')[0];
+			if (sendDate < today) {
+				showOrderErrors({ pickup: 'Pickup date cannot be in the past' });
+				return;
+			}
+		}
+
+		// Validate required addons
+		if (GK.state.customRequired && GK.state.customRequired.requiredAddons) {
+			const requiredAddons = GK.state.customRequired.requiredAddons;
+			const selectedAddonIds = (GK.state.serviceOptions || []).map(function(opt) { return opt.id; });
+			const missingAddons = requiredAddons.filter(function(reqId) {
+				return !selectedAddonIds.some(function(selId) { return (selId + '') === (reqId + ''); });
+			});
+			if (missingAddons.length > 0) {
+				showOrderErrors({ addons: 'Required addons are missing: ' + missingAddons.join(', ') });
+				return;
+			}
+		}
+
 		setProcessing(true);
 		const orderData = buildOrderData();
 		const token = window.InitialValues && window.InitialValues.token;
@@ -195,6 +385,7 @@ function initStateFromInitialValues() {
 			name: (iv.sender && iv.sender.name) || '',
 			street: (iv.sender && iv.sender.street) || '',
 			houseNumber: (iv.sender && iv.sender.houseNumber) || '',
+			apartmentNumber: (iv.sender && iv.sender.apartmentNumber) || '',
 			postalCode: (iv.sender && iv.sender.postCode) || '',
 			city: (iv.sender && iv.sender.city) || '',
 			country: iv.sender && iv.sender.countryId ? { id: iv.sender.countryId } : null,
@@ -207,6 +398,7 @@ function initStateFromInitialValues() {
 			name: rv.personName || rv.name || '',
 			street: rv.street || '',
 			houseNumber: rv.houseNumber || '',
+			apartmentNumber: rv.apartmentNumber || '',
 			postalCode: rv.postCode || rv.postalCode || '',
 			city: rv.city || '',
 			country: rv.countryId ? { id: rv.countryId, isoCode: (rv.countryCode || rv.countryIso || rv.isoCode || null) } : (rv.countryCode ? { id: null, isoCode: rv.countryCode } : null),
@@ -215,6 +407,10 @@ function initStateFromInitialValues() {
 			email: rv.email || ''
 		};
 		if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
+		// Initialize stateType from InitialValues if available
+		if (iv.receiver && iv.receiver.stateId) {
+			GK.state.additionalInfo.stateType = iv.receiver.stateId;
+		}
 		// make sure UI reflects current international rules immediately
         try { updateEnabledOptionsUI(); } catch(e) {}
         try { preloadCountriesMap().then(ensureCountryIdsFromIso); } catch(e) { ensureCountryIdsFromIso(); }
@@ -266,6 +462,7 @@ function renderAddressBoxes() {
     $('#sender_name').val(GK.state.sender.name);
     $('#sender_street').val(GK.state.sender.street);
     $('#sender_houseNumber').val(GK.state.sender.houseNumber);
+    $('#sender_apartmentNumber').val(GK.state.sender.apartmentNumber);
     $('#sender_postalCode').val(GK.state.sender.postalCode);
     $('#sender_city').val(GK.state.sender.city);
     $('#sender_phone').val(GK.state.sender.phone);
@@ -274,18 +471,19 @@ function renderAddressBoxes() {
     $('#receiver_name').val(GK.state.receiver.name);
     $('#receiver_street').val(GK.state.receiver.street);
     $('#receiver_houseNumber').val(GK.state.receiver.houseNumber);
+    $('#receiver_apartmentNumber').val(GK.state.receiver.apartmentNumber);
     $('#receiver_postalCode').val(GK.state.receiver.postalCode);
     $('#receiver_city').val(GK.state.receiver.city);
     $('#receiver_phone').val(GK.state.receiver.phone);
     $('#receiver_email').val(GK.state.receiver.email);
 
     // bind
-    $(document).on('input change', '#sender_name,#sender_street,#sender_houseNumber,#sender_postalCode,#sender_city,#sender_phone,#sender_email', function(){
+    $(document).on('input change', '#sender_name,#sender_street,#sender_houseNumber,#sender_apartmentNumber,#sender_postalCode,#sender_city,#sender_phone,#sender_email', function(){
         const id = this.id.replace('sender_','');
         GK.state.sender[id] = $(this).val();
         if (GK.state.sender.phone && GK.state.receiver.phone) { $('#validationErrorBox').hide(); }
     });
-    $(document).on('input change', '#receiver_name,#receiver_street,#receiver_houseNumber,#receiver_postalCode,#receiver_city,#receiver_phone,#receiver_email', function(){
+    $(document).on('input change', '#receiver_name,#receiver_street,#receiver_houseNumber,#receiver_apartmentNumber,#receiver_postalCode,#receiver_city,#receiver_phone,#receiver_email', function(){
         const id = this.id.replace('receiver_','');
         GK.state.receiver[id] = $(this).val();
         if (GK.state.sender.phone && GK.state.receiver.phone) { $('#validationErrorBox').hide(); }
@@ -327,6 +525,7 @@ function bindEditModals() {
         $('#sender_edit_name').val(GK.state.sender.name || '');
         $('#sender_edit_street').val(GK.state.sender.street || '');
         $('#sender_edit_houseNumber').val(GK.state.sender.houseNumber || '');
+        $('#sender_edit_apartmentNumber').val(GK.state.sender.apartmentNumber || '');
         $('#sender_edit_postalCode').val(GK.state.sender.postalCode || '');
         $('#sender_edit_city').val(GK.state.sender.city || '');
         $('#sender_edit_contact').val(GK.state.sender.contactPerson || '');
@@ -339,6 +538,7 @@ function bindEditModals() {
         GK.state.sender.name = $('#sender_edit_name').val();
         GK.state.sender.street = $('#sender_edit_street').val();
         GK.state.sender.houseNumber = $('#sender_edit_houseNumber').val();
+        GK.state.sender.apartmentNumber = $('#sender_edit_apartmentNumber').val();
         GK.state.sender.postalCode = $('#sender_edit_postalCode').val();
         GK.state.sender.city = $('#sender_edit_city').val();
         GK.state.sender.contactPerson = $('#sender_edit_contact').val();
@@ -355,6 +555,7 @@ function bindEditModals() {
         $('#receiver_edit_name').val(GK.state.receiver.name || '');
         $('#receiver_edit_street').val(GK.state.receiver.street || '');
         $('#receiver_edit_houseNumber').val(GK.state.receiver.houseNumber || '');
+        $('#receiver_edit_apartmentNumber').val(GK.state.receiver.apartmentNumber || '');
         $('#receiver_edit_postalCode').val(GK.state.receiver.postalCode || '');
         $('#receiver_edit_city').val(GK.state.receiver.city || '');
         $('#receiver_edit_contact').val(GK.state.receiver.contactPerson || '');
@@ -367,6 +568,7 @@ function bindEditModals() {
         GK.state.receiver.name = $('#receiver_edit_name').val();
         GK.state.receiver.street = $('#receiver_edit_street').val();
         GK.state.receiver.houseNumber = $('#receiver_edit_houseNumber').val();
+        GK.state.receiver.apartmentNumber = $('#receiver_edit_apartmentNumber').val();
         GK.state.receiver.postalCode = $('#receiver_edit_postalCode').val();
         GK.state.receiver.city = $('#receiver_edit_city').val();
         GK.state.receiver.contactPerson = $('#receiver_edit_contact').val();
@@ -502,11 +704,18 @@ function fetchProducts() {
 function renderServiceOptionsContainer() {
     // Use existing markup in TPL; just initialize widgets and bind events
     $('#serviceOptionsContainer').show();
-    try { $('#sendDateInput').datepicker({ dateFormat: 'yy-mm-dd' }); } catch(e) {}
+
+    // Initialize datepicker with available dates restriction
+    initializeDatepickerWithAvailability();
+
     if (window.InitialValues && window.InitialValues.todayDate) {
         $('#sendDateInput').val(window.InitialValues.todayDate);
     }
-    $('#sendDateInput').off('change').on('change', function(){ fetchTimeRanges(); });
+    $('#sendDateInput').off('change').on('change', function(){
+      if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
+      GK.state.additionalInfo.sendDate = $(this).val();
+      fetchTimeRanges();
+    });
     // bind new inputs to state
     $(document)
       .off('input change', '#codAmountInput')
@@ -535,6 +744,21 @@ function renderServiceOptionsContainer() {
     $(document)
       .off('input change', '#commentsInput')
       .on('input change', '#commentsInput', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.notes = $(this).val(); });
+    $(document)
+      .off('change', '#pickupTimeSelect')
+      .on('change', '#pickupTimeSelect', function(){
+        if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
+        const selectedValue = $(this).val();
+        if (selectedValue) {
+          try {
+            GK.state.additionalInfo.timeRange = JSON.parse(decodeURIComponent(selectedValue));
+          } catch(e) {
+            GK.state.additionalInfo.timeRange = null;
+          }
+        } else {
+          GK.state.additionalInfo.timeRange = null;
+        }
+      });
     $('input[name=pickup_type]').off('change').on('change', function(){
         fetchTimeRanges();
         refreshAddons();
@@ -582,6 +806,9 @@ function renderServiceOptionsContainer() {
         $('#terminalInfo').show();
         if (window.InitialValues && window.InitialValues.terminalCode) {
             $('#terminalCode').text(window.InitialValues.terminalCode);
+            // Also set the terminal in state for proper data handling
+            if (!GK.state.receiver) GK.state.receiver = {};
+            GK.state.receiver.terminal = window.InitialValues.terminalCode;
         }
         $('.terminalLabel').hide();
         if (window.InitialValues && window.InitialValues.terminalType) {
@@ -590,7 +817,15 @@ function renderServiceOptionsContainer() {
 		// Initial dependent UI and requirements
 		updateCarrierDependentUI();
 		enforceCollectionTypeRadios();
-		setTimeout(function(){ fetchTimeRanges(); fetchCustomRequiredFields(); }, 0);
+		setTimeout(function(){
+			fetchTimeRanges();
+			fetchCustomRequiredFields();
+			// Refresh available dates when service changes
+			fetchAvailablePickupDates().then(function(availableDates) {
+				GK.state.availablePickupDates = availableDates;
+				$('#sendDateInput').datepicker('refresh');
+			});
+		}, 0);
 	}
 
 function updateCarrierDependentUI() {
@@ -598,6 +833,10 @@ function updateCarrierDependentUI() {
     if (!s.pickedService) return;
     const name = (s.pickedService.carrierName || '').toLowerCase();
     const sendingType = $('input[name=pickup_type]:checked').val();
+
+    // Store current terminal code before any changes
+    const currentTerminalCode = $('#terminalCode').text();
+
     // hide all
     $('.receiverAddressPointId').hide();
     $('.senderAddressPointId').hide();
@@ -616,6 +855,12 @@ function updateCarrierDependentUI() {
     } else if (showReceiver && name.indexOf('dpd') > -1) {
         $('.receiverAddressPointIddpd').show();
     }
+
+    // Restore terminal code if it was set by user
+    if (currentTerminalCode && currentTerminalCode.trim() !== '') {
+        $('#terminalCode').text(currentTerminalCode);
+    }
+
     updateEnabledOptionsUI();
 }
 
@@ -627,14 +872,22 @@ function enforceCollectionTypeRadios() {
     // Enable/disable radios like Angular checkPickedServiceType
     $('#pickup').prop('disabled', !allowPickup).closest('.radio')[allowPickup ? 'removeClass' : 'addClass']('disabled');
     $('#point').prop('disabled', !allowPoint).closest('.radio')[allowPoint ? 'removeClass' : 'addClass']('disabled');
-    // Ensure a valid selection
-    const current = $('input[name=pickup_type]:checked').val();
-    let selected = current;
-    if (current === 'PICKUP' && !allowPickup) selected = allowPoint ? 'POINT' : current;
-    if (current === 'POINT' && !allowPoint) selected = allowPickup ? 'PICKUP' : current;
-    if (!selected) selected = allowPickup ? 'PICKUP' : (allowPoint ? 'POINT' : 'PICKUP');
-    if (selected !== current) {
-        $('input[name=pickup_type][value="' + selected + '"]').prop('checked', true).trigger('change');
+
+    // Auto-select collection type like Angular does
+    if (allowed.length === 1) {
+        // Only one option available, auto-select it
+        const autoSelect = allowed[0];
+        $('input[name=pickup_type][value="' + autoSelect + '"]').prop('checked', true).trigger('change');
+    } else {
+        // Multiple options available, ensure a valid selection
+        const current = $('input[name=pickup_type]:checked').val();
+        let selected = current;
+        if (current === 'PICKUP' && !allowPickup) selected = allowPoint ? 'POINT' : current;
+        if (current === 'POINT' && !allowPoint) selected = allowPickup ? 'PICKUP' : current;
+        if (!selected) selected = allowPickup ? 'PICKUP' : (allowPoint ? 'POINT' : 'PICKUP');
+        if (selected !== current) {
+            $('input[name=pickup_type][value="' + selected + '"]').prop('checked', true).trigger('change');
+        }
     }
 }
 
@@ -732,6 +985,71 @@ function updateChosenServiceUI() {
 			});
 	}
 
+	// Initialize datepicker with available dates restriction
+	function initializeDatepickerWithAvailability() {
+		const today = new Date();
+		const maxDate = new Date();
+		maxDate.setDate(today.getDate() + 30); // maksymalnie 30 dni do przodu
+
+		// Store available dates in state for datepicker
+		GK.state.availablePickupDates = [];
+
+		// Initialize basic datepicker first
+		try {
+			$('#sendDateInput').datepicker({
+				dateFormat: 'yy-mm-dd',
+				minDate: today,
+				maxDate: maxDate,
+				beforeShowDay: function(date) {
+					const dateStr = $.datepicker.formatDate('yy-mm-dd', date);
+					const isAvailable = GK.state.availablePickupDates.includes(dateStr);
+					return [isAvailable, isAvailable ? '' : 'unavailable'];
+				}
+			});
+		} catch(e) {
+			// Datepicker initialization failed
+		}
+
+		// Fetch available dates and update datepicker
+		fetchAvailablePickupDates().then(function(availableDates) {
+			GK.state.availablePickupDates = availableDates;
+			// Refresh datepicker to apply new restrictions
+			$('#sendDateInput').datepicker('refresh');
+		});
+	}
+
+	// Fetch available pickup dates and initialize datepicker with restrictions
+	function fetchAvailablePickupDates() {
+		const s = GK.state;
+		try { ensureCountryIdsFromIso(); } catch(e) {}
+		if (!s.pickedService) return Promise.resolve([]);
+
+		const params = {
+			productId: s.pickedService.id,
+			date: new Date().toISOString().split('T')[0] // today's date
+		};
+		const p = s.packageInfo || {};
+		if (p.weight != null) params.weight = p.weight;
+		params.quantity = p.count || 1;
+		if (s.sender && s.sender.country && s.sender.country.id) params.senderCountryId = s.sender.country.id;
+		if (s.receiver && s.receiver.country && s.receiver.country.id) params.receiverCountryId = s.receiver.country.id;
+		if (s.sender && s.sender.postalCode) params.senderPostCode = s.sender.postalCode;
+		if (s.receiver && s.receiver.postalCode) params.receiverPostCode = s.receiver.postalCode;
+
+		const url = 'https://api.globkurier.pl/v1/order/pickupTimeRanges?' + new URLSearchParams(params).toString();
+		return fetch(url, { headers: buildHeaders() })
+			.then(function(r){ return r.json(); })
+			.then(function(data){
+				const list = Array.isArray(data) ? data : (data && Array.isArray(data.timeRanges) ? data.timeRanges : []);
+				// Extract unique dates from the response
+				const availableDates = [...new Set(list.map(item => item.date))];
+				return availableDates;
+			})
+			.catch(function(e){
+				return [];
+			});
+	}
+
 	function fetchTimeRanges() {
 		const s = GK.state;
     try { ensureCountryIdsFromIso(); } catch(e) {}
@@ -755,9 +1073,24 @@ function updateChosenServiceUI() {
 			.then(function(r){ return r.json(); })
 			.then(function(data){
 				const list = Array.isArray(data) ? data : (data && Array.isArray(data.timeRanges) ? data.timeRanges : []);
-				const html = '<option value="">-- wybierz --</option>' + list.map(function(t){
-					const label = (t.timeFrom && t.timeTo) ? (t.timeFrom + ' - ' + t.timeTo) : (t.name || '');
-					const value = JSON.stringify(t);
+
+				// Group time ranges by date and merge overlapping ranges
+				const timeRangesByDate = {};
+				list.forEach(function(item) {
+					if (!timeRangesByDate[item.date]) {
+						timeRangesByDate[item.date] = [];
+					}
+					timeRangesByDate[item.date].push({
+						timeFrom: item.timeFrom,
+						timeTo: item.timeTo
+					});
+				});
+
+				// For the selected date, show all available time ranges
+				const selectedDateRanges = timeRangesByDate[date] || [];
+				const html = '<option value="">-- wybierz --</option>' + selectedDateRanges.map(function(t){
+					const label = (t.timeFrom && t.timeTo) ? (t.timeFrom + ' - ' + t.timeTo) : '';
+					const value = JSON.stringify({ timeFrom: t.timeFrom, timeTo: t.timeTo });
 					return '<option value="' + encodeURIComponent(value) + '">' + label + '</option>';
 				}).join('');
 				$('#pickupTimeSelect').html(html);
@@ -832,6 +1165,22 @@ function fetchStates(countryId, opts) {
                 } else {
                     $('#senderStatesGroup').hide();
                 }
+
+                // Handle required addons
+                if (json.requiredAddons && Array.isArray(json.requiredAddons)) {
+                    GK.state.customRequired.requiredAddons = json.requiredAddons;
+                    // Auto-select required addons
+                    json.requiredAddons.forEach(function(requiredId) {
+                        const addonCheckbox = $('.addon-checkbox[data-id="' + requiredId + '"]');
+                        if (addonCheckbox.length && !addonCheckbox.is(':checked')) {
+                            addonCheckbox.prop('checked', true).trigger('change');
+                        }
+                    });
+                } else {
+                    // Clear required addons if not present
+                    GK.state.customRequired.requiredAddons = null;
+                }
+
 				updateCarrierDependentUI();
 			});
 	}
@@ -1054,10 +1403,16 @@ function renderServicesAndBind() {
 			const id = $(this).data('id');
 			const price = $(this).data('price');
 			const category = $(this).data('category');
+			const addonName = $(this).closest('label').text().trim();
 			if ($(this).is(':checked')) {
 				if (!Array.isArray(GK.state.serviceOptions)) GK.state.serviceOptions = [];
 				if (!GK.state.serviceOptions.some(function(o){ return (o.id + '') === (id + ''); })) {
-					GK.state.serviceOptions.push({ id: id, price: price, category: category });
+					GK.state.serviceOptions.push({
+						id: id,
+						price: price,
+						category: category,
+						name: addonName
+					});
 				}
 			} else {
 				GK.state.serviceOptions = (GK.state.serviceOptions || []).filter(function(o){ return (o.id + '') !== (id + ''); });
@@ -1209,9 +1564,24 @@ function renderServicesAndBind() {
         bindEditModals();
 		renderServicesAndBind();
 		bind();
+
+		// Initialize terminal info if available from InitialValues
+		if (window.InitialValues && window.InitialValues.terminalCode) {
+			$('#terminalCode').text(window.InitialValues.terminalCode);
+			if (!GK.state.receiver) GK.state.receiver = {};
+			GK.state.receiver.terminal = window.InitialValues.terminalCode;
+		// Also set inPostReceiverPoint if terminalType is inpost
+		if (window.InitialValues.terminalType === 'inpost') {
+			if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
+			GK.state.additionalInfo.inPostReceiverPoint = { id: window.InitialValues.terminalCode };
+		}
+		}
+		if (window.InitialValues && window.InitialValues.terminalType) {
+			$('.terminalLabel').hide();
+			$('.terminalLabel[data-type="' + (window.InitialValues.terminalType || '') + '"]').show();
+		}
 	});
 
-	$(bind);
 })();
 
 
