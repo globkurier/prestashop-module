@@ -83,7 +83,7 @@ class Globkuriermodule extends Module
             && $this->registerHook('displayCarrierList')
             && $this->registerHook('displayAfterCarrier')
             && $this->registerHook('displayAfterCarrier')
-            && $this->registerHook('displayAdminOrder')
+            && $this->registerHook('displayAdminOrderMainBottom')
             && $this->registerHook('actionUpdateCarrier');
     }
 
@@ -159,7 +159,7 @@ class Globkuriermodule extends Module
         return $valid;
     }
 
-    public function hookDisplayAdminOrder($params)
+    public function hookdisplayAdminOrderMainBottom($params)
     {
         $orderM = new Globkuriermodule\Order\OrderManager();
         $gkOrder = $orderM->getByOrderId($params['id_order']);

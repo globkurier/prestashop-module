@@ -57,12 +57,14 @@
     background-color:#4B596D;
 }
 
-.bootstrap .btn.btn-success {
+.bootstrap .btn.btn-success,
+.card-body .btn.btn-success {
     background-color:#96c21f;
     border-color: #79a600;
 }
 
-.bootstrap .btn.btn-success:hover {
+.bootstrap .btn.btn-success:hover,
+.card-body .btn.btn-success:hover {
     background-color:#79a600;
 }
 
