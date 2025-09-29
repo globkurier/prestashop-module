@@ -24,14 +24,14 @@
  *}
 <div class="panel">
     <div class="panel-heading">
-        <i class="icon-cogs"></i> 2024
+        <i class="icon-cogs"></i> <h2>{l s='Authentication failed' mod='globkuriermodule'}</h2>
     </div>
     <div class="panel-body">
         <div class="col-lg-12" style="text-align: center;">
             <h2><i class="icon-ban text-danger" style="font-size: 50px!important;"></i></h2>
             <h2>{l s='No access' mod='globkuriermodule'}</h2>
             <p>{l s='In order to use this module you have to login first on the configuration page' mod='globkuriermodule'}</p>
-            <a class="btn btn-warning" href="{$configureUrl|escape:'javascript':'UTF-8'}">{l s='Log in' mod='globkuriermodule'}</a>
+            <a class="btn btn-success" href="{$configureUrl|escape:'javascript':'UTF-8'}">{l s='Log in' mod='globkuriermodule'}</a>
         </div>
     </div>
 </div>

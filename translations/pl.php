@@ -8,6 +8,7 @@ $_MODULE['<{globkuriermodule}prestashop>globkuriermodule_2357fa4873645dccbeaf2cd
 $_MODULE['<{globkuriermodule}prestashop>globkuriermodule_af3efe40b8283cb28787886698757c64'] = 'Wystąpił błąd podczas zapisu ustawień. Spróbuj ponownie.';
 $_MODULE['<{globkuriermodule}prestashop>globkuriermodule_21f0547a1213f69f41c9ba055c58a54b'] = 'Nie można wskazać tego samego przewoźnika dla dwóch usług';
 $_MODULE['<{globkuriermodule}prestashop>getlabel_afe7f0e2db32c4a4acce1a0cb8a78aa4'] = 'Plik etykiety paczki nie jest dostępny dla tej przesyłki.';
+$_MODULE['<{globkuriermodule}prestashop>auth_fail_v16_d4e6d6c42bf3eb807b8778255a4ce415'] = 'Uwierzytelnianie nie powiodło się';
 $_MODULE['<{globkuriermodule}prestashop>auth_fail_v16_7573b8110a24d08a0625c0af718c7ffb'] = 'Brak dostępu';
 $_MODULE['<{globkuriermodule}prestashop>auth_fail_v16_6822e71aa7dc5d740222bd672829ac73'] = 'Aby móc zamawiać przesyłki musisz najpierw się zalogować na stronie konfiguracyjnej modułu';
 $_MODULE['<{globkuriermodule}prestashop>auth_fail_v16_bffe9a3c9a7e00ba00a11749e022d911'] = 'Zaloguj się';
@@ -128,7 +129,6 @@ $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_93cba07454f06a4a960172bb
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_bafd7322c6e97d25b6299b5d6fe8920b'] = 'Nie';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_5b385947acf10ac0c5521161ce96aaa7'] = 'Wybierz dostawę';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_f4ec5f57bd4d31b803312d873be40da9'] = 'Zmień';
-$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_66c4c5112f455a19afde47829df363fa'] = 'Suma:';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_f15c1cae7882448b3fb0404682e17e61'] = 'Zawartość';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_d39e1498c3bd289bb7ed63f790adfb0d'] = 'Długość (cm)';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_3d0ed3e9145be53d081d10fe37c93290'] = 'Szerokość (cm)';
@@ -194,8 +194,6 @@ $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_b7cea4f6e8dd41e0cc16f0da
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_5cdea0362d09eaf35436fd7a67990c8a'] = 'Numer mieszkania';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_59716c97497eb9694541f7c3d37b1a4d'] = 'Kraj';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_311768edcde59acb5d264cd7f81f2c19'] = 'Przed wyceną należy uzupełnić adres odbiorcy';
-$_MODULE['<{globkuriermodule}prestashop>admin_order_6e973ee6892fa903e292a6485815b741'] = 'Wysyłaj z GlobKurierem';
-$_MODULE['<{globkuriermodule}prestashop>admin_order_81dcc5ae3ba3e8d6d79e0b8e75fdc795'] = 'Nadaj przesyłkę';
 $_MODULE['<{globkuriermodule}prestashop>admin_order_170a094ce3123d9a518c0903164b4001'] = 'Wysyłanie paczek z GlobKurier';
 $_MODULE['<{globkuriermodule}prestashop>admin_order_6d9a83e9ff6b9d9eba96a7306a14e618'] = 'ID GlobKurier';
 $_MODULE['<{globkuriermodule}prestashop>admin_order_809776a66554800005f5a219b61d6445'] = 'Data nadania';
@@ -207,6 +205,10 @@ $_MODULE['<{globkuriermodule}prestashop>admin_order_f4c6f851b00d5518bf888815de27
 $_MODULE['<{globkuriermodule}prestashop>admin_order_5030551cd5ca2f5644f3d4e00ff6eba7'] = 'Za pobraniem';
 $_MODULE['<{globkuriermodule}prestashop>admin_order_c453a4b8e8d98e82f35b67f433e3b4da'] = 'Płatność';
 $_MODULE['<{globkuriermodule}prestashop>admin_order_054b4f3ea543c990f6b125f41af6ebf7'] = 'Akcje';
+$_MODULE['<{globkuriermodule}prestashop>admin_order_77a1e44d64b8090574710c1908b4ce89'] = 'Pobierz etykietę';
+$_MODULE['<{globkuriermodule}prestashop>admin_order_18aaeb83afb79d66a434378abd1ffe86'] = 'Śledź przesyłkę';
+$_MODULE['<{globkuriermodule}prestashop>admin_order_9ae3f61c68bf91138f85ee63ca226b54'] = 'Nie znaleziono żadnych przesyłek';
+$_MODULE['<{globkuriermodule}prestashop>admin_order_81dcc5ae3ba3e8d6d79e0b8e75fdc795'] = 'Nadaj przesyłkę';
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_7c51308c9919827029230e313c0c2013'] = 'Wpisz nazwę swojego miasta i wybierz punkt odbioru najbliżej Ciebie';
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_13348442cc6a27032d2b4aa28b75a5d3'] = 'Szukaj';
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_e150ad0ce25b32cc393d6cb7c8be9e3f'] = 'Znalezione punkty odbioru';

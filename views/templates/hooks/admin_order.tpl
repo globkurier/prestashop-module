@@ -92,11 +92,11 @@
                         <td>{if $order->cod}{$order->cod|escape:'htmlall':'UTF-8'}zł{else} - {/if}</td>
                         <td>{$order->payment_name}</td>
                         <td>
-                            <a id="gk_{$order->gkId}" href="/module/globkuriermodule/getLabel?hash={$order->hash|escape:'url':'UTF-8'}" data-pdf="{$order->pdf}" onclick="return getLabel($(this));" data-id="{$order->gkId}" data-hash="{$order->hash|escape:'url':'UTF-8'}" class="getLabel" target="_blank" title="{l s='Pobierz etykietę' mod='globkuriermodule'}">
+                            <a id="gk_{$order->gkId}" href="/module/globkuriermodule/getLabel?hash={$order->hash|escape:'url':'UTF-8'}" data-pdf="{$order->pdf}" onclick="return getLabel($(this));" data-id="{$order->gkId}" data-hash="{$order->hash|escape:'url':'UTF-8'}" class="getLabel" target="_blank" title="{l s='Download label' mod='globkuriermodule'}">
                                 <i class="material-icons">note</i>
                             </a>
                             <form class="track-button" id="track{$order->gkId|escape:'htmlall':'UTF-8'}" action="https://www.globkurier.pl/shipment-tracking/{$order->gkId|escape:'htmlall':'UTF-8'}" target="_blank" method="get">
-                                <a href onclick="$('#track{$order->gkId|escape:'htmlall':'UTF-8'}').submit(); return false;" title="{l s='Śledź przesyłkę' mod='globkuriermodule'}">
+                                <a href onclick="$('#track{$order->gkId|escape:'htmlall':'UTF-8'}').submit(); return false;" title="{l s='Track shipment' mod='globkuriermodule'}">
                                     <i class="material-icons">local_shipping</i>
                                 </a>
                             </form>
