@@ -283,7 +283,6 @@ class Globkuriermodule extends Module
     {
         return $this->hookDisplayCarrierList($params);
     }
-
     /**
      * aktualizuje id przewoźnika inPostu
      * @param $params - parametry przewoźnika
@@ -453,3 +452,4 @@ class Globkuriermodule extends Module
         return hash('sha256', $cartId . $salt);
     }
 }
+
