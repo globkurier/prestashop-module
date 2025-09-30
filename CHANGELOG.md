@@ -1,5 +1,9 @@
+## [3.3.0] - 2025-09-15
++ Migrated js script
++ Fixed controller issues
++ Resolved compatibility issues with latest PrestaShop versions
 
-## [3.2.0] - 2025-01-15
+## [3.2.0] - 2025-09-15
 
 + Added discount code and order summary section
 + Display of detailed pricing information (net, gross, discount, VAT, fuel surcharge)
@@ -8,7 +12,7 @@
 + Overall improvements and bug fixes
 + Fixed security issues
 
-## [3.1.1] - 2025-08-01
+## [3.1.1] - 2024-09-30
 
 + Initial version of Globkurier module
 + Basic parcel shipping functionality
