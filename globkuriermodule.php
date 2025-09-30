@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2020 PrestaShop.
+ * 2007-2025 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
@@ -19,7 +19,7 @@
  * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2020 PrestaShop SA
+ * @copyright 2007-2025 PrestaShop SA
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
@@ -63,7 +63,7 @@ class Globkuriermodule extends Module
         parent::__construct();
 
         $this->displayName = $this->l('Globkurier integration');
-        $this->description = $this->l('Module Globkurier to ship parcels');
+        $this->description = $this->l('Official Globkurier integrationmodule for sending parcels');
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
         $this->link = new Link();
     }

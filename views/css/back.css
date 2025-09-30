@@ -1,5 +1,5 @@
 /**
-* 2007-2015 PrestaShop
+* 2007-2025 PrestaShop
 *
 * NOTICE OF LICENSE
 *
@@ -36,13 +36,6 @@
 .ui-datepicker .ui-datepicker-calendar td.unavailable:hover {
     background-color: #f5f5f5 !important;
 }
-*  @copyright 2007-2015 PrestaShop SA
-*  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*
-* Don't forget to prefix your containers with your own identifier
-* to avoid any conflicts with others containers.
-*/
 
 .bootstrap a {
     color:#1e3042;

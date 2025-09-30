@@ -1,5 +1,5 @@
 {*
- * 2007-2020 PrestaShop.
+ * 2007-2025 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
@@ -18,13 +18,13 @@
  * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2024 PrestaShop SA
+ * @copyright 2007-2025 PrestaShop SA
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  *}
 <style type="text/css">
     .track-button {
-        display: inline; 
+        display: inline;
         padding: 0px 10px;
     }
 </style>
@@ -49,7 +49,7 @@
 
 {if count($orders) > 0}
 <div class="panel">
-       
+
     <div class="panel-heading">
         <i class="icon-truck"></i> {l s='Parcel send with Globkurier' mod='globkuriermodule'}
         <span class="badge">2</span>
@@ -88,7 +88,7 @@
                         <th>
                              <span class="title_box">{l s='Payment' mod='globkuriermodule'}</span>
                         </th>
-                        
+
                         <th>
                             <span class="title_box">{l s='Option' mod='globkuriermodule'}</span>
                         </th>
@@ -117,12 +117,12 @@
                                 </a>
                             </form>
                         </td>
-                    </tr>    
+                    </tr>
                      {/foreach}
                 </tbody>
             </table>
         </div>
-    </div>  
+    </div>
 </div>
 {/if}
 

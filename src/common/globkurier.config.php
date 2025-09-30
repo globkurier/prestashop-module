@@ -74,7 +74,7 @@ class Config
 
     /**
      * Purges (removes) current configuration from presta db
-     * @return [type] [description]
+     * @return void
      */
     public static function purge()
     {

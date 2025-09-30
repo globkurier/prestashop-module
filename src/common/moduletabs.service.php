@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2023 PrestaShop.
+ * 2007-2025 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
@@ -19,7 +19,7 @@
  * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2023 PrestaShop SA
+ * @copyright 2007-2025 PrestaShop SA
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
@@ -63,7 +63,7 @@ class ModuleTabs
     private static function add($name, $className, $parent = 0)
     {
         $tab = new \Tab();
-        $tab->active = 1;
+        $tab->active = true;
         $tab->name = [];
         $languages = \Language::getLanguages(true);
         foreach ($languages as $lang) {

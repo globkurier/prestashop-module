@@ -3,7 +3,7 @@
 global $_MODULE;
 $_MODULE = array();
 $_MODULE['<{globkuriermodule}prestashop>globkuriermodule_a7668e8a363d1bacc163881e2d24208f'] = 'Integracja Globkurier';
-$_MODULE['<{globkuriermodule}prestashop>globkuriermodule_c99d66d27e38fd481ed4e386618c4a97'] = 'Moduł Globkurier do wysyłania paczek';
+$_MODULE['<{globkuriermodule}prestashop>globkuriermodule_125613edd7596ea2022ddfb1a24e6ca3'] = 'Oficjalny moduł integracyjny Globkurier do wysyłania przesyłek';
 $_MODULE['<{globkuriermodule}prestashop>globkuriermodule_2357fa4873645dccbeaf2cd856fa2fa5'] = 'Ustawienia modułu zostały poprawnie zapisane.';
 $_MODULE['<{globkuriermodule}prestashop>globkuriermodule_af3efe40b8283cb28787886698757c64'] = 'Wystąpił błąd podczas zapisu ustawień. Spróbuj ponownie.';
 $_MODULE['<{globkuriermodule}prestashop>globkuriermodule_21f0547a1213f69f41c9ba055c58a54b'] = 'Nie można wskazać tego samego przewoźnika dla dwóch usług';
