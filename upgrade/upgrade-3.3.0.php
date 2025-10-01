@@ -4,8 +4,11 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
+ * @file
  * Upgrade module to version 3.3.0
- *
+ */
+
+/**
  * Changes in this version:
  * - Migrated from Angular.js to jQuery implementation
  * - Removed Angular dependencies and related files
