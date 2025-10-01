@@ -135,6 +135,6 @@ $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_054b4f3ea543c990f
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_7af2d2c0f20e98300c4226586f308f8b'] = 'Waybill';
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_a441bcaf8660402073983b99b58769be'] = 'Generating waybill...';
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_a3c32c14e3a183decfc66e352116a631'] = 'Download waybill';
-
 // Error messages for getLabel controller
 $_MODULE['<{globkuriermodule}prestashop>getLabel_8b36ec2d9b6d1f23585875c4225f98f0'] = 'Package label file is not available for this shipment.';
+

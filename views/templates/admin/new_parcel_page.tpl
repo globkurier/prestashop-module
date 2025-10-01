@@ -77,7 +77,7 @@
             <div class="row">
                 <div class="col-lg-6" id="senderBox">
                     <div class="panel">
-                        <div class="panel-heading">{l s='Sender' mod='globkuriermodule'} <button class="btn btn-primary btn-xs pull-right" href="#" id="senderChangeLink">{l s='change' mod='globkuriermodule'}</button></div>
+                        <div class="panel-heading">{l s='Sender' mod='globkuriermodule'} <button class="btn btn-primary btn-gk-primary btn-xs pull-right" href="#" id="senderChangeLink">{l s='change' mod='globkuriermodule'}</button></div>
                         <div class="panel-body">
                             <div id="senderDisplay">
                                 <div><strong id="sender_display_name"></strong></div>
@@ -95,7 +95,7 @@
                 </div>
                 <div class="col-lg-6 receiverAddressBox" id="receiverBox">
                     <div class="panel">
-                        <div class="panel-heading">{l s='Receiver' mod='globkuriermodule'} <button class="btn btn-primary btn-xs pull-right" href="#" id="receiverChangeLink">{l s='change' mod='globkuriermodule'}</button></div>
+                        <div class="panel-heading">{l s='Receiver' mod='globkuriermodule'} <button class="btn btn-primary btn-gk-primary btn-xs pull-right" href="#" id="receiverChangeLink">{l s='change' mod='globkuriermodule'}</button></div>
                         <div class="panel-body">
                             <div id="receiverDisplay">
                                 <div><strong id="receiver_display_name"></strong></div>
@@ -124,6 +124,7 @@
                             <span class="terminalLabel" data-type="pocztex48owp" style="display:none;">{l s='Pocztex48 Odbiór w punkcie' mod='globkuriermodule'}</span>
                             <span class="terminalLabel" data-type="dhlparcel" style="display:none;">{l s='DHL ParcelShop' mod='globkuriermodule'}</span>
                             <span class="terminalLabel" data-type="dpdpickup" style="display:none;">{l s='DPD Pickup' mod='globkuriermodule'}</span>
+                            <span class="terminalLabel" data-type="fedex" style="display:none;">{l s='FedEx' mod='globkuriermodule'}</span>
                             <br/><br/>
                             {l s='In this case you will be shown only this services.' mod='globkuriermodule'}
                             {l s='If you want to get all services anyway, please click button below' mod='globkuriermodule'}
@@ -133,7 +134,7 @@
                                     padding-top: 7px; text-align: right; width: 34%;">
                                     {l s='Show all carriers' mod='globkuriermodule'}</label>
                                 <div class="col-lg-4">
-                                         <span class="switch prestashop-switch fixed-width-lg">
+                                         <span class="switch prestashop-switch prestashop-switch-gk fixed-width-lg">
                                             <input name="service_filters" id="service_filters_on" value="1" type="radio">
                                             <label for="service_filters_on" class="radioCheck" id="disableServiceFilters">
                                                 <i class="color_success"></i> {l s='Yes' mod='globkuriermodule'}
@@ -157,7 +158,7 @@
                 <div class="panel">
                     <div class="panel-heading">
                         {l s='Choose delivery' mod='globkuriermodule'}
-                        <button type="button" class="btn btn-primary btn-xs pull-right" id="openServicesModal" style="display: none;">{l s='Change' mod='globkuriermodule'}</button></div>
+                        <button type="button" class="btn btn-primary btn-gk-primary btn-xs pull-right" id="openServicesModal" style="display: none;">{l s='Change' mod='globkuriermodule'}</button></div>
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-lg-2"><img id="chosenServiceLogo" src="" alt="" style="max-width:100%; display:none;"></div>
@@ -176,7 +177,7 @@
                                 <div class="form-group"><label>{l s='Quantity' mod='globkuriermodule'}</label><input id="pkg-count" type="number" step="1" class="form-control" value="1"></div>
                             </div>
                         </div>
-                        <button type="button" id="getServicesBtn" class="btn btn-primary">{l s='Get services' mod='globkuriermodule'}</button>
+                        <button type="button" id="getServicesBtn" class="btn btn-primary btn-gk-primary">{l s='Get services' mod='globkuriermodule'}</button>
                     </div>
                 </div>
             </div>
@@ -206,50 +207,92 @@
                 <div class="panel">
                     <div class="panel-heading">{l s='Service options' mod='globkuriermodule'}</div>
                     <div class="panel-body additionalInfo" id="serviceOptionsBody">
-                        <div class="row" id="pickupMeta" style="margin-bottom:10px;">
-                            <div class="col-lg-6"><label>{l s='Date sending' mod='globkuriermodule'}</label><input type="text" id="sendDateInput" class="form-control" placeholder="YYYY-MM-DD"></div>
-                            <div class="col-lg-6"><label>{l s='Pickup time' mod='globkuriermodule'}</label><select id="pickupTimeSelect" class="form-control"><option value="">-- {l s='select' mod='globkuriermodule'} --</option></select></div>
-                        </div>
                         <div class="form-group row receiverAddressPointId receiverAddressPointIdinpost" style="display:none;">
                             <label class="col-sm-4 col-form-label">{l s='InPost' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
                             <div class="col-sm-8"><div class="well" style="padding:6px;">
                                 <span id="inpostReceiverLabel"></span>
-                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="inPostReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="inPostReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
                             </div></div>
+                        </div>
+                        <div class="row" id="pickupMeta" style="margin-bottom:10px;">
+                            <div class="col-lg-6"><label>{l s='Date sending' mod='globkuriermodule'}</label><input type="text" id="sendDateInput" class="form-control" placeholder="YYYY-MM-DD"></div>
+                            <div class="col-lg-6"><label>{l s='Pickup time' mod='globkuriermodule'}</label><select id="pickupTimeSelect" class="form-control"><option value="">-- {l s='select' mod='globkuriermodule'} --</option></select></div>
                         </div>
                         <div class="form-group row senderAddressPointId senderAddressPointIdinpost" style="display:none;">
                             <label class="col-sm-4 col-form-label">{l s='InPost' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
                             <div class="col-sm-8"><div class="well" style="padding:6px;">
                                 <span id="inpostSenderLabel"></span>
-                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="inPostSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="inPostSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
                             </div></div>
                         </div>
                         <div class="form-group row receiverAddressPointId receiverAddressPointIdorlen" style="display:none;">
                             <label class="col-sm-4 col-form-label">{l s='ORLEN Paczka' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
                             <div class="col-sm-8"><div class="well" style="padding:6px;">
                                 <span id="orlenReceiverLabel"></span>
-                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="paczkaRuchReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="paczkaRuchReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
                             </div></div>
                         </div>
                         <div class="form-group row receiverAddressPointId receiverAddressPointIdpocztex48" style="display:none;">
                             <label class="col-sm-4 col-form-label">{l s='Pocztex48 OWP' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
                             <div class="col-sm-8"><div class="well" style="padding:6px;">
                                 <span id="pocztexReceiverLabel"></span>
-                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="pocztex48owpReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="pocztex48owpReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
                             </div></div>
                         </div>
                         <div class="form-group row receiverAddressPointId receiverAddressPointIddhl" style="display:none;">
                             <label class="col-sm-4 col-form-label">{l s='DHL ParcelShop' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
                             <div class="col-sm-8"><div class="well" style="padding:6px;">
                                 <span id="dhlReceiverLabel"></span>
-                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="dhlparcelReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="dhlparcelReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row senderAddressPointId senderAddressPointIddhl" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='DHL ParcelShop' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="dhlSenderLabel"></span>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="dhlparcelSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row senderAddressPointId senderAddressPointIdorlen" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='ORLEN Paczka' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="orlenSenderLabel"></span>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="paczkaRuchSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row senderAddressPointId senderAddressPointIdpocztex48" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='Pocztex48 OWP' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="pocztexSenderLabel"></span>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="pocztex48owpSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row senderAddressPointId senderAddressPointIddpd" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='DPD Pickup' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="dpdSenderLabel"></span>
+                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="dpdpickupSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row receiverAddressPointId receiverAddressPointIdfedex" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='FedEx' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="fedexReceiverLabel"></span>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="fedexReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                            </div></div>
+                        </div>
+                        <div class="form-group row senderAddressPointId senderAddressPointIdfedex" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='FedEx' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
+                            <div class="col-sm-8"><div class="well" style="padding:6px;">
+                                <span id="fedexSenderLabel"></span>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="fedexSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
                             </div></div>
                         </div>
                         <div class="form-group row receiverAddressPointId receiverAddressPointIddpd" style="display:none;">
                             <label class="col-sm-4 col-form-label">{l s='DPD Pickup' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
                             <div class="col-sm-8"><div class="well" style="padding:6px;">
                                 <span id="dpdReceiverLabel"></span>
-                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="dpdpickupReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="dpdpickupReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
                             </div></div>
                         </div>
                         <div class="form-group row">
@@ -337,7 +380,7 @@
                                     <div class="row">
                                         <div class="col-sm-7"><input type="text" id="discountCodeInput" class="form-control" /></div>
                                         <div class="col-sm-5">
-                                            <button class="btn btn-primary" id="applyDiscountBtn" type="button" style="margin-right:8px;">{l s='Apply' mod='globkuriermodule'}</button>
+                                            <button class="btn btn-primary btn-gk-primary" id="applyDiscountBtn" type="button" style="margin-right:8px;">{l s='Apply' mod='globkuriermodule'}</button>
                                             <button class="btn btn-default" id="clearDiscountBtn" type="button">{l s='Clear' mod='globkuriermodule'}</button>
                                         </div>
                                     </div>
@@ -363,7 +406,7 @@
             <button
                 type="button"
                 id="sendOrderBtn"
-                class="btn btn-success"
+                class="btn btn-success btn-gk-success"
                 style="padding: 12px 40px;"
             >
                 <i class="icon-send" id="sendIcon"></i>
@@ -403,7 +446,7 @@
             <div class="form-group">
               <label class="col-lg-4 control-label">{l s='City' mod='globkuriermodule'}</label>
               <div class="col-lg-6"><input type="text" id="terminalQuery" class="form-control"></div>
-              <div class="col-lg-2"><button class="btn btn-primary" id="terminalSearchBtn">{l s='Search' mod='globkuriermodule'}</button></div>
+              <div class="col-lg-2"><button class="btn btn-primary btn-gk-primary" id="terminalSearchBtn">{l s='Search' mod='globkuriermodule'}</button></div>
             </div>
             <div class="form-group">
               <label class="col-lg-4 control-label">{l s='Point' mod='globkuriermodule'}</label>
@@ -416,7 +459,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">{l s='Cancel' mod='globkuriermodule'}</button>
-            <button type="button" class="btn btn-primary" id="terminalSaveBtn" data-dismiss="modal">{l s='Save' mod='globkuriermodule'}</button>
+            <button type="button" class="btn btn-primary btn-gk-primary" id="terminalSaveBtn" data-dismiss="modal">{l s='Save' mod='globkuriermodule'}</button>
           </div>
         </div>
       </div>
@@ -440,7 +483,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">{l s='Cancel' mod='globkuriermodule'}</button>
-            <button type="button" class="btn btn-primary" id="saveSenderEdit" data-dismiss="modal">{l s='Save' mod='globkuriermodule'}</button>
+            <button type="button" class="btn btn-primary btn-gk-primary" id="saveSenderEdit" data-dismiss="modal">{l s='Save' mod='globkuriermodule'}</button>
           </div>
         </div>
       </div>
@@ -465,7 +508,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">{l s='Cancel' mod='globkuriermodule'}</button>
-            <button type="button" class="btn btn-primary" id="saveReceiverEdit" data-dismiss="modal">{l s='Save' mod='globkuriermodule'}</button>
+            <button type="button" class="btn btn-primary btn-gk-primary" id="saveReceiverEdit" data-dismiss="modal">{l s='Save' mod='globkuriermodule'}</button>
           </div>
         </div>
         </div>

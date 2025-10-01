@@ -41,27 +41,27 @@
     color:#1e3042;
 }
 
-.bootstrap .btn.btn-primary {
+.bootstrap .btn.btn-primary.btn-gk-primary {
     background-color:#1e3042;
     border-color: #4B596D;
 }
 
-.bootstrap .btn.btn-primary:hover {
+.bootstrap .btn.btn-primary.btn-gk-primary:hover {
     background-color:#4B596D;
 }
 
-.bootstrap .btn.btn-success,
-.card-body .btn.btn-success {
+.bootstrap .btn.btn-success.btn-gk-success,
+.card-body .btn.btn-success.btn-gk-success {
     background-color:#96c21f;
     border-color: #79a600;
 }
 
-.bootstrap .btn.btn-success:hover,
-.card-body .btn.btn-success:hover {
+.bootstrap .btn.btn-success.btn-gk-success:hover,
+.card-body .btn.btn-success.btn-gk-success:hover {
     background-color:#79a600;
 }
 
-.bootstrap .prestashop-switch input:first-of-type:checked ~ .slide-button {
+.bootstrap .prestashop-switch.prestashop-switch-gk input:first-of-type:checked ~ .slide-button {
     background:#96c21f;
 }
 

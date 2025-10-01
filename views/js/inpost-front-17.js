@@ -471,7 +471,7 @@ $(function () {
             <p>${terminalItem.name}</p>
             <p>${terminalItem.address}</p>
             <p>${terminalItem.city} ${terminalItem.postCode} </p>
-            <p><a data-terminalId="${terminalItem.id}" class="marker-info-link btn btn-primary">Wybierz</a></p>
+            <p><a data-terminalId="${terminalItem.id}" class="marker-info-link btn btn-primary btn-gk-primary">Wybierz</a></p>
             </div>`,
         });
         marker.addListener("click", () => {

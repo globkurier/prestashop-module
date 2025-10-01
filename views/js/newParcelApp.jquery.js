@@ -24,6 +24,7 @@
 		forceShowAll: false
 	};
 
+
 function setProcessing(on) {
 		GK.state.isProcessing = !!on;
 		$('#processingBox').toggle(!!on);
@@ -166,17 +167,22 @@ function showOrderErrors(obj) {
 			data.pickup = generatePickup(s.additionalInfo || {});
 		}
 
+
 		// map sender/receiver
 		['sender','receiver'].forEach(function(role){
 			const src = s[role] || {};
 			const dst = (role === 'sender') ? data.senderAddress : data.receiverAddress;
 			dst.name = src.name;
 			dst.city = src.city;
+
 			dst.street = src.street;
 			dst.houseNumber = src.houseNumber;
+
 			dst.postCode = src.postalCode;
 			dst.countryId = src.country && src.country.id;
+
 			dst.phone = src.phone;
+
 			dst.email = src.email;
 			dst.contactPerson = src.contactPerson;
 
@@ -186,48 +192,73 @@ function showOrderErrors(obj) {
 			}
 
 			// Add pointId for specific carrier terminal points (like Angular does in generateAddress)
-			// BUT ONLY for POINT collection type (like Angular does in generate())
-			if (role === 'receiver' && s.pickedService && collectionType === 'POINT') {
+			// For POINT collection type OR when delivery is to POINT (like InPost Paczkomat)
+			const isPointDelivery = collectionType === 'POINT' || (s.pickedService && s.pickedService.deliveryTypes && s.pickedService.deliveryTypes.includes('POINT'));
+			if (s.pickedService && isPointDelivery) {
 				const carrierName = (s.pickedService.carrierName || '').toLowerCase();
 				const serviceName = (s.pickedService.name || '').toLowerCase();
 				const collectionTypes = s.pickedService.collectionTypes || [];
 
-				// Poczta Polska - only if single POINT collection type and service name contains "do Punktu"
-				if (carrierName.indexOf('poczta') > -1 && s.additionalInfo && s.additionalInfo.pocztex48owpReceiverPoint && s.additionalInfo.pocztex48owpReceiverPoint.id) {
-					if (collectionTypes.length === 1 && collectionTypes.indexOf('POINT') > -1 && serviceName.indexOf(' do punktu') > -1) {
-						dst.pointId = s.additionalInfo.pocztex48owpReceiverPoint.id;
+				// InPost - receiver and sender points
+				if (carrierName.indexOf('inpost') > -1 && s.additionalInfo) {
+					const pointKey = role === 'receiver' ? 'inPostReceiverPoint' : 'inPostSenderPoint';
+					if (s.additionalInfo[pointKey] && s.additionalInfo[pointKey].id) {
+						dst.pointId = s.additionalInfo[pointKey].id;
 					}
 				}
-				// Orlen/Ruch - always if available
-				else if ((carrierName.indexOf('orlen') > -1 || carrierName.indexOf('ruch') > -1) && s.additionalInfo && s.additionalInfo.paczkaRuchReceiverPoint && s.additionalInfo.paczkaRuchReceiverPoint.id) {
-					dst.pointId = s.additionalInfo.paczkaRuchReceiverPoint.id;
+				// DHL - receiver and sender points
+				else if (carrierName.indexOf('dhl') > -1 && s.additionalInfo) {
+					const pointKey = role === 'receiver' ? 'dhlparcelReceiverPoint' : 'dhlparcelSenderPoint';
+					if (s.additionalInfo[pointKey] && s.additionalInfo[pointKey].id) {
+						dst.pointId = s.additionalInfo[pointKey].id;
+					}
 				}
-				// DHL - always if available
-				else if (carrierName.indexOf('dhl') > -1 && s.additionalInfo && s.additionalInfo.dhlparcelReceiverPoint && s.additionalInfo.dhlparcelReceiverPoint.id) {
-					dst.pointId = s.additionalInfo.dhlparcelReceiverPoint.id;
+				// Orlen/Ruch - receiver and sender points
+				else if ((carrierName.indexOf('orlen') > -1 || carrierName.indexOf('ruch') > -1) && s.additionalInfo) {
+					const pointKey = role === 'receiver' ? 'paczkaRuchReceiverPoint' : 'paczkaRuchSenderPoint';
+					if (s.additionalInfo[pointKey] && s.additionalInfo[pointKey].id) {
+						dst.pointId = s.additionalInfo[pointKey].id;
+					}
 				}
-				// DPD - always if available
-				else if (carrierName.indexOf('dpd') > -1 && s.additionalInfo && s.additionalInfo.dpdpickupReceiverPoint && s.additionalInfo.dpdpickupReceiverPoint.id) {
-					dst.pointId = s.additionalInfo.dpdpickupReceiverPoint.id;
+				// Poczta Polska - receiver and sender points
+				else if (carrierName.indexOf('poczta') > -1 && s.additionalInfo) {
+					const pointKey = role === 'receiver' ? 'pocztex48owpReceiverPoint' : 'pocztex48owpSenderPoint';
+					if (s.additionalInfo[pointKey] && s.additionalInfo[pointKey].id) {
+						dst.pointId = s.additionalInfo[pointKey].id;
+					}
 				}
-				// InPost - always if available (like Angular)
-				else if (carrierName.indexOf('inpost') > -1 && s.additionalInfo && s.additionalInfo.inPostReceiverPoint && s.additionalInfo.inPostReceiverPoint.id) {
-					dst.pointId = s.additionalInfo.inPostReceiverPoint.id;
+				// DPD - receiver and sender points
+				else if (carrierName.indexOf('dpd') > -1 && s.additionalInfo) {
+					const pointKey = role === 'receiver' ? 'dpdpickupReceiverPoint' : 'dpdpickupSenderPoint';
+					if (s.additionalInfo[pointKey] && s.additionalInfo[pointKey].id) {
+						dst.pointId = s.additionalInfo[pointKey].id;
+					}
+				}
+				// FedEx - receiver and sender points
+				else if (carrierName.indexOf('fedex') > -1 && s.additionalInfo) {
+					const pointKey = role === 'receiver' ? 'fedexReceiverPoint' : 'fedexSenderPoint';
+					if (s.additionalInfo[pointKey] && s.additionalInfo[pointKey].id) {
+						dst.pointId = s.additionalInfo[pointKey].id;
+					}
 				}
 			}
 
 			// Also add terminal/point ID for POINT collection type (fallback)
-			if (collectionType === 'POINT' && src.terminal) {
+			const isPointDeliveryFallback = collectionType === 'POINT' || (s.pickedService && s.pickedService.deliveryTypes && s.pickedService.deliveryTypes.includes('POINT'));
+			if (isPointDeliveryFallback && src.terminal) {
 				dst.pointId = src.terminal;
 			}
 
-			// Add state ID if exists (for international shipments)
-			if (s.additionalInfo && s.additionalInfo.stateType && s.additionalInfo.stateType > 0) {
+			// Add state ID if exists (for international shipments) - only if > 0 like Angular
+			// Use separate stateType for sender and receiver like Angular
+			if (role === 'sender' && s.additionalInfo && s.additionalInfo.senderStateType && s.additionalInfo.senderStateType > 0) {
+				dst.stateId = s.additionalInfo.senderStateType;
+			} else if (role === 'receiver' && s.additionalInfo && s.additionalInfo.stateType && s.additionalInfo.stateType > 0) {
 				dst.stateId = s.additionalInfo.stateType;
 			}
 		});
 
-		// Add international shipment fields
+		// Add international shipment fields (like Angular)
 		if (data.senderAddress.countryId !== data.receiverAddress.countryId) {
 			if (s.additionalInfo && s.additionalInfo.declaredValue) {
 				data.declaredValue = s.additionalInfo.declaredValue;
@@ -235,6 +266,33 @@ function showOrderErrors(obj) {
 			if (s.additionalInfo && s.additionalInfo.purpose) {
 				data.purpose = s.additionalInfo.purpose;
 			}
+		}
+
+		// Add customs section for international shipments (like in the API example)
+		if (data.senderAddress.countryId !== data.receiverAddress.countryId) {
+			data.customs = {
+				currency: (GK.state.orderSummary && GK.state.orderSummary.currency) || 'EUR',
+				total: s.additionalInfo && s.additionalInfo.declaredValue ? parseFloat(s.additionalInfo.declaredValue) : 0,
+				totalWeight: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.weight : 0,
+				sender: {
+					eori: 'PL812350554600000' // Default EORI for testing
+				},
+				receiver: {
+					eori: 'PL107194088600000' // Default EORI for testing
+				},
+				commodities: [{
+					description: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.content : 'Goods',
+					hsCode: '96081099', // Default HS code from API example
+					countryOfOrigin: 'PL', // Use country code instead of ID
+					quantity: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.count : 1,
+					unitValue: s.additionalInfo && s.additionalInfo.declaredValue ? parseFloat(s.additionalInfo.declaredValue) : 0,
+					subTotalValue: s.additionalInfo && s.additionalInfo.declaredValue ? parseFloat(s.additionalInfo.declaredValue) : 0,
+					unitWeight: s.pickedService && s.pickedService.packageInfo ? s.pickedService.packageInfo.weight : 0
+				}],
+				exportReasonType: 'SALE', // Default export reason
+				invoiceNumber: 'INV-' + new Date().getTime(), // Generate invoice number
+				invoiceDate: new Date().toISOString().split('T')[0] // Today's date
+			};
 		}
 
 		// Add declared value if exists (regardless of international)
@@ -274,14 +332,6 @@ function showOrderErrors(obj) {
 				if (additionalInfo.codAccountHolder) addon.name = additionalInfo.codAccountHolder;
 				if (additionalInfo.codAccountAddr1) addon.addressLine1 = additionalInfo.codAccountAddr1;
 				if (additionalInfo.codAccountAddr2) addon.addressLine2 = additionalInfo.codAccountAddr2;
-				// Add missing fields that API expects
-				if (additionalInfo.codAccountHolder) addon.countryId = 1; // Default to Poland
-				if (additionalInfo.codAccountAddr2) {
-					// Extract city from address line 2 (format: "00-000 Miasto")
-					const addr2 = additionalInfo.codAccountAddr2;
-					const cityMatch = addr2.match(/\d{2}-\d{3}\s+(.+)/);
-					if (cityMatch) addon.city = cityMatch[1];
-				}
 			} else if (option.category === 'INSURANCE') {
 				addon.value = additionalInfo.insuranceAmount || '';
 			}
@@ -316,6 +366,33 @@ function showOrderErrors(obj) {
 			const today = new Date().toISOString().split('T')[0];
 			if (sendDate < today) {
 				showOrderErrors({ pickup: 'Pickup date cannot be in the past' });
+				return;
+			}
+		// Check if date is in available dates
+		if (GK.state.availablePickupDates && GK.state.availablePickupDates.length > 0) {
+			if (!GK.state.availablePickupDates.includes(sendDate)) {
+				showOrderErrors({ pickup: 'Pickup date is not available, please select another date' });
+				return;
+			}
+		} else {
+			// If no available dates fetched, use today or tomorrow as fallback
+			const today = new Date().toISOString().split('T')[0];
+			const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+			if (sendDate < today) {
+				sendDate = today; // Use today if date is in the past
+			}
+		}
+		}
+
+		// Validate international shipment fields
+		if (GK.state.sender && GK.state.sender.country && GK.state.receiver && GK.state.receiver.country &&
+			GK.state.sender.country.id !== GK.state.receiver.country.id) {
+			if (!GK.state.additionalInfo || !GK.state.additionalInfo.purpose) {
+				showOrderErrors({ purpose: 'Purpose is required for international shipments' });
+				return;
+			}
+			if (!GK.state.additionalInfo || !GK.state.additionalInfo.declaredValue) {
+				showOrderErrors({ declaredValue: 'Declared value is required for international shipments' });
 				return;
 			}
 		}
@@ -408,9 +485,39 @@ function initStateFromInitialValues() {
 		};
 		if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
 		// Initialize stateType from InitialValues if available
-		if (iv.receiver && iv.receiver.stateId) {
-			GK.state.additionalInfo.stateType = iv.receiver.stateId;
+		// Only set stateType if stateId > 0 (like Angular logic)
+		// NOTE: stateId from PrestaShop needs to be mapped to Globkurier state IDs
+		if (iv.receiver && iv.receiver.stateId && iv.receiver.stateId > 0) {
+			// For now, don't auto-set stateType from PrestaShop stateId
+			// User should select state from Globkurier API list
+			// GK.state.additionalInfo.stateType = iv.receiver.stateId;
 		}
+		// Initialize receiver points from InitialValues (like Angular)
+		if (iv.terminalCode && iv.terminalType) {
+			switch (iv.terminalType) {
+				case 'inpost':
+					GK.state.additionalInfo.inPostReceiverPoint = { id: iv.terminalCode };
+					break;
+				case 'ruch':
+					GK.state.additionalInfo.paczkaRuchReceiverPoint = { id: iv.terminalCode };
+					break;
+				case 'pocztex48owp':
+					GK.state.additionalInfo.pocztex48owpReceiverPoint = { id: iv.terminalCode };
+					break;
+				case 'dhlparcel':
+					GK.state.additionalInfo.dhlparcelReceiverPoint = { id: iv.terminalCode };
+					break;
+				case 'dpdpickup':
+					GK.state.additionalInfo.dpdpickupReceiverPoint = { id: iv.terminalCode };
+					break;
+			}
+		}
+
+		// Also set default sender point if available (like Angular)
+		if (iv.defaultInPostPoint) {
+			GK.state.additionalInfo.inPostSenderPoint = { id: iv.defaultInPostPoint };
+		}
+
 		// make sure UI reflects current international rules immediately
         try { updateEnabledOptionsUI(); } catch(e) {}
         try { preloadCountriesMap().then(ensureCountryIdsFromIso); } catch(e) { ensureCountryIdsFromIso(); }
@@ -425,6 +532,11 @@ function ensureCountryIdsFromIso() {
     function normalizeCountry(country, fallbackId) {
         if (!country) return null;
         const iso = (country.isoCode || country.code || country.iso || '').toUpperCase();
+        // Special handling for USA like Angular (countryId = 30)
+        if (iso === 'US') {
+            country.id = 30;
+            return country;
+        }
         // if we have a countries map, override id based on ISO
         if (map && map[iso]) { country.id = map[iso]; return country; }
         // fallback: use id from InitialValues (if provided)
@@ -514,6 +626,53 @@ function populateDisplayPanels() {
         $('#receiver_display_contact').text(GK.state.receiver.contactPerson || '');
         $('#receiver_display_phone').text(GK.state.receiver.phone || '');
         $('#receiver_display_email').text(GK.state.receiver.email || '');
+    }
+}
+
+function populateReceiverPoints() {
+    // Display receiver points in UI if they exist in state
+    if (GK.state.additionalInfo) {
+        if (GK.state.additionalInfo.inPostReceiverPoint && GK.state.additionalInfo.inPostReceiverPoint.id) {
+            $('#inpostReceiverLabel').text('[' + GK.state.additionalInfo.inPostReceiverPoint.id + ']');
+        }
+        if (GK.state.additionalInfo.paczkaRuchReceiverPoint && GK.state.additionalInfo.paczkaRuchReceiverPoint.id) {
+            $('#orlenReceiverLabel').text('[' + GK.state.additionalInfo.paczkaRuchReceiverPoint.id + ']');
+        }
+        if (GK.state.additionalInfo.pocztex48owpReceiverPoint && GK.state.additionalInfo.pocztex48owpReceiverPoint.id) {
+            $('#pocztexReceiverLabel').text('[' + GK.state.additionalInfo.pocztex48owpReceiverPoint.id + ']');
+        }
+        if (GK.state.additionalInfo.dhlparcelReceiverPoint && GK.state.additionalInfo.dhlparcelReceiverPoint.id) {
+            $('#dhlReceiverLabel').text('[' + GK.state.additionalInfo.dhlparcelReceiverPoint.id + ']');
+        }
+        if (GK.state.additionalInfo.dhlparcelSenderPoint && GK.state.additionalInfo.dhlparcelSenderPoint.id) {
+            $('#dhlSenderLabel').text('[' + GK.state.additionalInfo.dhlparcelSenderPoint.id + ']');
+        }
+        if (GK.state.additionalInfo.dpdpickupReceiverPoint && GK.state.additionalInfo.dpdpickupReceiverPoint.id) {
+            $('#dpdReceiverLabel').text('[' + GK.state.additionalInfo.dpdpickupReceiverPoint.id + ']');
+        }
+
+        // Also display sender points
+        if (GK.state.additionalInfo.inPostSenderPoint && GK.state.additionalInfo.inPostSenderPoint.id) {
+            $('#inpostSenderLabel').text('[' + GK.state.additionalInfo.inPostSenderPoint.id + ']');
+        }
+        if (GK.state.additionalInfo.dhlparcelSenderPoint && GK.state.additionalInfo.dhlparcelSenderPoint.id) {
+            $('#dhlSenderLabel').text('[' + GK.state.additionalInfo.dhlparcelSenderPoint.id + ']');
+        }
+        if (GK.state.additionalInfo.paczkaRuchSenderPoint && GK.state.additionalInfo.paczkaRuchSenderPoint.id) {
+            $('#orlenSenderLabel').text('[' + GK.state.additionalInfo.paczkaRuchSenderPoint.id + ']');
+        }
+        if (GK.state.additionalInfo.pocztex48owpSenderPoint && GK.state.additionalInfo.pocztex48owpSenderPoint.id) {
+            $('#pocztexSenderLabel').text('[' + GK.state.additionalInfo.pocztex48owpSenderPoint.id + ']');
+        }
+        if (GK.state.additionalInfo.dpdpickupSenderPoint && GK.state.additionalInfo.dpdpickupSenderPoint.id) {
+            $('#dpdSenderLabel').text('[' + GK.state.additionalInfo.dpdpickupSenderPoint.id + ']');
+        }
+        if (GK.state.additionalInfo.fedexReceiverPoint && GK.state.additionalInfo.fedexReceiverPoint.id) {
+            $('#fedexReceiverLabel').text('[' + GK.state.additionalInfo.fedexReceiverPoint.id + ']');
+        }
+        if (GK.state.additionalInfo.fedexSenderPoint && GK.state.additionalInfo.fedexSenderPoint.id) {
+            $('#fedexSenderLabel').text('[' + GK.state.additionalInfo.fedexSenderPoint.id + ']');
+        }
     }
 }
 
@@ -640,7 +799,7 @@ function cardForProduct(product) {
 				'<strong>' + (product.carrierName || '') + '</strong><br/>' +
 				'<span>' + (product.name || '') + '</span><br/><br/>' +
 				'<strong>' + price + '</strong><br/><br/>' +
-				'<button class="btn btn-sm btn-success pick-product" data-id="' + product.id + '">Wybierz</button>' +
+				'<button class="btn btn-sm btn-success btn-gk-success pick-product" data-id="' + product.id + '">Wybierz</button>' +
 				'</div>' +
 			'</div>'
 		);
@@ -677,7 +836,8 @@ function fetchProducts() {
 						ruch: function(p){ return (p.carrierName || '').toLowerCase().indexOf('orlen') > -1 || (p.carrierName || '').toLowerCase().indexOf('ruch') > -1; },
 						pocztex48owp: function(p){ return (p.carrierName || '').toLowerCase().indexOf('poczta') > -1; },
 						dhlparcel: function(p){ return (p.carrierName || '').toLowerCase().indexOf('dhl') > -1; },
-						dpdpickup: function(p){ return (p.carrierName || '').toLowerCase().indexOf('dpd') > -1; }
+						dpdpickup: function(p){ return (p.carrierName || '').toLowerCase().indexOf('dpd') > -1; },
+						fedex: function(p){ return (p.carrierName || '').toLowerCase().indexOf('fedex') > -1; }
 					};
 					let fn = map[(terminalType + '').toLowerCase()];
 					if (fn) list = list.filter(fn);
@@ -744,6 +904,12 @@ function renderServiceOptionsContainer() {
     $(document)
       .off('input change', '#commentsInput')
       .on('input change', '#commentsInput', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.notes = $(this).val(); });
+    $(document)
+      .off('change', '#statesSelect')
+      .on('change', '#statesSelect', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.stateType = $(this).val(); });
+    $(document)
+      .off('change', '#senderStatesSelect')
+      .on('change', '#senderStatesSelect', function(){ if (!GK.state.additionalInfo) GK.state.additionalInfo = {}; GK.state.additionalInfo.senderStateType = $(this).val(); });
     $(document)
       .off('change', '#pickupTimeSelect')
       .on('change', '#pickupTimeSelect', function(){
@@ -834,16 +1000,15 @@ function updateCarrierDependentUI() {
     const name = (s.pickedService.carrierName || '').toLowerCase();
     const sendingType = $('input[name=pickup_type]:checked').val();
 
-    // Store current terminal code before any changes
-    const currentTerminalCode = $('#terminalCode').text();
-
     // hide all
     $('.receiverAddressPointId').hide();
     $('.senderAddressPointId').hide();
     // Toggle pickup meta only for courier pickup
     if (sendingType === 'PICKUP') { $('#pickupMeta').show(); } else { $('#pickupMeta').hide(); }
-    // Receiver point selection only for POINT shipments
-    const showReceiver = (sendingType === 'POINT');
+    // Receiver point selection ONLY when deliveryTypes contains POINT (dostawa do paczkomatu)
+    // This is independent of how we send it (courier pickup vs point drop-off)
+    const hasPointDelivery = s.pickedService.deliveryTypes && s.pickedService.deliveryTypes.includes('POINT');
+    const showReceiver = hasPointDelivery;
     if (showReceiver && name.indexOf('inpost') > -1) {
         $('.receiverAddressPointIdinpost').show();
     } else if (showReceiver && (name.indexOf('orlen') > -1 || name.indexOf('ruch') > -1)) {
@@ -854,12 +1019,28 @@ function updateCarrierDependentUI() {
         $('.receiverAddressPointIddhl').show();
     } else if (showReceiver && name.indexOf('dpd') > -1) {
         $('.receiverAddressPointIddpd').show();
+    } else if (showReceiver && name.indexOf('fedex') > -1) {
+        $('.receiverAddressPointIdfedex').show();
     }
 
-    // Restore terminal code if it was set by user
-    if (currentTerminalCode && currentTerminalCode.trim() !== '') {
-        $('#terminalCode').text(currentTerminalCode);
+    // Sender point selection logic - only show when POINT collection type
+    if (sendingType === 'POINT') {
+        if (name.indexOf('inpost') > -1) {
+            $('.senderAddressPointIdinpost').show();
+        } else if (name.indexOf('dhl') > -1) {
+            $('.senderAddressPointIddhl').show();
+        } else if (name.indexOf('orlen') > -1 || name.indexOf('ruch') > -1) {
+            $('.senderAddressPointIdorlen').show();
+        } else if (name.indexOf('poczta') > -1) {
+            $('.senderAddressPointIdpocztex48').show();
+        } else if (name.indexOf('dpd') > -1) {
+            $('.senderAddressPointIddpd').show();
+        } else if (name.indexOf('fedex') > -1) {
+            $('.senderAddressPointIdfedex').show();
+        }
     }
+
+    // Don't modify terminalCode - it shows client's original choice
 
     updateEnabledOptionsUI();
 }
@@ -869,25 +1050,45 @@ function enforceCollectionTypeRadios() {
     const allowed = Array.isArray(ps.collectionTypes) ? ps.collectionTypes : [];
     const allowPickup = allowed.indexOf('PICKUP') > -1;
     const allowPoint = allowed.indexOf('POINT') > -1;
-    // Enable/disable radios like Angular checkPickedServiceType
-    $('#pickup').prop('disabled', !allowPickup).closest('.radio')[allowPickup ? 'removeClass' : 'addClass']('disabled');
-    $('#point').prop('disabled', !allowPoint).closest('.radio')[allowPoint ? 'removeClass' : 'addClass']('disabled');
 
-    // Auto-select collection type like Angular does
-    if (allowed.length === 1) {
+    // Enable/disable and show/hide radios
+    const $pickupLabel = $('#pickup').closest('.radio');
+    const $pointLabel = $('#point').closest('.radio');
+
+    $('#pickup').prop('disabled', !allowPickup);
+    $pickupLabel[allowPickup ? 'removeClass' : 'addClass']('disabled');
+    $pickupLabel.css('opacity', allowPickup ? '1' : '0.5');
+
+    $('#point').prop('disabled', !allowPoint);
+    $pointLabel[allowPoint ? 'removeClass' : 'addClass']('disabled');
+    $pointLabel.css('opacity', allowPoint ? '1' : '0.5');
+
+    // Determine which option should be selected
+    const current = $('input[name=pickup_type]:checked').val();
+    let selected = null;
+
+    if (allowed.length === 0) {
+        // No collection types specified - default to PICKUP
+        selected = 'PICKUP';
+    } else if (allowed.length === 1) {
         // Only one option available, auto-select it
-        const autoSelect = allowed[0];
-        $('input[name=pickup_type][value="' + autoSelect + '"]').prop('checked', true).trigger('change');
+        selected = allowed[0];
     } else {
-        // Multiple options available, ensure a valid selection
-        const current = $('input[name=pickup_type]:checked').val();
-        let selected = current;
-        if (current === 'PICKUP' && !allowPickup) selected = allowPoint ? 'POINT' : current;
-        if (current === 'POINT' && !allowPoint) selected = allowPickup ? 'PICKUP' : current;
-        if (!selected) selected = allowPickup ? 'PICKUP' : (allowPoint ? 'POINT' : 'PICKUP');
-        if (selected !== current) {
-            $('input[name=pickup_type][value="' + selected + '"]').prop('checked', true).trigger('change');
+        // Multiple options available
+        // Keep current selection if it's valid, otherwise pick first available
+        if (current === 'PICKUP' && allowPickup) {
+            selected = 'PICKUP';
+        } else if (current === 'POINT' && allowPoint) {
+            selected = 'POINT';
+        } else {
+            // Current selection is not valid, pick first available
+            selected = allowPickup ? 'PICKUP' : (allowPoint ? 'POINT' : null);
         }
+    }
+
+    // Apply selection if valid and different from current
+    if (selected && selected !== current) {
+        $('input[name=pickup_type][value="' + selected + '"]').prop('checked', true).trigger('change');
     }
 }
 
@@ -1106,7 +1307,10 @@ function fetchStates(countryId, opts) {
     return fetch(url, { headers: buildHeaders() })
         .then(function(r){ return r.json(); })
         .then(function(list){
-            if (!Array.isArray(list) || !list.length) { $(targetGroup).hide(); return []; }
+            if (!Array.isArray(list) || !list.length) {
+                $(targetGroup).hide();
+                return [];
+            }
             const html = '<option value="">-- wybierz --</option>' + list.map(function(s){ return '<option value="' + s.id + '">' + (s.name || ('ID ' + s.id)) + '</option>'; }).join('');
             $(targetSelect).html(html);
             $(targetGroup).show();
@@ -1134,8 +1338,27 @@ function fetchStates(countryId, opts) {
 			.then(function(json){
 				GK.state.customRequired = json || {};
 				// declared value and purpose
-				$('#declaredValueGroup').toggle(!!json.declaredValue);
-				$('#purposeGroup').toggle(!!json.purpose);
+				if (json.declaredValue) {
+					$('#declaredValueGroup').show();
+					// Initialize declaredValue with default value if not set
+					if (!GK.state.additionalInfo || !GK.state.additionalInfo.declaredValue) {
+						GK.state.additionalInfo = GK.state.additionalInfo || {};
+						GK.state.additionalInfo.declaredValue = '0'; // Default value
+						$('#declaredValueInput').val('0');
+					}
+				} else {
+					$('#declaredValueGroup').hide();
+				}
+				if (json.purpose) {
+					$('#purposeGroup').show();
+					// Initialize purpose with default value if not set
+					if (!GK.state.additionalInfo || !GK.state.additionalInfo.purpose) {
+						GK.state.additionalInfo = GK.state.additionalInfo || {};
+						GK.state.additionalInfo.purpose = 'SOLD'; // Default value
+					}
+				} else {
+					$('#purposeGroup').hide();
+				}
 				// pickup date/time
 				const showPickupMeta = !!(json.pickupDate || json.pickupTimeFrom || json.pickupTimeTo);
 				$('#pickupMeta').toggle(showPickupMeta);
@@ -1180,6 +1403,20 @@ function fetchStates(countryId, opts) {
                     // Clear required addons if not present
                     GK.state.customRequired.requiredAddons = null;
                 }
+
+				// Handle orderCustoms fields (customs section requirements)
+				if (json.orderCustoms && typeof json.orderCustoms === 'object') {
+					// Filter out 'fields' key as it's not needed in the request
+					const filteredCustoms = {};
+					Object.keys(json.orderCustoms).forEach(function(key) {
+						if (key !== 'fields') {
+							filteredCustoms[key] = json.orderCustoms[key];
+						}
+					});
+					GK.state.customRequired.orderCustoms = filteredCustoms;
+				} else {
+					GK.state.customRequired.orderCustoms = null;
+				}
 
 				updateCarrierDependentUI();
 			});
@@ -1353,6 +1590,7 @@ function renderSummaryContainer() {
 function renderServicesAndBind() {
     // Keep TPL markup; only bind events here
     populatePackageInputs();
+    populateReceiverPoints(); // Display receiver points in UI
     $('#getServicesBtn').off('click').on('click', function(){
             const $btn = $(this);
             $btn.prop('disabled', true);
@@ -1516,9 +1754,7 @@ function renderServicesAndBind() {
 			GK.state.receiver = GK.state.receiver || {};
 			GK.state.receiver.terminal = code;
 			$('#inpostReceiverLabel').text('[' + code + '] ' + label);
-			$('#terminalCode').text(code);
-			$('.terminalLabel').hide();
-			$('.terminalLabel[data-type="inpost"]').show();
+			// Don't update terminalCode or terminalLabel - they show client's original choice
 		} else if (target === 'inPostSenderPoint') {
 			GK.state.additionalInfo.inPostSenderPoint = { id: code };
 			GK.state.sender = GK.state.sender || {};
@@ -1528,30 +1764,51 @@ function renderServicesAndBind() {
 			GK.state.additionalInfo.paczkaRuchReceiverPoint = { id: code };
 			GK.state.receiver.terminal = code;
 			$('#orlenReceiverLabel').text('[' + code + '] ' + label);
-			$('#terminalCode').text(code);
-			$('.terminalLabel').hide();
-			$('.terminalLabel[data-type="ruch"]').show();
+			// Don't update terminalCode or terminalLabel - they show client's original choice
 		} else if (target === 'pocztex48owpReceiverPoint') {
 			GK.state.additionalInfo.pocztex48owpReceiverPoint = { id: code };
 			GK.state.receiver.terminal = code;
 			$('#pocztexReceiverLabel').text('[' + code + '] ' + label);
-			$('#terminalCode').text(code);
-			$('.terminalLabel').hide();
-			$('.terminalLabel[data-type="pocztex48owp"]').show();
+			// Don't update terminalCode or terminalLabel - they show client's original choice
 		} else if (target === 'dhlparcelReceiverPoint') {
 			GK.state.additionalInfo.dhlparcelReceiverPoint = { id: code };
 			GK.state.receiver.terminal = code;
 			$('#dhlReceiverLabel').text('[' + code + '] ' + label);
-			$('#terminalCode').text(code);
-			$('.terminalLabel').hide();
-			$('.terminalLabel[data-type="dhlparcel"]').show();
+			// Don't update terminalCode or terminalLabel - they show client's original choice
+		} else if (target === 'dhlparcelSenderPoint') {
+			GK.state.additionalInfo.dhlparcelSenderPoint = { id: code };
+			GK.state.sender = GK.state.sender || {};
+			GK.state.sender.terminal = code;
+			$('#dhlSenderLabel').text('[' + code + '] ' + label);
+		} else if (target === 'paczkaRuchSenderPoint') {
+			GK.state.additionalInfo.paczkaRuchSenderPoint = { id: code };
+			GK.state.sender = GK.state.sender || {};
+			GK.state.sender.terminal = code;
+			$('#orlenSenderLabel').text('[' + code + '] ' + label);
+		} else if (target === 'pocztex48owpSenderPoint') {
+			GK.state.additionalInfo.pocztex48owpSenderPoint = { id: code };
+			GK.state.sender = GK.state.sender || {};
+			GK.state.sender.terminal = code;
+			$('#pocztexSenderLabel').text('[' + code + '] ' + label);
 		} else if (target === 'dpdpickupReceiverPoint') {
 			GK.state.additionalInfo.dpdpickupReceiverPoint = { id: code };
 			GK.state.receiver.terminal = code;
 			$('#dpdReceiverLabel').text('[' + code + '] ' + label);
-			$('#terminalCode').text(code);
-			$('.terminalLabel').hide();
-			$('.terminalLabel[data-type="dpdpickup"]').show();
+			// Don't update terminalCode or terminalLabel - they show client's original choice
+		} else if (target === 'dpdpickupSenderPoint') {
+			GK.state.additionalInfo.dpdpickupSenderPoint = { id: code };
+			GK.state.sender = GK.state.sender || {};
+			GK.state.sender.terminal = code;
+			$('#dpdSenderLabel').text('[' + code + '] ' + label);
+		} else if (target === 'fedexReceiverPoint') {
+			GK.state.additionalInfo.fedexReceiverPoint = { id: code };
+			GK.state.receiver.terminal = code;
+			$('#fedexReceiverLabel').text('[' + code + '] ' + label);
+		} else if (target === 'fedexSenderPoint') {
+			GK.state.additionalInfo.fedexSenderPoint = { id: code };
+			GK.state.sender = GK.state.sender || {};
+			GK.state.sender.terminal = code;
+			$('#fedexSenderLabel').text('[' + code + '] ' + label);
 		}
 		recalcOrderPrice();
 	});
@@ -1570,12 +1827,8 @@ function renderServicesAndBind() {
 			$('#terminalCode').text(window.InitialValues.terminalCode);
 			if (!GK.state.receiver) GK.state.receiver = {};
 			GK.state.receiver.terminal = window.InitialValues.terminalCode;
-		// Also set inPostReceiverPoint if terminalType is inpost
-		if (window.InitialValues.terminalType === 'inpost') {
-			if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
-			GK.state.additionalInfo.inPostReceiverPoint = { id: window.InitialValues.terminalCode };
 		}
-		}
+
 		if (window.InitialValues && window.InitialValues.terminalType) {
 			$('.terminalLabel').hide();
 			$('.terminalLabel[data-type="' + (window.InitialValues.terminalType || '') + '"]').show();
