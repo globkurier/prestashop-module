@@ -110,7 +110,13 @@ $(function(){
 
         getProductId(productCode, function(err, productId) {
 
-            if (err) { console.warn(err);}
+            if (err) {
+                console.error('Error getting product ID:', err);
+                $('img.ajax-loader').hide();
+                $('select[name="pickup_point"]').html('<option value="0">Nie znaleziono punktów - ' + err + '</option>');
+                $('div.no_results').show();
+                return;
+            }
 
             $.getJSON(url, {productId: productId, city: town, isCashOnDeliveryAddonSelected: isInpostCODCarrierSelected()})
             .done(function (r) {
@@ -231,8 +237,10 @@ $(function(){
                 var product = r.standard[i];
                 if (product.labels.indexOf(carrierType) != -1) return callback(null, product.id);
             }
+            // If no product found, call callback with error
+            return callback("Product not found for carrier type: " + carrierType);
         }).fail(function (r) {
-            return callback("error");
+            return callback("API error: " + (r.statusText || "Unknown error"));
         });
     }
 

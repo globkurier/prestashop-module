@@ -171,6 +171,15 @@ $(function () {
             });
         } else {*/
         getProductId(productCode, function (err, productId) {
+            if (err) {
+                console.error('Error getting product ID:', err);
+                $('img.ajax-loader').hide();
+                $('.pickup-loader .lds-ripple').hide();
+                $('.pickup-result').show();
+                $('div.no_results').show();
+                $('select[name="pickup_point"]').html('<option value="0">Nie znaleziono punktów - ' + err + '</option>');
+                return;
+            }
             $.getJSON(url, {
                 productId: productId,
                 filter: town,
@@ -180,6 +189,13 @@ $(function () {
                 $('img.ajax-loader').hide();
                 $('.pickup-loader .lds-ripple').hide();
                 $('.pickup-result').show();
+            }).fail(function(xhr, status, error) {
+                console.error('Error fetching points:', error);
+                $('img.ajax-loader').hide();
+                $('.pickup-loader .lds-ripple').hide();
+                $('.pickup-result').show();
+                $('div.no_results').show();
+                $('select[name="pickup_point"]').html('<option value="0">Błąd pobierania punktów</option>');
             });
         });
         // }
@@ -285,16 +301,18 @@ $(function () {
 
                 if (carrierType == 'POCZTA POLSKA') {
                     if (carrierName.indexOf(carrierType) != -1) {
-                        let productName = product.name;
-                        if (productName.indexOf('Dostawa do Punktu') != -1) {
+                        let productName = product.name.toUpperCase();
+                        // Check for both Polish and English product names
+                        if (productName.indexOf('DOSTAWA DO PUNKTU') != -1 || productName.indexOf('PUDO') != -1) {
                             return callback(null, product.id);
                         }
                     }
                 } else if (carrierType == 'DPD PICKUP') {
                     carrierType = 'DPD';
                     if (carrierName.indexOf(carrierType) != -1) {
-                        let productName = product.name;
-                        if (productName.indexOf('DPD PICKUP') != -1) {
+                        let productName = product.name.toUpperCase();
+                        // Check for both Polish and English product names
+                        if (productName.indexOf('DPD PICKUP') != -1 || productName.indexOf('PICKUP') != -1) {
                             return callback(null, product.id);
                         }
                     }
@@ -304,8 +322,10 @@ $(function () {
                     }
                 }
             }
+            // If no product found, call callback with error
+            return callback("Product not found for carrier type: " + carrierType);
         }).fail(function (r) {
-            return callback("error");
+            return callback("API error: " + (r.statusText || "Unknown error"));
         });
     }
 
