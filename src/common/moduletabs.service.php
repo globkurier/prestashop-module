@@ -46,6 +46,34 @@ class ModuleTabs
             3 => 'Send via Globkurier',
             4 => 'GlobKurier',
         ],
+        'de' => [
+            0 => 'Versand über GlobKurier',
+            1 => 'Sendungsverlauf',
+            2 => 'Konfiguration',
+            3 => 'Versand über GlobKurier',
+            4 => 'GlobKurier',
+        ],
+        'fr' => [
+            0 => 'Envoyer via GlobKurier',
+            1 => 'Historique des envois',
+            2 => 'Configuration',
+            3 => 'Envoyer via GlobKurier',
+            4 => 'GlobKurier',
+        ],
+        'es' => [
+            0 => 'Enviar vía GlobKurier',
+            1 => 'Historial de envíos',
+            2 => 'Configuración',
+            3 => 'Enviar vía GlobKurier',
+            4 => 'GlobKurier',
+        ],
+        'it' => [
+            0 => 'Invia tramite GlobKurier',
+            1 => 'Cronologia spedizioni',
+            2 => 'Configurazione',
+            3 => 'Invia tramite GlobKurier',
+            4 => 'GlobKurier',
+        ],
     ];
 
     public static $moduleName = 'globkuriermodule';
@@ -67,7 +95,12 @@ class ModuleTabs
         $tab->name = [];
         $languages = \Language::getLanguages(true);
         foreach ($languages as $lang) {
-            $tab->name[$lang['id_lang']] = self::$tab_name[$lang['iso_code']][$name];
+            $iso = $lang['iso_code'];
+            // Fallback to English if language is not defined
+            if (!isset(self::$tab_name[$iso])) {
+                $iso = 'en';
+            }
+            $tab->name[$lang['id_lang']] = self::$tab_name[$iso][$name];
         }
         $tab->class_name = $className;
         $tab->id_parent = $parent;
