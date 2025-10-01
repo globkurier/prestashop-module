@@ -30,19 +30,19 @@
 </style>
 
 <div id="new-glob-parcel">
-    <a href="{$newParcelPageLink|escape:'javascript':'UTF-8'}" class="btn btn-success">
+    <a href="{$newParcelPageLink|escape:'javascript':'UTF-8'}" class="btn btn-success btn-gk-success">
         <i class="icon-truck"></i> {l s='SHIP WITH GLOBKURIER' mod='globkuriermodule'}
     </a>
 </div>
 
 <div id="new-glob-invoice-parcel">
-    <a href="{$newParcelPageLink|escape:'javascript':'UTF-8'}&invoice_address=1" class="btn btn-success">
+    <a href="{$newParcelPageLink|escape:'javascript':'UTF-8'}&invoice_address=1" class="btn btn-success btn-gk-success">
         <i class="icon-truck"></i> {l s='SHIP WITH GLOBKURIER' mod='globkuriermodule'} INVOCIE
     </a>
 </div>
 
 <div id="new-glob-invoice-parcel">
-    <a href="{$newParcelPageLink|escape:'javascript':'UTF-8'}&action=addNewGlobOrder" class="btn btn-success">
+    <a href="{$newParcelPageLink|escape:'javascript':'UTF-8'}&action=addNewGlobOrder" class="btn btn-success btn-gk-success">
         <i class="icon-truck"></i> {l s='SHIP WITH GLOBKURIER' mod='globkuriermodule'} ADD
     </a>
 </div>

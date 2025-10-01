@@ -124,7 +124,7 @@
     <div class="card-body">
         <div class="row" style="padding: 15px;">
             <div id="new-glob-parcel col-lg-3" style="padding: 0 10px;">
-                <a href="{$newParcelPageLink|escape:'javascript':'UTF-8'}" class="btn btn-success pull-right">
+                <a href="{$newParcelPageLink|escape:'javascript':'UTF-8'}" class="btn btn-success btn-gk-success pull-right">
                     <i class="icon-truck"></i> {l s='Send a package' mod='globkuriermodule'}
                 </a>
             </div>
