@@ -791,7 +791,7 @@ function buildHeaders() {
 
 function cardForProduct(product) {
     const logo = product.carrierLogoLink ? '<img src="' + product.carrierLogoLink + '" alt="' + (product.carrierName || '') + '" />' : '';
-    const price = (product.netPrice != null) ? (product.netPrice + ' net') : '';
+    const price = (product.netPrice != null) ? (product.netPrice + " " + product.currency) : '';
 		return (
 			'<div class="col-lg-4 col-md-6 col-sm-6 glob-product-block text-center">' +
 				'<div class="glob-product-wrapper">' +
