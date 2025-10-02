@@ -485,7 +485,7 @@ function initStateFromInitialValues() {
 			apartmentNumber: (iv.sender && iv.sender.apartmentNumber) || '',
 			postalCode: (iv.sender && iv.sender.postCode) || '',
 			city: (iv.sender && iv.sender.city) || '',
-			country: iv.sender && iv.sender.countryId ? { id: iv.sender.countryId } : null,
+			country: iv.sender && iv.sender.countryCode ? { id: null, isoCode: iv.sender.countryCode } : null,
 			contactPerson: (iv.sender && iv.sender.personName) || '',
 			phone: (iv.sender && iv.sender.phone) || '',
 			email: (iv.sender && iv.sender.email) || ''
@@ -552,22 +552,24 @@ function ensureCountryIdsFromIso() {
     function normalizeCountry(country, fallbackId) {
         if (!country) return null;
         const iso = (country.isoCode || country.code || country.iso || '').toUpperCase();
-        // Special handling for USA like Angular (countryId = 30)
-        if (iso === 'US') {
-            country.id = 30;
+        // if we have a countries map, override id based on ISO
+        if (map && map[iso]) {
+            country.id = map[iso];
             return country;
         }
-        // if we have a countries map, override id based on ISO
-        if (map && map[iso]) { country.id = map[iso]; return country; }
-        // fallback: use id from InitialValues (if provided)
-        if (fallbackId) { country.id = fallbackId; return country; }
+        // fallback: use id from fallbackId (if provided)
+        if (fallbackId) {
+            country.id = fallbackId;
+            return country;
+        }
         // if id already set and no map/fallback, keep as is
         if (country.id) return country;
-        // no reliable source → leave unchanged
+        // default fallback to Poland (country ID 1 in Globkurier)
+        country.id = 1;
         return country;
     }
-    if (s.sender && s.sender.country) s.sender.country = normalizeCountry(s.sender.country, (window.InitialValues && window.InitialValues.senderCountryIdNew));
-    if (s.receiver && s.receiver.country) s.receiver.country = normalizeCountry(s.receiver.country, (window.InitialValues && window.InitialValues.receiverCountryIdNew));
+    if (s.sender && s.sender.country) s.sender.country = normalizeCountry(s.sender.country, null);
+    if (s.receiver && s.receiver.country) s.receiver.country = normalizeCountry(s.receiver.country, null);
 }
 
 // Fetch countries once and build ISO -> ID map
@@ -1474,8 +1476,8 @@ function renderSummaryContainer() {
 		usp.append('height', p.height || 0);
 		usp.append('weight', p.weight || 0);
 		usp.append('quantity', p.count || 1);
-		usp.append('senderCountryId', (s.sender && s.sender.country && s.sender.country.id) || (window.InitialValues && window.InitialValues.senderCountryIdNew) || 1);
-		usp.append('receiverCountryId', (s.receiver && s.receiver.country && s.receiver.country.id) || (window.InitialValues && window.InitialValues.receiverCountryIdNew) || 1);
+		usp.append('senderCountryId', (s.sender && s.sender.country && s.sender.country.id) || 1);
+		usp.append('receiverCountryId', (s.receiver && s.receiver.country && s.receiver.country.id) || 1);
 		usp.append('senderPostCode', (s.sender && s.sender.postalCode) || (window.InitialValues && window.InitialValues.sender && window.InitialValues.sender.postCode) || '');
 		usp.append('receiverPostCode', (s.receiver && s.receiver.postalCode) || (window.InitialValues && window.InitialValues.receiver && window.InitialValues.receiver.postCode) || '');
 		usp.append('paymentId', parseInt(s.additionalInfo.paymentType, 10) || s.additionalInfo.paymentType);

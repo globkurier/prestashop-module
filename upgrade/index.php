@@ -23,26 +23,12 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
-class AdminGlobkurierConfigurationController extends ModuleAdminController
-{
-    public function __construct()
-    {
-        $this->table = 'configuration';
-        $this->display = 'view';
-        $this->bootstrap = true;
-        $this->meta_title = 'Zamawianie przesyłki globkurier';
-        parent::__construct();
-        $this->path = $this->path ? $this->path : _MODULE_DIR_ . $this->module->name;
-    }
+header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
 
-    // @Override
-    public function init()
-    {
-        parent::init();
-        $url = $this->context->link->getAdminLink('AdminModules');
-        Tools::redirectAdmin($url . '&configure=' . Tools::safeOutput($this->module->name));
-    }
-}
+header('Cache-Control: no-store, no-cache, must-revalidate');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+
+header('Location: ../');
+exit;

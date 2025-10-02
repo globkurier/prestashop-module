@@ -29,7 +29,6 @@ if (!defined('_PS_VERSION_')) {
 }
 class GlobkurierApi
 {
-    private $baseTestApiUrl = 'http://test.api.globkurier.pl/v1/';
     private $baseApiUrl = 'https://api.globkurier.pl/v1/';
     /** @var string user login in globkurier.pl */
     private $login;
@@ -75,6 +74,10 @@ class GlobkurierApi
         }
 
         $this->token = $r['token'];
+        // Set clientId if available in response
+        if (isset($r['clientId'])) {
+            $this->clientId = $r['clientId'];
+        }
         return $this;
     }
 

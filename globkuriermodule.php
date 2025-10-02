@@ -82,7 +82,6 @@ class Globkuriermodule extends Module
             && $this->registerHook('displayBackOfficeHeader')
             && $this->registerHook('displayCarrierList')
             && $this->registerHook('displayAfterCarrier')
-            && $this->registerHook('displayAfterCarrier')
             && $this->registerHook('displayAdminOrderMainBottom')
             && $this->registerHook('actionUpdateCarrier');
     }
@@ -165,9 +164,8 @@ class Globkuriermodule extends Module
         $gkOrder = $orderM->getByOrderId($params['id_order']);
         if (!empty($gkOrder)) {
             foreach ($gkOrder as &$item) {
-                $pdf = (int)$this->checkPDFReady($item->hash);
+                $pdf = (int) $this->checkPDFReady($item->hash);
                 $item->pdf = $pdf;
-
                 $item->payment_name = $this->payments[$item->payment];
             }
         }
@@ -178,6 +176,7 @@ class Globkuriermodule extends Module
             'moduleApiUrl' => $this->link->getAdminLink('AdminGlobkurierHistory'),
             'newParcelPageLink' => $newParcelPageLink,
         ]);
+
         if (version_compare(_PS_VERSION_, '8.0.0', '>=') === true) {
             // PrestaShop 8.x and 9.x
             return $this->display(__FILE__, 'views/templates/hooks/admin_order.tpl');
@@ -207,17 +206,12 @@ class Globkuriermodule extends Module
             return 0;
         }
 
-        // Verify that context and shop objects exist - required for URL construction
-        if (!isset($this->context) || !isset($this->context->shop)) {
-            return 0;
-        }
-
         // Build internal API URL to check label status
-        $url = 'https://tebimpro:tebimpro@'.$this->context->shop->domain.$this->context->shop->physical_uri.'module/globkuriermodule/getLabel?hash='.$hash.'&ajax=1';
+        $url = 'https://tebimpro:tebimpro@' . $this->context->shop->domain . $this->context->shop->physical_uri . 'module/globkuriermodule/getLabel?hash=' . $hash . '&ajax=1';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_VERBOSE, true);
         $result = curl_exec($ch);
         curl_close($ch);
@@ -245,7 +239,7 @@ class Globkuriermodule extends Module
     {
         $config = new Config();
         if (!$config->inPostEnabled && !$config->inPostCODEnabled && !$config->paczkaRuchEnabled && !$config->pocztex48owpEnabled) {
-            return;
+            return '';
         }
         $address = new Address($this->context->cart->id_address_delivery);
         $this->smarty->assign([
@@ -452,4 +446,3 @@ class Globkuriermodule extends Module
         return hash('sha256', $cartId . $salt);
     }
 }
-

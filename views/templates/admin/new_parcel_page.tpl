@@ -515,10 +515,8 @@
     </div>
 
     <script type="text/javascript">
-        let package = [
-            ['senderCountryId', {$config->id_country}],
-            ['receiverCountryId', {if !empty($adress) && isset($adress->id_country)}{$adress->id_country}{else}1{/if}],
-        ];
+        // Note: These will be mapped to Globkurier country IDs in JavaScript via ISO codes
+        let package = [];
         let urlRedirect = '{$urlRedirect}';
 
         window.InitialValues = {
@@ -530,8 +528,8 @@
                         apartmentNumber: '{$config->defaultSenderApartmentNumber|escape:'javascript':'UTF-8'}',
                         postCode: '{$config->defaultSenderPostCode|escape:'javascript':'UTF-8'}',
                         city: '{$config->defaultSenderCity|escape:'javascript':'UTF-8'}',
-                        countryCode: '{$config->defaultCountryCode|escape:'javascript':'UTF-8'}',
-                        countryId: '{$config->id_country|escape:'javascript':'UTF-8'}',
+                        countryCode: '{$sender_country_iso|escape:'javascript':'UTF-8'}',
+                        countryId: null, // Will be set by JavaScript from ISO code
                         phone: '{$config->defaultSenderPhoneNumber|escape:'javascript':'UTF-8'}',
                         email: '{$config->defaultSenderEmail|escape:'javascript':'UTF-8'}',
                     },
@@ -549,8 +547,8 @@
                         {/if}
                         postCode: '{$adress->postcode|escape:'javascript':'UTF-8'}',
                         city: '{$adress->city|escape:'javascript':'UTF-8'}',
-                        countryCode: '{$country->iso_code|escape:'javascript':'UTF-8'}',
-                        countryId: '{if !empty($adress) && isset($adress->id_country)}{$adress->id_country}{else}1{/if}',
+                        countryCode: '{$receiver_country_iso|escape:'javascript':'UTF-8'}',
+                        countryId: null, // Will be set by JavaScript from ISO code
                         phone: '{if $adress->phone}{$adress->phone|escape:'javascript':'UTF-8'}{else}{$adress->phone_mobile|escape:'javascript':'UTF-8'}{/if}',
                         email: '{if isset($customer->email)}{$customer->email|escape:'javascript':'UTF-8'}{else}null{/if}',
                         stateId: {$adress->id_state},
@@ -587,8 +585,6 @@
                     defaultInPostPoint : {if $config->defaultInPostPoint}'{$config->defaultInPostPoint|escape:'javascript':'UTF-8'}'{else}null{/if},
                     prestaOrderId : '{$orderId|escape:'javascript':'UTF-8'}',
                     collectionTypes: '',
-                    senderCountryIdNew : {$config->idCountry},
-                    receiverCountryIdNew : {$country_id},
                     isoCode: '{$iso_code|escape:'javascript':'UTF-8'}',
                     lang1: '{l s='Parameter' mod='globkuriermodule'}',
                     lang2: '{l s='is required!' mod='globkuriermodule'}',

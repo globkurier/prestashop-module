@@ -30,9 +30,9 @@ if (!defined('_PS_VERSION_')) {
 class TerminalPickupManager
 {
     /**
-     * Zwraca obiekt typu 'wybrany terminal' po id koszyka
-     * @param $id - id koszyka
-     * @return obiekt typu 'wybrany terminal' z wszystkimi jego wartościami
+     * Zwraca dane wybranego terminalu po id koszyka
+     * @param int $id - id koszyka
+     * @return array|false - tablica z danymi terminalu lub false jeśli nie znaleziono
      */
     public function getByCartId($id)
     {

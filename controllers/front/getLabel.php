@@ -28,16 +28,14 @@ if (!defined('_PS_VERSION_')) {
 }
 class GlobkuriermoduleGetLabelModuleFrontController extends ModuleFrontController
 {
-
     public function init()
     {
         $this->page_name = 'getlabel';
-        $this->path = _MODULE_DIR_ . $this->module->name;
         parent::init();
 
         $return = [];
         $hash = isset($_REQUEST['hash']) ? $_REQUEST['hash'] : '';
-        $ajax = isset($_REQUEST['ajax']) ? (int)$_REQUEST['ajax'] : 0;
+        $ajax = isset($_REQUEST['ajax']) ? (int) $_REQUEST['ajax'] : 0;
         if (!empty($hash)) {
             $c = new Globkuriermodule\Common\Config();
             $api = new Globkuriermodule\Common\GlobkurierApi($c->login, $c->password, $c->apiKey);
@@ -51,20 +49,22 @@ class GlobkuriermoduleGetLabelModuleFrontController extends ModuleFrontControlle
 
                 if (!empty($fields)) {
                     foreach ($fields as $field) {
-                        // Use PrestaShop translation system
-                        $translatedText = $this->module->l('Package label file is not available for this shipment.', 'getLabel');
+                        $translatedText = $this->module->l(
+                            'Package label file is not available for this shipment.',
+                            'getLabel'
+                        );
                         $html .= $translatedText . '<br />';
                     }
                 }
                 $return['errors'] = $html;
                 $return['status'] = false;
                 echo json_encode($return);
-                die;
+                exit;
             } else {
                 if ($ajax) {
                     $return['status'] = true;
                     echo json_encode($return);
-                    die;
+                    exit;
                 } else {
                     $dir = __DIR__ . '/../../files/' . $hash . '.pdf';
                     file_put_contents($dir, $request);
@@ -78,6 +78,5 @@ class GlobkuriermoduleGetLabelModuleFrontController extends ModuleFrontControlle
                 }
             }
         }
-//        exit;
     }
 }

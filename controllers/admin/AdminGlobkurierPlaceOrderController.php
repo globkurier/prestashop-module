@@ -48,7 +48,7 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
         $api = new Globkuriermodule\Common\GlobkurierApi($c->login, $c->password, $c->apiKey);
         $moduleApiUrl = $this->link->getAdminLink('AdminGlobkurierPlaceOrder');
         $country_name = '';
-        $id_country = 0;
+        $sender_country_iso = $c->defaultCountryCode ? $c->defaultCountryCode : 'PL';
 
         if (!$api->isUserAuthorized()) {
             return $this->displayAuthFail();
@@ -59,11 +59,8 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
         $this->context->controller->addJS($this->path . '/views/js/newParcelApp.jquery.js');
 
         if (!empty($c->defaultCountryCode)) {
-            $country = Country::getByIso($c->defaultCountryCode);
-            $country_name = new Country($country);
-            $id_country = 1;
-            $c->idCountry = $id_country;
-            $c->id_country = $id_country;
+            $sender_country_id = Country::getByIso($c->defaultCountryCode);
+            $country_name = new Country($sender_country_id);
         }
 
         $lang = new Language((int) $this->context->cookie->id_lang);
@@ -76,6 +73,7 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
             'globClientId' => $api->getClientId(),
             'service' => 'PICKUP',
             'iso_code' => $lang->iso_code,
+            'sender_country_iso' => $sender_country_iso,
         ]);
 
         if (Tools::getValue('order_id')) {
@@ -89,18 +87,17 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
             }
 
             $country = new Country($adress->id_country);
-            if ($adress->id_country == 14) {
-                $adress->idCountry = 1;
-            }
+            $receiver_country_iso = $country->iso_code ? $country->iso_code : 'PL';
+
             $tpm = new Globkuriermodule\TerminalPickup\TerminalPickupManager();
 
             $codeTerminal = null;
             $splitedAddress = null;
             $terminalPickup = $tpm->getByCartId($order->id_cart);
             $terminalType = null;
-            if ($terminalPickup) {
-                $codeTerminal = $terminalPickup['code'];
-                $terminalType = $terminalPickup['type'];
+            if ($terminalPickup && is_array($terminalPickup)) {
+                $codeTerminal = isset($terminalPickup['code']) ? $terminalPickup['code'] : null;
+                $terminalType = isset($terminalPickup['type']) ? $terminalPickup['type'] : null;
             }
             if ($splitter = $this->getSplittedAddres($adress)) {
                 $splitedAddress = [
@@ -117,7 +114,7 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
                 'customer' => $customer,
                 'terminalCode' => $codeTerminal,
                 'terminalType' => $terminalType,
-                'country_id' => $id_country,
+                'receiver_country_iso' => $receiver_country_iso,
             ]);
         } else {
             $this->context->smarty->assign([
@@ -125,7 +122,6 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
                 'splitedAddress' => null,
                 'country' => $country_name,
                 'customer' => [],
-                'country_id' => $id_country,
             ]);
         }
 
@@ -151,7 +147,7 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
     private function getSplittedAddres(Address $address)
     {
         $splitter = new AddressSplitter\AddressSplitter();
-        if ($address->address2 && strlen($address->address2) && $splitter->split($address->address1 . ' ' . $address->address2)) {
+        if (!empty($address->address2) && $splitter->split($address->address1 . ' ' . $address->address2)) {
             return $splitter;
         }
 

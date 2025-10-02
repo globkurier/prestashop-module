@@ -126,9 +126,7 @@ class ModuleTabs
 
         foreach ($tabs as $tabName) {
             $tab = \Tab::getInstanceFromClassName($tabName);
-            if ($tab) {
-                $tab->delete();
-            }
+            $tab->delete();
         }
 
         return true;

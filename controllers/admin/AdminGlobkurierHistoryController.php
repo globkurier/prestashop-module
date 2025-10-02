@@ -29,7 +29,6 @@ if (!defined('_PS_VERSION_')) {
 class AdminGlobkurierHistoryController extends ModuleAdminController
 {
     private $link;
-
     public function __construct()
     {
         $this->table = 'configuration';
