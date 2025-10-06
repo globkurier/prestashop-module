@@ -1,5 +1,9 @@
 # Integracja z systemem Glob Kurier
 
+[![Latest stable release](https://img.shields.io/github/v/release/globkurier/prestashop-module?labelColor=green&label=Latest%20release)](https://github.com/globkurier/prestashop-module/releases)
+![Supported PrestaShop Version](https://img.shields.io/badge/Prestashop-%3E%3D1.7.9.0-gray?labelColor=DF0067&logo=prestashop)
+![Supported PHP Version](https://img.shields.io/badge/PHP-%3E=7.4-B0B3D6?labelColor=white&logo=php)
+
 ## Założenia główne modułu
 
 1. Napisany zgodnie z wytycznymi serwisu PrestaShop.
