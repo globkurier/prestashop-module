@@ -52,13 +52,15 @@
         </div>
         {*        <img class="ajax-loader" src="img/loader.gif" style="display: none;" />*}
         <div class="pickup-point-selected"></div>
+            <div class="col-sm-12">
+            <div class="clearfix"></div>
+            <div id="containerForMapOfTerminals" style="display:none;"></div>
+        </div>
     </div>
 
     <div class="no_inpost_point_selected" style="display: none;">
         <p><i class="icon-warning"></i> {l s='Please pick parcel point' mod='globkuriermodule'}</p>
     </div>
-    <div class="clearfix"></div>
-    <div id="containerForMapOfTerminals" style="display:none; margin-top: 5px; width:100%; height:500px"></div>
 
 </div>
 
@@ -74,6 +76,12 @@
     const rest_endpoint = '{$rest_endpoint|escape:'javascript':'UTF-8'}';
     const address = '{$address_all|escape:'javascript':'UTF-8'}';
     const baseUrl = '{$baseurl|escape:'javascript':'UTF-8'}';
+    const delivery_city = '{$city|escape:'javascript':'UTF-8'}';
+    const delivery_postcode = '{$postcode|escape:'javascript':'UTF-8'}';
+    
+    // Make variables globally accessible
+    window.delivery_city = delivery_city;
+    window.delivery_postcode = delivery_postcode;
     let mainTextLang = '{l s='Type a name of your city and select parcel point closest to you' mod='globkuriermodule'}',
         mainTextLang2 = '{l s='for' mod='globkuriermodule'}',
         postcode = '{$postcode}';

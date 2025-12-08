@@ -1,3 +1,6 @@
+## [3.3.1] - 2025-11-26
++ Replace Google Maps API with Leaflet
+
 ## [3.3.0] - 2025-09-15
 + Migrated js script
 + Fixed controller issues

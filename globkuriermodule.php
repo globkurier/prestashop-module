@@ -54,7 +54,7 @@ class Globkuriermodule extends Module
     {
         $this->name = 'globkuriermodule';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.3.0';
+        $this->version = '3.3.1';
         $this->author = 'GlobKurier.pl';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -323,30 +323,56 @@ class Globkuriermodule extends Module
                 ]
             );
 
-            // Load Google Maps API if configured
-            $goolgeMapsApiKeyFromConfiguration = $config->googleMapsApiKey;
-            if ($goolgeMapsApiKeyFromConfiguration) {
-                $this->context->controller->registerJavascript(
-                    'google-maps-api',
-                    'https://maps.google.com/maps/api/js?key=' . $goolgeMapsApiKeyFromConfiguration,
-                    [
-                        'server' => 'remote',
-                        'position' => 'bottom',
-                        'priority' => 200,
-                        'attribute' => 'defer',
-                    ]
-                );
-                $this->context->controller->registerJavascript(
-                    'google-maps-clusterer',
-                    'https://unpkg.com/@googlemaps/markerclustererplus/dist/index.min.js',
-                    [
-                        'server' => 'remote',
-                        'position' => 'bottom',
-                        'priority' => 200,
-                        'attribute' => 'defer',
-                    ]
-                );
-            }
+            // Load Leaflet Maps CSS - high priority to load before other styles
+            $this->context->controller->registerStylesheet(
+                'module-' . $this->name . '-leaflet-style',
+                'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+                [
+                    'server' => 'remote',
+                    'media' => 'all',
+                    'priority' => 150,
+                ]
+            );
+
+            $this->context->controller->registerStylesheet(
+                'module-' . $this->name . '-MarkerCluster',
+                'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
+                [
+                    'server' => 'remote',
+                    'media' => 'all',
+                    'priority' => 150,
+                ]
+            );
+
+            $this->context->controller->registerStylesheet(
+                'module-' . $this->name . '-MarkerCluster-default',
+                'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css',
+                [
+                    'server' => 'remote',
+                    'media' => 'all',
+                    'priority' => 150,
+                ]
+            );
+
+            // Load Leaflet Maps JavaScript
+            $this->context->controller->registerJavascript(
+                'leaflet-maps-js',
+                'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+                [
+                    'server' => 'remote',
+                    'position' => 'bottom',
+                    'priority' => 180,
+                ]
+            );
+            $this->context->controller->registerJavascript(
+                'leaflet-markercluster-js',
+                'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js',
+                [
+                    'server' => 'remote',
+                    'position' => 'bottom',
+                    'priority' => 185,
+                ]
+            );
 
             // Load Select2 JavaScript
             $this->context->controller->registerJavascript(
@@ -381,29 +407,59 @@ class Globkuriermodule extends Module
                     'priority' => 200,
                 ]
             );
-            $goolgeMapsApiKeyFromConfiguration = $config->googleMapsApiKey;
-            if ($goolgeMapsApiKeyFromConfiguration) {
-                $this->context->controller->registerJavascript(
-                    'google-maps-api',
-                    'https://maps.google.com/maps/api/js?key=' . $goolgeMapsApiKeyFromConfiguration,
-                    [
-                        'server' => 'remote',
-                        'position' => 'bottom',
-                        'priority' => 200,
-                        'attribute' => 'defer',
-                    ]
-                );
-                $this->context->controller->registerJavascript(
-                    'google-maps-clusterer',
-                    'https://unpkg.com/@googlemaps/markerclustererplus/dist/index.min.js',
-                    [
-                        'server' => 'remote',
-                        'position' => 'bottom',
-                        'priority' => 200,
-                        'attribute' => 'defer',
-                    ]
-                );
-            }
+
+            // Load Leaflet Maps CSS - high priority to load before other styles
+            $this->context->controller->registerStylesheet(
+                'module-' . $this->name . '-leaflet-style',
+                'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+                [
+                    'server' => 'remote',
+                    'media' => 'all',
+                    'priority' => 150,
+                ]
+            );
+
+            $this->context->controller->registerStylesheet(
+                'module-' . $this->name . '-MarkerCluster',
+                'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
+                [
+                    'server' => 'remote',
+                    'media' => 'all',
+                    'priority' => 150,
+                ]
+            );
+
+            $this->context->controller->registerStylesheet(
+                'module-' . $this->name . '-MarkerCluster-default',
+                'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css',
+                [
+                    'server' => 'remote',
+                    'media' => 'all',
+                    'priority' => 150,
+                ]
+            );
+
+            // Load Leaflet Maps JavaScript
+            $this->context->controller->registerJavascript(
+                'leaflet-maps-js',
+                'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+                [
+                    'server' => 'remote',
+                    'position' => 'bottom',
+                    'priority' => 180,
+                ]
+            );
+
+            $this->context->controller->registerJavascript(
+                'leaflet-markercluster-js',
+                'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js',
+                [
+                    'server' => 'remote',
+                    'position' => 'bottom',
+                    'priority' => 185,
+                ]
+            );
+
             $this->context->controller->registerJavascript(
                 'select-select2',
                 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js',

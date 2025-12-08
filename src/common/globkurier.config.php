@@ -63,6 +63,7 @@ class Config
     public $login;
     public $password;
     public $apiKey;
+    /** @deprecated No longer used - replaced with Leaflet maps */
     public $googleMapsApiKey;
     /** --- */
     public function __construct($initialLoad = true)

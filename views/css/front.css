@@ -119,3 +119,108 @@ button.gm-ui-hover-effect {
     font-size: 14px;
     font-weight: 700;
 }
+
+/* Leaflet map container */
+#containerForMapOfTerminals {
+    width: 100% !important;
+    height: 500px !important;
+    max-width: 100% !important;
+    position: relative !important;
+    z-index: 1 !important;
+    overflow: hidden !important;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+/* Fix Leaflet container */
+#containerForMapOfTerminals .leaflet-container {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Fix Leaflet pane positioning */
+#containerForMapOfTerminals .leaflet-pane {
+    position: absolute !important;
+}
+
+#containerForMapOfTerminals .leaflet-map-pane {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+}
+
+/* Fix Leaflet tiles */
+#containerForMapOfTerminals .leaflet-tile-pane {
+    position: absolute !important;
+}
+
+#containerForMapOfTerminals .leaflet-tile-container {
+    pointer-events: auto;
+    position: absolute !important;
+}
+
+#containerForMapOfTerminals .leaflet-tile {
+    position: absolute !important;
+    width: 256px !important;
+    height: 256px !important;
+}
+
+/* Fix Leaflet controls */
+#containerForMapOfTerminals .leaflet-control-container {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    pointer-events: none;
+}
+
+#containerForMapOfTerminals .leaflet-control {
+    pointer-events: auto !important;
+}
+
+#containerForMapOfTerminals .leaflet-top,
+#containerForMapOfTerminals .leaflet-bottom {
+    position: absolute !important;
+    z-index: 1000 !important;
+    pointer-events: none;
+}
+
+#containerForMapOfTerminals .leaflet-top {
+    top: 0 !important;
+}
+
+#containerForMapOfTerminals .leaflet-bottom {
+    bottom: 0 !important;
+}
+
+#containerForMapOfTerminals .leaflet-left {
+    left: 0 !important;
+}
+
+#containerForMapOfTerminals .leaflet-right {
+    right: 0 !important;
+}
+
+/* Ensure Leaflet popup is properly styled */
+#containerForMapOfTerminals .leaflet-popup-content-wrapper {
+    text-align: center;
+}
+
+#containerForMapOfTerminals .leaflet-popup-content {
+    margin: 13px 19px;
+    min-width: 200px;
+}
+
+/* Reset any conflicting styles */
+#containerForMapOfTerminals * {
+    box-sizing: border-box;
+}
+
+#containerForMapOfTerminals img {
+    max-width: none !important;
+}

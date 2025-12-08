@@ -37,7 +37,8 @@ $_MODULE['<{globkuriermodule}prestashop>config_page_v16_35b4b09d5d0686ec5c2e2cc9
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_a4b696b03ae8d5210f97e249846cdee7'] = 'Online transfer';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_db1b73ab06bd303c6dbc1ad332c16636'] = 'Prepaid';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_8fe7494a226a3c34665468ba6d40b24a'] = 'Delayed payment';
-$_MODULE['<{globkuriermodule}prestashop>config_page_v16_f9ae539a015bd1b6c974c17ed1bd3a0f'] = 'Google Maps API';
+// DEPRECATED: Replaced with Leaflet maps
+// $_MODULE['<{globkuriermodule}prestashop>config_page_v16_f9ae539a015bd1b6c974c17ed1bd3a0f'] = 'Google Maps API';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_d4afce0395e03d4ea941e9febdf1a882'] = 'Cache points for whole country';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_9de42a13d71ca327f0cd1f224cf92a1e'] = 'Enable inPost carrier';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_93cba07454f06a4a960172bbd6e2a435'] = 'Yes';
@@ -120,6 +121,7 @@ $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_e150ad0ce25b32cc393d6cb7
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_94a3750f044c39365ddd987d31946002'] = 'Please use the search';
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_1ace43ccc7e0af067b36c2d9b34efe7a'] = 'Unfortunately, we did not find any parcel machines in given city';
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_5e408603ae11bdc576b14294ce20b230'] = 'Please pick parcel point';
+$_MODULE['<{globkuriermodule}prestashop>carrier_list_17_auto_search_info'] = 'We automatically search for points near your delivery address';
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_42537c6b0e91a45067148269bdd0de88'] = 'SHIP WITH GLOBKURIER';
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_170a094ce3123d9a518c0903164b4001'] = 'Parcel send with Globkurier';
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_6d9a83e9ff6b9d9eba96a7306a14e618'] = 'GK No';

@@ -256,15 +256,6 @@
             </div>
         </div>
 
-        <div class="row" style="margin-top: 50px;">
-            <div class="form-group">
-                <label class="col-lg-4 control-label" style="text-align: right;margin-bottom: 0;padding-top:7px; width: 34%;">
-                {l s='Google Maps API' mod='globkuriermodule'}</label>
-                 <div class="col-lg-4">
-                    <input type="text" name="config_googleMapsApiKey" value="{html_entity_decode($config->googleMapsApiKey|escape:'htmlall':'UTF-8')}" />
-                 </div>
-            </div>
-        </div>
         <div class="row form-group text-center" style="margin-top:10px">
             <button type="button" id="updateCacheBtn" data-url="{html_entity_decode($getCachePointsLink|escape:'htmlall':'UTF-8')}" class="btn btn-primary">
             {l s='Cache points for whole country' mod='globkuriermodule'}</button>
