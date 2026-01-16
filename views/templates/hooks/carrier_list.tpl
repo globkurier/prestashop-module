@@ -22,7 +22,11 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  *}
-<div id="pickup-terminal-container" class="">
+<div id="pickup-terminal-container"
+     class=""
+     data-gk-cart-id="{$cart_id|escape:'html':'UTF-8'}"
+     data-gk-token="{$gk_token|escape:'html':'UTF-8'}"
+     data-gk-rest-endpoint="{$rest_endpoint|escape:'html':'UTF-8'}">
     <div>
         <table class="resume table table-bordered">
             <tbody>
@@ -57,33 +61,72 @@
 </div>
 
 <script type="text/javascript">
-    const inpost_carrier_id = {if $globConfig->inPostEnabled}{$globConfig->inPostCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    const inpost_cod_carrier_id = {if $globConfig->inPostCODEnabled}{$globConfig->inPostCODCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    const paczkaruch_carrier_id = {if $globConfig->paczkaRuchEnabled}{$globConfig->paczkaRuchCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    const pocztex48owp_carrier_id = {if $globConfig->pocztex48owpEnabled}{$globConfig->pocztex48owpCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    const dhlparcel_carrier_id = null; {*{if $globConfig->dhlparcelEnabled}{$globConfig->dhlparcelCarrier|escape:'javascript':'UTF-8'}{else}null{/if};*}
-    const cart_id = {$cart_id|escape:'javascript':'UTF-8'};
-    const gk_token = '{$gk_token|escape:'javascript':'UTF-8'}';
-    const rest_endpoint = '{$rest_endpoint|escape:'javascript':'UTF-8'}';
+(function() {
+    'use strict';
 
-    $(function(){
-        /**
-         * Jesli domyslnie jest ustawiony dostawca inpost, to pokaz wyszukiwarke punktow
-         * Instrukcja musi być tutaj, ponieważ prestaShop, przy każdorazowym wyborze przewoźnika
-         * ładuje jeszcze raz cały ten szablon
-         */
-        var inpostCODSelected = ($('input[value="' + inpost_cod_carrier_id + ',"') && $('input[value="' + inpost_cod_carrier_id + ',"').attr('checked')) ? true : false;
-        var inpostSelected = ($('input[value="' + inpost_carrier_id + ',"') && $('input[value="' + inpost_carrier_id + ',"').attr('checked')) ? true : false;
-        var ruchSelected = ($('input[value="' + paczkaruch_carrier_id + ',"').length && $('input[value="' + paczkaruch_carrier_id + ',"').attr('checked')) ? true : false;
-        var pocztexSelected = ($('input[value="' + pocztex48owp_carrier_id + ',"').length && $('input[value="' + pocztex48owp_carrier_id + ',"').attr('checked')) ? true : false;
-        var dhlparcelSelected = ($('input[value="' + dhlparcel_carrier_id + ',"').length && $('input[value="' + dhlparcel_carrier_id + ',"').attr('checked')) ? true : false;
+    // Namespace pattern - create GlobKurier namespace if it doesn't exist
+    if (typeof window.GlobKurier === 'undefined') {
+        window.GlobKurier = {};
+    }
 
-        if (inpostCODSelected || inpostSelected || ruchSelected || pocztexSelected || dhlparcelSelected) {
-            $('#pickup-terminal-container').show();
-            var serviceCode = (ruchSelected ? "ORLEN PACZKA" : "PACZKOMAT");
-            $('input[name="pickup_town"]').data("service-code", serviceCode);
-        } else {
-            $('#pickup-terminal-container').hide();
+    // Configuration object with all module data
+    window.GlobKurier.config = {
+        carriers: {
+            inpost: {if $globConfig->inPostEnabled}{$globConfig->inPostCarrier|escape:'javascript':'UTF-8'}{else}null{/if},
+            inpostCod: {if $globConfig->inPostCODEnabled}{$globConfig->inPostCODCarrier|escape:'javascript':'UTF-8'}{else}null{/if},
+            paczkaruch: {if $globConfig->paczkaRuchEnabled}{$globConfig->paczkaRuchCarrier|escape:'javascript':'UTF-8'}{else}null{/if},
+            pocztex48owp: {if $globConfig->pocztex48owpEnabled}{$globConfig->pocztex48owpCarrier|escape:'javascript':'UTF-8'}{else}null{/if},
+            dhlparcel: null,{* {if $globConfig->dhlparcelEnabled}{$globConfig->dhlparcelCarrier|escape:'javascript':'UTF-8'}{else}null{/if} *}
+            dpdpickup: {if $globConfig->dpdpickupEnabled}{$globConfig->dpdpickupCarrier|escape:'javascript':'UTF-8'}{else}null{/if}
+        },
+        cart: {
+            id: {$cart_id|escape:'javascript':'UTF-8'},
+            token: '{$gk_token|escape:'javascript':'UTF-8'}'
+        },
+        api: {
+            endpoint: '{$rest_endpoint|escape:'javascript':'UTF-8'}'
         }
-    });
+    };
+
+    // Backward compatibility - keep old window.* variables for PS 1.6 compatibility
+    const inpost_carrier_id = window.GlobKurier.config.carriers.inpost;
+    const inpost_cod_carrier_id = window.GlobKurier.config.carriers.inpostCod;
+    const paczkaruch_carrier_id = window.GlobKurier.config.carriers.paczkaruch;
+    const pocztex48owp_carrier_id = window.GlobKurier.config.carriers.pocztex48owp;
+    const dhlparcel_carrier_id = window.GlobKurier.config.carriers.dhlparcel;
+    const cart_id = window.GlobKurier.config.cart.id;
+    const gk_token = window.GlobKurier.config.cart.token;
+    const rest_endpoint = window.GlobKurier.config.api.endpoint;
+
+    // Legacy variables for backward compatibility with inpost-front.js
+    window.gk_cart_id = cart_id;
+    window.gk_token = gk_token;
+    window.gk_rest_endpoint = rest_endpoint;
+    window.gk_inpost_carrier_id = inpost_carrier_id;
+    window.gk_inpost_cod_carrier_id = inpost_cod_carrier_id;
+    window.gk_paczkaruch_carrier_id = paczkaruch_carrier_id;
+    window.gk_pocztex48owp_carrier_id = pocztex48owp_carrier_id;
+    window.gk_dhlparcel_carrier_id = dhlparcel_carrier_id;
+})();
+
+$(function(){
+    /**
+     * Jesli domyslnie jest ustawiony dostawca inpost, to pokaz wyszukiwarke punktow
+     * Instrukcja musi być tutaj, ponieważ prestaShop, przy każdorazowym wyborze przewoźnika
+     * ładuje jeszcze raz cały ten szablon
+     */
+    const inpostCODSelected = ($('input[value="' + window.gk_inpost_cod_carrier_id + ',"') && $('input[value="' + window.gk_inpost_cod_carrier_id + ',"').attr('checked')) ? true : false;
+    const inpostSelected = ($('input[value="' + window.gk_inpost_carrier_id + ',"') && $('input[value="' + window.gk_inpost_carrier_id + ',"').attr('checked')) ? true : false;
+    const ruchSelected = ($('input[value="' + window.gk_paczkaruch_carrier_id + ',"').length && $('input[value="' + window.gk_paczkaruch_carrier_id + ',"').attr('checked')) ? true : false;
+    const pocztexSelected = ($('input[value="' + window.gk_pocztex48owp_carrier_id + ',"').length && $('input[value="' + window.gk_pocztex48owp_carrier_id + ',"').attr('checked')) ? true : false;
+    const dhlparcelSelected = ($('input[value="' + window.gk_dhlparcel_carrier_id + ',"').length && $('input[value="' + window.gk_dhlparcel_carrier_id + ',"').attr('checked')) ? true : false;
+
+    if (inpostCODSelected || inpostSelected || ruchSelected || pocztexSelected || dhlparcelSelected) {
+        $('#pickup-terminal-container').show();
+        const serviceCode = (ruchSelected ? "ORLEN PACZKA" : "PACZKOMAT");
+        $('input[name="pickup_town"]').data("service-code", serviceCode);
+    } else {
+        $('#pickup-terminal-container').hide();
+    }
+});
 </script>

@@ -24,7 +24,15 @@
  *}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-<div id="pickup-terminal-container" class="delivery-option row" style="display: none;">
+<div id="pickup-terminal-container"
+     class="delivery-option row"
+     style="display: none;"
+     data-gk-cart-id="{$cart_id|escape:'html':'UTF-8'}"
+     data-gk-token="{$gk_token|escape:'html':'UTF-8'}"
+     data-gk-rest-endpoint="{$rest_endpoint|escape:'html':'UTF-8'}"
+     data-gk-delivery-city="{$city|escape:'html':'UTF-8'}"
+     data-gk-delivery-postcode="{$postcode|escape:'html':'UTF-8'}"
+     data-gk-base-url="{$baseurl|escape:'html':'UTF-8'}">
 
     <div class="no_results" style="display: none; color: red; text-align: center">
         {l s='No results found for: ' mod='globkuriermodule'} <b></b>
@@ -65,24 +73,41 @@
 </div>
 
 <script type="text/javascript">
-    const inpost_carrier_id = {if $globConfig->inPostEnabled}{$globConfig->inPostCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    const inpost_cod_carrier_id = {if $globConfig->inPostCODEnabled}{$globConfig->inPostCODCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    const paczkaruch_carrier_id = {if $globConfig->paczkaRuchEnabled}{$globConfig->paczkaRuchCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    const pocztex48owp_carrier_id = {if $globConfig->pocztex48owpEnabled}{$globConfig->pocztex48owpCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    const dhlparcel_carrier_id = null;{* {if $globConfig->dhlparcelEnabled}{$globConfig->dhlparcelCarrier|escape:'javascript':'UTF-8'}{else}null{/if} *};
-    const dpdpickup_carrier_id = {if $globConfig->dpdpickupEnabled}{$globConfig->dpdpickupCarrier|escape:'javascript':'UTF-8'}{else}null{/if};
-    const cart_id = {$cart_id|escape:'javascript':'UTF-8'};
-    const gk_token = '{$gk_token|escape:'javascript':'UTF-8'}';
-    const rest_endpoint = '{$rest_endpoint|escape:'javascript':'UTF-8'}';
-    const address = '{$address_all|escape:'javascript':'UTF-8'}';
-    const baseUrl = '{$baseurl|escape:'javascript':'UTF-8'}';
-    const delivery_city = '{$city|escape:'javascript':'UTF-8'}';
-    const delivery_postcode = '{$postcode|escape:'javascript':'UTF-8'}';
-    
-    // Make variables globally accessible
-    window.delivery_city = delivery_city;
-    window.delivery_postcode = delivery_postcode;
-    let mainTextLang = '{l s='Type a name of your city and select parcel point closest to you' mod='globkuriermodule'}',
-        mainTextLang2 = '{l s='for' mod='globkuriermodule'}',
-        postcode = '{$postcode}';
+(function() {
+    'use strict';
+
+    // Namespace pattern - create GlobKurier namespace if it doesn't exist
+    if (typeof window.GlobKurier === 'undefined') {
+        window.GlobKurier = {};
+    }
+
+    // Configuration object with all module data
+    window.GlobKurier.config = {
+        carriers: {
+            inpost: {if $globConfig->inPostEnabled}{$globConfig->inPostCarrier|escape:'javascript':'UTF-8'}{else}null{/if},
+            inpostCod: {if $globConfig->inPostCODEnabled}{$globConfig->inPostCODCarrier|escape:'javascript':'UTF-8'}{else}null{/if},
+            paczkaruch: {if $globConfig->paczkaRuchEnabled}{$globConfig->paczkaRuchCarrier|escape:'javascript':'UTF-8'}{else}null{/if},
+            pocztex48owp: {if $globConfig->pocztex48owpEnabled}{$globConfig->pocztex48owpCarrier|escape:'javascript':'UTF-8'}{else}null{/if},
+            dhlparcel: null,{* {if $globConfig->dhlparcelEnabled}{$globConfig->dhlparcelCarrier|escape:'javascript':'UTF-8'}{else}null{/if} *}
+            dpdpickup: {if $globConfig->dpdpickupEnabled}{$globConfig->dpdpickupCarrier|escape:'javascript':'UTF-8'}{else}null{/if}
+        },
+        cart: {
+            id: {$cart_id|escape:'javascript':'UTF-8'},
+            token: '{$gk_token|escape:'javascript':'UTF-8'}'
+        },
+        api: {
+            endpoint: '{$rest_endpoint|escape:'javascript':'UTF-8'}',
+            baseUrl: '{$baseurl|escape:'javascript':'UTF-8'}'
+        },
+        address: {
+            all: '{$address_all|escape:'javascript':'UTF-8'}',
+            city: '{$city|escape:'javascript':'UTF-8'}',
+            postcode: '{$postcode|escape:'javascript':'UTF-8'}'
+        },
+        i18n: {
+            mainText: '{l s='Type a name of your city and select parcel point closest to you' mod='globkuriermodule'}',
+            mainText2: '{l s='for' mod='globkuriermodule'}'
+        }
+    };
+})();
 </script>

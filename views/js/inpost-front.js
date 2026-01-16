@@ -24,9 +24,9 @@
  */
 $(function(){
 
-    var self = this;
-    // var baseApiUrl = 'http://test.api.globkurier.pl/v1/';
-    var baseApiUrl = 'https://api.globkurier.pl/v1/';
+    const self = this;
+    // const baseApiUrl = 'http://test.api.globkurier.pl/v1/';
+    const baseApiUrl = 'https://api.globkurier.pl/v1/';
 
     $('img.ajax-loader').hide();
 
@@ -36,8 +36,8 @@ $(function(){
     if ($('#opc_payment_methods').length) {
         $('.no_pickup_point_selected').appendTo('#opc_payment_methods');
 
-        var opcCheck = function () {
-            var selected_point = $('select[name="pickup_point"]').val();
+        const opcCheck = function () {
+            const selected_point = $('select[name="pickup_point"]').val();
 
             if ((!selected_point || selected_point == '0') && isAnyCarrierSelected() ) {
                 $('#opc_payment_methods-content').hide();
@@ -72,10 +72,14 @@ $(function(){
         // $('select[name="pickup_point"]').val(0);
         deletePickupPoint();
 
-        if ($(this).val() == (inpost_carrier_id + ',') || $(this).val() == (inpost_cod_carrier_id + ',')) {
+        const inpostId = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('carriers.inpost') : window.gk_inpost_carrier_id;
+        const inpostCodId = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('carriers.inpostCod') : window.gk_inpost_cod_carrier_id;
+        const paczkaruchId = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('carriers.paczkaruch') : window.gk_paczkaruch_carrier_id;
+
+        if (inpostId && ($(this).val() == (inpostId + ',') || (inpostCodId && $(this).val() == (inpostCodId + ',')))) {
             $('#pickup-terminal-container').show();
             $('input[name="pickup_town"]').data("service-code", "PACZKOMAT");
-        } else if ($(this).val() == (paczkaruch_carrier_id + ',')) {
+        } else if (paczkaruchId && $(this).val() == (paczkaruchId + ',')) {
             $('#pickup-terminal-container').show();
             $('input[name="pickup_town"]').data("service-code", "PACZKA_W_RUCHU");
         }
@@ -84,14 +88,23 @@ $(function(){
     });
 
     function deletePickupPoint() {
-        var postData = {
-            id_cart: window.cart_id,
+        const cartId = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('cart.id') : window.gk_cart_id;
+        const token = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('cart.token') : window.gk_token;
+        const endpoint = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('api.endpoint') : window.gk_rest_endpoint;
+
+        if (!cartId || !token || !endpoint) {
+            console.error('GlobKurier Module: Missing required variables (cart_id, gk_token, or rest_endpoint)');
+            return;
+        }
+
+        const postData = {
+            id_cart: cartId,
             ajax: 1,
             action: 'deletePickupPoint',
-            token: window.gk_token,
+            token: token,
         };
 
-        var url = rest_endpoint;
+        const url = endpoint;
         $.getJSON(url, postData);
     }
 
@@ -101,10 +114,10 @@ $(function(){
      */
     $(document).on('click','button.search-button',function (e) {
         e.preventDefault();
-        // var url = 'https://www.webservices.globkurier.pl/services/terminal/';
-        var url = baseApiUrl + 'points';
-        var town = $('input[name="pickup_town"]').val();
-        var productCode = $('input[name="pickup_town"]').data("service-code");
+        // const url = 'https://www.webservices.globkurier.pl/services/terminal/';
+        const url = baseApiUrl + 'points';
+        const town = $('input[name="pickup_town"]').val();
+        const productCode = $('input[name="pickup_town"]').data("service-code");
 
         $('img.ajax-loader').show();
 
@@ -126,11 +139,11 @@ $(function(){
                     $('select[name="pickup_point"]').show();
                     $('div.no_pickup_point').hide();
 
-                    var optionHtml = '<option value="0" selected>Proszę wybrać</option>';
+                    let optionHtml = '<option value="0" selected>Proszę wybrać</option>';
                     $('select[name="pickup_point"]').append(optionHtml);
 
                     $.each(r, function (index, v) {
-                        var optionHtml = '<option value="' + v.id + '">';
+                        optionHtml = '<option value="' + v.id + '">';
                         optionHtml += v.city + ' - ' + v.address;
                         optionHtml += ' [' + v.id + ']';
                         optionHtml += '</option>';
@@ -156,15 +169,24 @@ $(function(){
      * Nasłuchuje, czy wybrano jakis punkt odbioru - jesli tak, to go zapisuje
      */
     $(document).on('change', 'select[name="pickup_point"]', function () {
-        var selected_point = $('select[name="pickup_point"]').val();
-        var productCode = $('input[name="pickup_town"]').data("service-code");
-        var url = rest_endpoint;
-        var a = (productCode == "PACZKOMAT" ? 'saveInPostPoint' : 'savePaczkaRuchPoint');
-        var postData = {
-            id_cart: cart_id,
+        const cartId = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('cart.id') : window.gk_cart_id;
+        const token = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('cart.token') : window.gk_token;
+        const endpoint = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('api.endpoint') : window.gk_rest_endpoint;
+
+        if (!cartId || !token || !endpoint) {
+            console.error('GlobKurier Module: Missing required variables (cart_id, gk_token, or rest_endpoint)');
+            return false;
+        }
+
+        const selected_point = $('select[name="pickup_point"]').val();
+        const productCode = $('input[name="pickup_town"]').data("service-code");
+        const url = endpoint;
+        const a = (productCode == "PACZKOMAT" ? 'saveInPostPoint' : 'savePaczkaRuchPoint');
+        const postData = {
+            id_cart: cartId,
             ajax: 1,
             action: a,
-            token: gk_token,
+            token: token,
             point: selected_point
         };
 
@@ -198,7 +220,7 @@ $(function(){
      */
     $(document).on('submit','form[name="carrier_area"]',function(){
 
-        var selected_point = $('select[name="pickup_point"]').val();
+        const selected_point = $('select[name="pickup_point"]').val();
 
         if ((!selected_point || selected_point == '0') && isAnyCarrierSelected()) {
             if (!!$.prototype.fancybox)
@@ -221,8 +243,8 @@ $(function(){
 
     function getProductId(carrierType, callback) {
         if (['PACZKOMAT', 'PACZKA_W_RUCHU'].indexOf(carrierType) == -1) return callback("Invalid carrier type: " + carrierType);
-        var url = baseApiUrl + 'products';
-        var dummyParams = {
+        const url = baseApiUrl + 'products';
+        const dummyParams = {
           length: 10,
           width: 10,
           height: 10,
@@ -233,8 +255,8 @@ $(function(){
         };
 
         $.getJSON(url, dummyParams).done(function (r) {
-            for (var i = r.standard.length - 1; i >= 0; i--) {
-                var product = r.standard[i];
+            for (let i = r.standard.length - 1; i >= 0; i--) {
+                const product = r.standard[i];
                 if (product.labels.indexOf(carrierType) != -1) return callback(null, product.id);
             }
             // If no product found, call callback with error
@@ -250,18 +272,21 @@ $(function(){
     }
 
     function isInpostCODCarrierSelected() {
-        if (window.inpost_cod_carrier_id === undefined) return false;
-        return ($('input[value="' + inpost_cod_carrier_id + ',"]').length > 0 && $('input[value="' + inpost_cod_carrier_id + ',"]').is(':checked')) ? true : false;
+        const inpostCodId = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('carriers.inpostCod') : window.gk_inpost_cod_carrier_id;
+        if (inpostCodId === null || inpostCodId === undefined) return false;
+        return ($('input[value="' + inpostCodId + ',"]').length > 0 && $('input[value="' + inpostCodId + ',"]').is(':checked')) ? true : false;
     }
 
     function isInpostCarrierSelected() {
-        if (window.inpost_carrier_id === undefined) return false;
-        return ($('input[value="' + inpost_carrier_id + ',"]').length > 0 && $('input[value="' + inpost_carrier_id + ',"]').is(':checked')) ? true : false;
+        const inpostId = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('carriers.inpost') : window.gk_inpost_carrier_id;
+        if (inpostId === null || inpostId === undefined) return false;
+        return ($('input[value="' + inpostId + ',"]').length > 0 && $('input[value="' + inpostId + ',"]').is(':checked')) ? true : false;
     }
 
     function isRuchCarrierSelected() {
-        if (window.inpost_carrier_id === undefined) return false;
-        return ($('input[value="' + paczkaruch_carrier_id + ',"]').length > 0 && $('input[value="' + paczkaruch_carrier_id + ',"]').is(':checked')) ? true : false;
+        const paczkaruchId = window.GlobKurier && window.GlobKurier.get ? window.GlobKurier.get('carriers.paczkaruch') : window.gk_paczkaruch_carrier_id;
+        if (paczkaruchId === null || paczkaruchId === undefined) return false;
+        return ($('input[value="' + paczkaruchId + ',"]').length > 0 && $('input[value="' + paczkaruchId + ',"]').is(':checked')) ? true : false;
     }
 
 });
