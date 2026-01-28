@@ -1678,12 +1678,35 @@ function renderServicesAndBind() {
 		fetchCustomRequiredFields();
 		});
 		$(document).on('change', '.addon-checkbox', function(){
-			const id = $(this).data('id');
-			const price = $(this).data('price');
-			const category = $(this).data('category');
-			const rawAttrs = $(this).data('attributes');
-			const addonName = $(this).closest('label').text().trim();
-			const $attrBox = $(this).closest('.col-lg-12').find('.addon-attributes');
+			const $current = $(this);
+			const id = $current.data('id');
+			const price = $current.data('price');
+			const category = $current.data('category');
+			const rawAttrs = $current.data('attributes');
+			const addonName = $current.closest('label').text().trim();
+			const $attrBox = $current.closest('.col-lg-12').find('.addon-attributes');
+			const isChecked = $current.is(':checked');
+
+			// Kategorie z ograniczeniem do jednego wyboru *w ramach danej kategorii*
+			// (CASH_ON_DELIVERY: tylko jedno COD, INSURANCE: tylko jedno, INSURANCE_CARGO: tylko jedno)
+			const singlePerCategory = ['CASH_ON_DELIVERY', 'INSURANCE', 'INSURANCE_CARGO'];
+
+			// Jeśli zaznaczamy opcję z jednej z ww. kategorii – odznacz inne z TEJ SAMEJ kategorii
+			if (isChecked && singlePerCategory.indexOf(category) !== -1) {
+				$('.addon-checkbox').each(function(){
+					const $other = $(this);
+					if ($other[0] === $current[0]) return;
+					const otherCat = $other.data('category');
+					if (otherCat !== category) return; // tylko w obrębie tej samej kategorii
+					if ($other.is(':checked')) {
+						const otherId = $other.data('id');
+						const $otherAttrBox = $other.closest('.col-lg-12').find('.addon-attributes');
+						$other.prop('checked', false);
+						$otherAttrBox.hide().empty();
+						GK.state.serviceOptions = (GK.state.serviceOptions || []).filter(function(o){ return (o.id + '') !== (otherId + ''); });
+					}
+				});
+			}
 
 			// Render attributes HTML (if provided) under the checkbox
 			if (rawAttrs) {
@@ -1693,12 +1716,12 @@ function renderServicesAndBind() {
 				} catch(e) {
 					$attrBox.text('');
 				}
-				$attrBox.toggle($(this).is(':checked'));
+				$attrBox.toggle(isChecked);
 			} else {
 				$attrBox.hide().empty();
 			}
 
-			if ($(this).is(':checked')) {
+			if (isChecked) {
 				if (!Array.isArray(GK.state.serviceOptions)) GK.state.serviceOptions = [];
 				if (!GK.state.serviceOptions.some(function(o){ return (o.id + '') === (id + ''); })) {
 					GK.state.serviceOptions.push({
