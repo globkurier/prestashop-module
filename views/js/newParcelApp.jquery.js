@@ -95,8 +95,10 @@ function setProcessing(on) {
 		} else {
 			$('#codAmountInput, #codAccountInput, #codAccountHolderInput, #codAccountAddr1Input, #codAccountAddr2Input').val('');
 		}
-		// INSURANCE → show insurance amount
-		const hasInsurance = activeCategories.indexOf('INSURANCE') !== -1;
+		// INSURANCE / INSURANCE_CARGO → show insurance amount
+		const hasInsurance =
+			activeCategories.indexOf('INSURANCE') !== -1 ||
+			activeCategories.indexOf('INSURANCE_CARGO') !== -1;
 		$('#insuranceAmountGroup').toggle(hasInsurance);
 		if (!hasInsurance) { $('#insuranceAmountInput').val(''); }
 		// International → declared value + purpose when receiver ISO != PL
@@ -352,7 +354,7 @@ function showOrderErrors(obj) {
 				if (additionalInfo.codAccountHolder) addon.name = additionalInfo.codAccountHolder;
 				if (additionalInfo.codAccountAddr1) addon.addressLine1 = additionalInfo.codAccountAddr1;
 				if (additionalInfo.codAccountAddr2) addon.addressLine2 = additionalInfo.codAccountAddr2;
-			} else if (option.category === 'INSURANCE') {
+			} else if (option.category === 'INSURANCE' || option.category === 'INSURANCE_CARGO') {
 				addon.value = additionalInfo.insuranceAmount || '';
 			}
 			// For other addons, don't add value field unless explicitly provided
@@ -977,7 +979,15 @@ function renderServiceOptionsContainer() {
 					const curr = (opt.currency || '').trim();
 					const priceTxt = (p != null) ? (' <span class="text-muted">(+' + p + (curr ? (' ' + curr) : '') + ')</span>') : '';
 					const label = opt.addonName || opt.name || opt.symbol || ('#' + opt.id);
-					return '<div class="col-lg-12"><label><input type="checkbox" class="addon-checkbox" data-id="' + opt.id + '" data-category="' + (opt.category || '') + '" data-price="' + (p != null ? p : '') + '"> ' + label + priceTxt + '</label></div>';
+					var attrsEncoded = opt.attributes ? encodeURIComponent(opt.attributes) : '';
+					return '' +
+						'<div class="col-lg-12">' +
+							'<label>' +
+								'<input type="checkbox" class="addon-checkbox" data-id="' + opt.id + '" data-category="' + (opt.category || '') + '" data-price="' + (p != null ? p : '') + '" data-attributes="' + attrsEncoded + '"> ' +
+								label + priceTxt +
+							'</label>' +
+							'<div class="addon-attributes" style="display:none;"></div>' +
+						'</div>';
 				}).join('');
 				$('#addonsList').html(html);
 				if (html) { $('#addonsListContainer').show(); } else { $('#addonsListContainer').hide(); }
@@ -1146,7 +1156,15 @@ function updateChosenServiceUI() {
 				const html = list.map(function(opt){
 					const price = (opt.price != null) ? (' <span class="text-muted">(+' + opt.price + ')</span>') : '';
 					const label = opt.addonName || opt.name || opt.symbol || ('#' + opt.id);
-					return '<div class="col-lg-12"><label><input type="checkbox" class="addon-checkbox" data-id="' + opt.id + '" data-category="' + (opt.category || '') + '" data-price="' + (opt.price != null ? opt.price : '') + '"> ' + label + price + '</label></div>';
+					var attrsEncoded = opt.attributes ? encodeURIComponent(opt.attributes) : '';
+					return '' +
+						'<div class="col-lg-12">' +
+							'<label>' +
+								'<input type="checkbox" class="addon-checkbox" data-id="' + opt.id + '" data-category="' + (opt.category || '') + '" data-price="' + (opt.price != null ? opt.price : '') + '" data-attributes="' + attrsEncoded + '"> ' +
+								label + price +
+							'</label>' +
+							'<div class="addon-attributes" style="display:none;"></div>' +
+						'</div>';
 				}).join('');
 				$('#addonsList').html(html);
 				if (html) { $('#addonsListContainer').show(); } else { $('#addonsListContainer').hide(); }
@@ -1663,7 +1681,23 @@ function renderServicesAndBind() {
 			const id = $(this).data('id');
 			const price = $(this).data('price');
 			const category = $(this).data('category');
+			const rawAttrs = $(this).data('attributes');
 			const addonName = $(this).closest('label').text().trim();
+			const $attrBox = $(this).closest('.col-lg-12').find('.addon-attributes');
+
+			// Render attributes HTML (if provided) under the checkbox
+			if (rawAttrs) {
+				try {
+					const decoded = decodeURIComponent(rawAttrs);
+					$attrBox.html(decoded);
+				} catch(e) {
+					$attrBox.text('');
+				}
+				$attrBox.toggle($(this).is(':checked'));
+			} else {
+				$attrBox.hide().empty();
+			}
+
 			if ($(this).is(':checked')) {
 				if (!Array.isArray(GK.state.serviceOptions)) GK.state.serviceOptions = [];
 				if (!GK.state.serviceOptions.some(function(o){ return (o.id + '') === (id + ''); })) {
