@@ -1,3 +1,9 @@
+## [3.3.2] - 2025-03-03
++ refactor variables using namespaces and IIFE
++ fix for displaying points in the Hummingbird theme
++ add Insurance Premium support
+
+
 ## [3.3.1] - 2025-11-26
 + Replace Google Maps API with Leaflet
 
