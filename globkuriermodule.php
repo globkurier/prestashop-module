@@ -1,6 +1,6 @@
 <?php
 /**
- * 2007-2025 PrestaShop.
+ * 2007-2026 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
@@ -19,7 +19,7 @@
  * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2025 PrestaShop SA
+ * @copyright 2007-2026 PrestaShop SA
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  */
@@ -54,7 +54,7 @@ class Globkuriermodule extends Module
     {
         $this->name = 'globkuriermodule';
         $this->tab = 'shipping_logistics';
-        $this->version = '3.3.1';
+        $this->version = '3.3.2';
         $this->author = 'GlobKurier.pl';
         $this->need_instance = 0;
         $this->bootstrap = true;
