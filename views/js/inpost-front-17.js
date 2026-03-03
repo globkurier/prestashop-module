@@ -96,7 +96,19 @@ $(function () {
         return;
     }
 
-    mainContainer.appendTo('.delivery-options');
+    // Try to append to container - support both Classic and Hummingbird themes
+    // Priority: 1) .delivery-options (Classic), 2) .delivery-options__container (Hummingbird), 3) #hook-display-after-carrier (fallback)
+    let targetContainer = $('.delivery-options');
+    if (targetContainer.length === 0) {
+        targetContainer = $('.delivery-options__form .delivery-options__container');
+    }
+
+    if (targetContainer.length > 0) {
+        mainContainer.appendTo(targetContainer);
+    } else {
+        // Last resort - append to form
+        mainContainer.appendTo('#js-delivery');
+    }
 
     $('img.ajax-loader').hide();
     if (isAnyCarrierSelected()) {
@@ -124,7 +136,8 @@ $(function () {
      * changes mind and after selecting pickup point chooses another carrier
      */
     // $('input.delivery_option_radio').change(function() {
-    $(document).on('click', '.delivery-option input[type=radio]', function () {
+    // Support both Classic (.delivery-option) and Hummingbird (.delivery-options__item) themes
+    $(document).on('click', '.delivery-option input[type=radio], .delivery-options__item input[type=radio], .js-delivery-option input[type=radio]', function () {
         mainContainer.hide();
         $('.pickup-result').hide();
         $('#containerForMapOfTerminals').hide();
@@ -989,7 +1002,8 @@ $(function () {
         let delivery_select = 0,
             carrierName = '',
             all_text = '';
-        $('.delivery-option input[type=radio]').each(function() {
+        // Support both Classic and Hummingbird themes
+        $('.delivery-option input[type=radio], .delivery-options__item input[type=radio], .js-delivery-option input[type=radio]').each(function() {
             if ($(this).is(':checked')) {
                 delivery_select = parseInt($(this).val());
             }
