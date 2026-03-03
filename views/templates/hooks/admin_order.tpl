@@ -29,13 +29,15 @@
     }
 </style>
 
+{assign var='orderCount' value=$orders|count}
 
 <div class="card">
     <div class="card-header">
         <div class="row">
             <div class="col-md-6">
                 <h3 class="card-header-title">
-                    <i class="icon-truck"></i> {l s='Parcel send with Globkurier' mod='globkuriermodule'}<span class="badge">({count($orders)})</span>
+                    <i class="icon-truck"></i> {l s='Parcel send with Globkurier' mod='globkuriermodule'}
+                    <span class="badge">({$orderCount|intval})</span>
                 </h3>
             </div>
         </div>
@@ -90,9 +92,9 @@
                         <td>{$order->carrier|escape:'htmlall':'UTF-8'}</td>
                         <td>{$order->comments|escape:'htmlall':'UTF-8'}</td>
                         <td>{if $order->cod}{$order->cod|escape:'htmlall':'UTF-8'}zł{else} - {/if}</td>
-                        <td>{$order->payment_name}</td>
+                        <td>{$order->payment_name|escape:'htmlall':'UTF-8'}</td>
                         <td>
-                            <a id="gk_{$order->gkId}" href="/module/globkuriermodule/getLabel?hash={$order->hash|escape:'url':'UTF-8'}" data-pdf="{$order->pdf}" onclick="return getLabel($(this));" data-id="{$order->gkId}" data-hash="{$order->hash|escape:'url':'UTF-8'}" class="getLabel" target="_blank" title="{l s='Download label' mod='globkuriermodule'}">
+                            <a id="gk_{$order->gkId|escape:'htmlall':'UTF-8'}" href="/module/globkuriermodule/getLabel?hash={$order->hash|escape:'url':'UTF-8'}" data-pdf="{$order->pdf|escape:'htmlall':'UTF-8'}" onclick="return getLabel($(this));" data-id="{$order->gkId|escape:'htmlall':'UTF-8'}" data-hash="{$order->hash|escape:'url':'UTF-8'}" class="getLabel" target="_blank" title="{l s='Download label' mod='globkuriermodule'}">
                                 <i class="material-icons">note</i>
                             </a>
                             <form class="track-button" id="track{$order->gkId|escape:'htmlall':'UTF-8'}" action="https://www.globkurier.pl/shipment-tracking/{$order->gkId|escape:'htmlall':'UTF-8'}" target="_blank" method="get">
@@ -100,7 +102,7 @@
                                     <i class="material-icons">local_shipping</i>
                                 </a>
                             </form>
-                            <div class="alert-box alert_{$order->gkId}" style="display: none;">
+                            <div class="alert-box alert_{$order->gkId|escape:'htmlall':'UTF-8'}" style="display: none;">
                                 <div class="header"></div>
                                 <div class="body">
                                     <div class="alert alert-danger"></div>

@@ -112,7 +112,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row" id="terminalInfo" style="margin-top: 10px;" data-service="{$service}">
+            <div class="row" id="terminalInfo" style="margin-top: 10px;" data-service="{$service|escape:'htmlall':'UTF-8'}">
                 <div class="col-lg-12">
                     <div class="panel" style="border: 3px dashed #79a600;">
                         <div class="panel-heading">{l s='Pick point' mod='globkuriermodule'}</div>
@@ -517,7 +517,7 @@
     <script type="text/javascript">
         // Note: These will be mapped to Globkurier country IDs in JavaScript via ISO codes
         let package = [];
-        let urlRedirect = '{$urlRedirect}';
+        let urlRedirect = '{$urlRedirect|escape:'javascript':'UTF-8'}';
 
         window.InitialValues = {
                     sender : {
@@ -551,7 +551,7 @@
                         countryId: null, // Will be set by JavaScript from ISO code
                         phone: '{if $adress->phone}{$adress->phone|escape:'javascript':'UTF-8'}{else}{$adress->phone_mobile|escape:'javascript':'UTF-8'}{/if}',
                         email: '{if isset($customer->email)}{$customer->email|escape:'javascript':'UTF-8'}{else}null{/if}',
-                        stateId: {$adress->id_state},
+                        stateId: {$adress->id_state|escape:'javascript':'UTF-8'},
                     },
                     {else}
                     receiver : {},

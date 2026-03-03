@@ -1,5 +1,5 @@
 {*
- * 2007-2025 PrestaShop.
+ * 2007-2026 PrestaShop.
  *
  * NOTICE OF LICENSE
  *
@@ -18,7 +18,7 @@
  * needs please refer to http://www.prestashop.com for more information.
  *
  * @author    PrestaShop SA <contact@prestashop.com>
- * @copyright 2007-2025 PrestaShop SA
+ * @copyright 2007-2026 PrestaShop SA
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  * International Registered Trademark & Property of PrestaShop SA
  *}
@@ -56,20 +56,20 @@
             {if isset($success)}
             <div class="col-lg-12">
                 <div class="alert alert-success">
-                    {$success}
+                    {$success |escape:'htmlall':'UTF-8'}
                 </div>
             </div>
             {/if}
             {if isset($error_info)}
             <div class="col-lg-12">
                 <div class="alert alert-danger">
-                    {$error_info}
+                    {$error_info |escape:'htmlall':'UTF-8'}
                 </div>
             </div>
             {/if}
             <div class="col-lg-12">
                 <div class="alert alert-info">
-                    {l s='Your current version of the module is' mod='globkuriermodule'}: <b>{$moduleVersion}</b>
+                    {l s='Your current version of the module is' mod='globkuriermodule'}: <b>{$moduleVersion |escape:'htmlall':'UTF-8'}</b>
                 </div>
             </div>
             <div class="col-lg-5">
@@ -556,7 +556,7 @@
 {/literal}
 
 <script type="text/javascript">
-    let tokenAPI = '{$tokenAPI}';
+    let tokenAPI = '{$tokenAPI|escape:'javascript':'UTF-8'}';
     let lang_change = '{l s='Change' mod='globkuriermodule'}';
     let lang_choose = '{l s='Choose' mod='globkuriermodule'}';
     let lang_delete = '{l s='Delete' mod='globkuriermodule'}';

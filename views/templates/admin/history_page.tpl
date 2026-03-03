@@ -59,7 +59,7 @@
                 <td>{$order->paymentName|escape:'htmlall':'UTF-8'}</td>
                 <td>
                     {if $order->hash}
-                        <a href="{$urlModule}?hash={$order->hash|escape:'url':'UTF-8'}" class="" target="_blank" title="{l s='Download the bill of lading' mod='globkuriermodule'}">
+                        <a href="{$urlModule|escape:'javascript':'UTF-8'}?hash={$order->hash|escape:'url':'UTF-8'}" class="" target="_blank" title="{l s='Download the bill of lading' mod='globkuriermodule'}">
                             <i class="material-icons">note</i>
                         </a>
                     {else}
