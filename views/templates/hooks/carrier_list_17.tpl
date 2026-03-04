@@ -41,7 +41,7 @@
     <div class="col-sm-12 pickup-search">
         <span>{l s='Type a name of your city and select parcel point closest to you' mod='globkuriermodule'}</span>
         <div class="input-group">
-            <input type="text" name="pickup_town" class="form-control pickup_town" value="{$city |escape:'htmlall':'UTF-8'}" />
+            <input type="text" name="pickup_town" class="form-control pickup_town" value="{$city|escape:'htmlall':'UTF-8'}" />
             <div class="input-group-btn">
                 <button class="btn btn-primary search-button">{l s='Search' mod='globkuriermodule'}</button>
             </div>
