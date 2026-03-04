@@ -56,20 +56,20 @@
             {if isset($success)}
             <div class="col-lg-12">
                 <div class="alert alert-success">
-                    {$success |escape:'htmlall':'UTF-8'}
+                    {$success|escape:'htmlall':'UTF-8'}
                 </div>
             </div>
             {/if}
             {if isset($error_info)}
             <div class="col-lg-12">
                 <div class="alert alert-danger">
-                    {$error_info |escape:'htmlall':'UTF-8'}
+                    {$error_info|escape:'htmlall':'UTF-8'}
                 </div>
             </div>
             {/if}
             <div class="col-lg-12">
                 <div class="alert alert-info">
-                    {l s='Your current version of the module is' mod='globkuriermodule'}: <b>{$moduleVersion |escape:'htmlall':'UTF-8'}</b>
+                    {l s='Your current version of the module is' mod='globkuriermodule'}: <b>{$moduleVersion|escape:'htmlall':'UTF-8'}</b>
                 </div>
             </div>
             <div class="col-lg-5">
