@@ -169,6 +169,7 @@ $(function () {
 
         // Use namespace for carrier IDs
         const inpostId = window.GlobKurier.get('carriers.inpost');
+        const inpostCodId = window.GlobKurier.get('carriers.inpostCod');
         const paczkaruchId = window.GlobKurier.get('carriers.paczkaruch');
         const pocztexId = window.GlobKurier.get('carriers.pocztex48owp');
         const dhlparcelId = window.GlobKurier.get('carriers.dhlparcel');
@@ -178,6 +179,18 @@ $(function () {
             mainContainer.show();
             searchTownInput.data("service-code", "PACZKOMAT");
             carrierName = 'Paczkomatów InPost';
+            all_text = mainTextLang+' '+mainTextLang2+' '+carrierName;
+            // Pre-fill search field with delivery city
+            setTimeout(function() {
+                const deliveryCity = window.GlobKurier.get('address.city');
+                if (deliveryCity) {
+                    searchTownInput.val(deliveryCity);
+                }
+            }, 50);
+        } else if (inpostCodId && $(this).val() == (inpostCodId + ',')) {
+            mainContainer.show();
+            searchTownInput.data("service-code", "PACZKOMAT");
+            carrierName = 'Paczkomatów InPost (COD)';
             all_text = mainTextLang+' '+mainTextLang2+' '+carrierName;
             // Pre-fill search field with delivery city
             setTimeout(function() {
