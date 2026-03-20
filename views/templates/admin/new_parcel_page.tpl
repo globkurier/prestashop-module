@@ -115,18 +115,12 @@
             <div class="row" id="terminalInfo" style="margin-top: 10px;" data-service="{$service|escape:'htmlall':'UTF-8'}">
                 <div class="col-lg-12">
                     <div class="panel" style="border: 3px dashed #79a600;">
-                        <div class="panel-heading">{l s='Pick point' mod='globkuriermodule'}</div>
                         <div class="panel-body">
-                            {l s='Your client wants to pick parcel in parcel point:' mod='globkuriermodule'}<br/>
-                            [<strong id="terminalCode"></strong>]
-                            <span class="terminalLabel" data-type="ruch" style="display:none;">{l s='ORLEN Paczka' mod='globkuriermodule'}</span>
-                            <span class="terminalLabel" data-type="inpost" style="display:none;">{l s='Paczkomat InPost' mod='globkuriermodule'}</span>
-                            <span class="terminalLabel" data-type="pocztex48owp" style="display:none;">{l s='Pocztex48 Odbiór w punkcie' mod='globkuriermodule'}</span>
-                            <span class="terminalLabel" data-type="dhlparcel" style="display:none;">{l s='DHL ParcelShop' mod='globkuriermodule'}</span>
-                            <span class="terminalLabel" data-type="dpdpickup" style="display:none;">{l s='DPD Pickup' mod='globkuriermodule'}</span>
-                            <span class="terminalLabel" data-type="fedex" style="display:none;">{l s='FedEx' mod='globkuriermodule'}</span>
+                            {l s='Your customer has chosen to have the parcel delivered by a courier' mod='globkuriermodule'} <strong>{if $presta_carrier_name}{$presta_carrier_name|escape:'htmlall':'UTF-8'}{/if}</strong>
+                            {if $terminalCode}{l s='with pickup point' mod='globkuriermodule'}[<strong id="terminalCode"></strong>]{/if}
+
                             <br/><br/>
-                            {l s='In this case you will be shown only this services.' mod='globkuriermodule'}
+                            {l s='If the client selected a carrier mapped in the module configuration, only services matched to the selected carrier will be considered in the quote.' mod='globkuriermodule'}
                             {l s='If you want to get all services anyway, please click button below' mod='globkuriermodule'}
 
                             <div class="form-group">
@@ -134,17 +128,17 @@
                                     padding-top: 7px; text-align: right; width: 34%;">
                                     {l s='Show all carriers' mod='globkuriermodule'}</label>
                                 <div class="col-lg-4">
-                                         <span class="switch prestashop-switch prestashop-switch-gk fixed-width-lg">
-                                            <input name="service_filters" id="service_filters_on" value="1" type="radio">
-                                            <label for="service_filters_on" class="radioCheck" id="disableServiceFilters">
-                                                <i class="color_success"></i> {l s='Yes' mod='globkuriermodule'}
-                                            </label>
-                                            <input name="service_filters" id="service_filters_off" value="0" checked="checked" type="radio">
-                                            <label for="service_filters_off" class="radioCheck" id="enableServiceFilters">
-                                                <i class="color_danger"></i> {l s='No' mod='globkuriermodule'}
-                                            </label>
-                                            <a class="slide-button btn"></a>
-                                         </span>
+                                    <span class="switch prestashop-switch prestashop-switch-gk fixed-width-lg">
+                                        <input name="service_filters" id="service_filters_on" value="1" type="radio">
+                                        <label for="service_filters_on" class="radioCheck" id="disableServiceFilters">
+                                            <i class="color_success"></i> {l s='Yes' mod='globkuriermodule'}
+                                        </label>
+                                        <input name="service_filters" id="service_filters_off" value="0" checked="checked" type="radio">
+                                        <label for="service_filters_off" class="radioCheck" id="enableServiceFilters">
+                                            <i class="color_danger"></i> {l s='No' mod='globkuriermodule'}
+                                        </label>
+                                        <a class="slide-button btn"></a>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -520,90 +514,94 @@
         let urlRedirect = '{$urlRedirect|escape:'javascript':'UTF-8'}';
 
         window.InitialValues = {
-                    sender : {
-                        name: '{$config->defaultSenderName|escape:'javascript':'UTF-8'}',
-                        personName: '{$config->defaultSenderPersonName|escape:'javascript':'UTF-8'}',
-                        street: '{$config->defaultSenderStreet|escape:'javascript':'UTF-8'}',
-                        houseNumber: '{$config->defaultSenderHouseNumber|escape:'javascript':'UTF-8'}',
-                        apartmentNumber: '{$config->defaultSenderApartmentNumber|escape:'javascript':'UTF-8'}',
-                        postCode: '{$config->defaultSenderPostCode|escape:'javascript':'UTF-8'}',
-                        city: '{$config->defaultSenderCity|escape:'javascript':'UTF-8'}',
-                        countryCode: '{$sender_country_iso|escape:'javascript':'UTF-8'}',
-                        countryId: null, // Will be set by JavaScript from ISO code
-                        phone: '{$config->defaultSenderPhoneNumber|escape:'javascript':'UTF-8'}',
-                        email: '{$config->defaultSenderEmail|escape:'javascript':'UTF-8'}',
-                    },
-                    {if isset($adress) && !empty($adress)}
-                    receiver : {
-                        personName: '{$adress->firstname|escape:'javascript':'UTF-8'} {$adress->lastname|escape:'javascript':'UTF-8'}',
-                        {if $splitedAddress != null}
-                        street: '{$splitedAddress.street|escape:'javascript':'UTF-8'}',
-                        houseNumber: '{$splitedAddress.houseNumber|escape:'javascript':'UTF-8'}',
-                        apartmentNumber: '{$splitedAddress.apartmentNumber|escape:'javascript':'UTF-8'}',
-                        {else}
-                        street: '{$adress->address1|escape:'javascript':'UTF-8'}',
-                        houseNumber: null,
-                        apartmentNumber: null,
-                        {/if}
-                        postCode: '{$adress->postcode|escape:'javascript':'UTF-8'}',
-                        city: '{$adress->city|escape:'javascript':'UTF-8'}',
-                        countryCode: '{$receiver_country_iso|escape:'javascript':'UTF-8'}',
-                        countryId: null, // Will be set by JavaScript from ISO code
-                        phone: '{if $adress->phone}{$adress->phone|escape:'javascript':'UTF-8'}{else}{$adress->phone_mobile|escape:'javascript':'UTF-8'}{/if}',
-                        email: '{if isset($customer->email)}{$customer->email|escape:'javascript':'UTF-8'}{else}null{/if}',
-                        stateId: {$adress->id_state|escape:'javascript':'UTF-8'},
-                    },
-                    {else}
-                    receiver : {},
-                    {/if}
-                    defaultPackageInfo : {
-                        content: '{$config->defaultContent|escape:'javascript':'UTF-8'  }',
-                        length : {if $config->defaultDepth}{$config->defaultDepth|escape:'javascript':'UTF-8'}{else}null{/if},
-                        width  : {if $config->defaultWidth}{$config->defaultWidth|escape:'javascript':'UTF-8'}{else}null{/if},
-                        height : {if $config->defaultHeight}{$config->defaultHeight|escape:'javascript':'UTF-8'}{else}null{/if},
-                        weight : {if $config->defaultWeight}{$config->defaultWeight|escape:'javascript':'UTF-8'}{else}null{/if},
-                        count  : 1,
-                    },
-                    defaultPaymentType : '{$config->defaultPaymentType|escape:'javascript':'UTF-8'}',
-                    defaultCodAccount : '{$config->defaultCodAccount|escape:'javascript':'UTF-8'}',
-                    defaultCodAccountHolderName : '{$config->defaultCodAccountHolderName|escape:'javascript':'UTF-8'}',
-                    defaultCodAccountHolderAddr1 : '{$config->defaultCodAccountHolderAddr1|escape:'javascript':'UTF-8'}',
-                    defaultCodAccountHolderAddr2 : '{$config->defaultCodAccountHolderAddr2|escape:'javascript':'UTF-8'}',
-                    defaultServiceCode : '{$config->defaultServiceCode|escape:'javascript':'UTF-8'}',
-                    moduleName : 'globkuriermodule',
-                    partialsPath : '../modules/globkuriermodule/views/templates/partials/',
-                    moduleApiUrl : '{$moduleApiUrl|escape:'javascript':'UTF-8'}',
-                    login : '{$config->login|escape:'javascript':'UTF-8'}',
-                    password : '{$config->password|escape:'javascript':'UTF-8'}',
-                    apiKey : '{$config->apiKey|escape:'javascript':'UTF-8'}',
-                    token : '{$token|escape:'javascript':'UTF-8'}',
-                    clientId : '{$globClientId|escape:'javascript':'UTF-8'}',
-                    todayDate : '{date("Y-m-d")|escape:'javascript':'UTF-8'}',
-                    terminalCode : {if isset($terminalCode)}'{$terminalCode|escape:'javascript':'UTF-8'}'{else}null{/if},
-                    terminalType : {if isset($terminalType)}'{$terminalType|escape:'javascript':'UTF-8'}'{else}null{/if},
-                    terminalType2 : {if isset($terminalType)}'{$terminalType|escape:'javascript':'UTF-8'}'{else}'none'{/if},
-                    defaultInPostPoint : {if $config->defaultInPostPoint}'{$config->defaultInPostPoint|escape:'javascript':'UTF-8'}'{else}null{/if},
-                    prestaOrderId : '{$orderId|escape:'javascript':'UTF-8'}',
-                    collectionTypes: '',
-                    isoCode: '{$iso_code|escape:'javascript':'UTF-8'}',
-                    lang1: '{l s='Parameter' mod='globkuriermodule'}',
-                    lang2: '{l s='is required!' mod='globkuriermodule'}',
-                    lang3: '{l s='Contact person' mod='globkuriermodule'}',
-                    lang4: '{l s='Change address' mod='globkuriermodule'}',
-                    lang5: '{l s='Name' mod='globkuriermodule'}',
-                    lang6: '{l s='Street' mod='globkuriermodule'}',
-                    lang7: '{l s='House number' mod='globkuriermodule'}',
-                    lang8: '{l s='Apartment number' mod='globkuriermodule'}',
-                    lang9: '{l s='Postcode' mod='globkuriermodule'}',
-                    lang10: '{l s='City' mod='globkuriermodule'}',
-                    lang11: '{l s='Country' mod='globkuriermodule'}',
-                    lang12: '{l s='change' mod='globkuriermodule'}',
-                    lang13: '{l s='Phone' mod='globkuriermodule'}',
-                    lang14: '{l s='E-mail' mod='globkuriermodule'}',
-                    lang15: '{l s='Cancel' mod='globkuriermodule'}',
-                    lang16: '{l s='Save' mod='globkuriermodule'}',
-                    lang17: '{l s='Complete the recipients address before quoting' mod='globkuriermodule'}',
-                };
+            sender : {
+                name: '{$config->defaultSenderName|escape:'javascript':'UTF-8'}',
+                personName: '{$config->defaultSenderPersonName|escape:'javascript':'UTF-8'}',
+                street: '{$config->defaultSenderStreet|escape:'javascript':'UTF-8'}',
+                houseNumber: '{$config->defaultSenderHouseNumber|escape:'javascript':'UTF-8'}',
+                apartmentNumber: '{$config->defaultSenderApartmentNumber|escape:'javascript':'UTF-8'}',
+                postCode: '{$config->defaultSenderPostCode|escape:'javascript':'UTF-8'}',
+                city: '{$config->defaultSenderCity|escape:'javascript':'UTF-8'}',
+                countryCode: '{$sender_country_iso|escape:'javascript':'UTF-8'}',
+                countryId: null, // Will be set by JavaScript from ISO code
+                phone: '{$config->defaultSenderPhoneNumber|escape:'javascript':'UTF-8'}',
+                email: '{$config->defaultSenderEmail|escape:'javascript':'UTF-8'}',
+            },
+            {if isset($adress) && !empty($adress)}
+            receiver : {
+                personName: '{$adress->firstname|escape:'javascript':'UTF-8'} {$adress->lastname|escape:'javascript':'UTF-8'}',
+                {if $splitedAddress != null}
+                street: '{$splitedAddress.street|escape:'javascript':'UTF-8'}',
+                houseNumber: '{$splitedAddress.houseNumber|escape:'javascript':'UTF-8'}',
+                apartmentNumber: '{$splitedAddress.apartmentNumber|escape:'javascript':'UTF-8'}',
+                {else}
+                street: '{$adress->address1|escape:'javascript':'UTF-8'}',
+                houseNumber: null,
+                apartmentNumber: null,
+                {/if}
+                postCode: '{$adress->postcode|escape:'javascript':'UTF-8'}',
+                city: '{$adress->city|escape:'javascript':'UTF-8'}',
+                countryCode: '{$receiver_country_iso|escape:'javascript':'UTF-8'}',
+                countryId: null, // Will be set by JavaScript from ISO code
+                phone: '{if $adress->phone}{$adress->phone|escape:'javascript':'UTF-8'}{else}{$adress->phone_mobile|escape:'javascript':'UTF-8'}{/if}',
+                email: '{if isset($customer->email)}{$customer->email|escape:'javascript':'UTF-8'}{else}null{/if}',
+                stateId: {$adress->id_state|escape:'javascript':'UTF-8'},
+            },
+            {else}
+            receiver : {},
+            {/if}
+            prestaCarrier : {
+                id: {if $presta_carrier_id}{$presta_carrier_id|escape:'javascript':'UTF-8'}{else}null{/if},
+                name: '{if $presta_carrier_name}{$presta_carrier_name|escape:'javascript':'UTF-8'}{/if}'
+            },
+            defaultPackageInfo : {
+                content: '{$config->defaultContent|escape:'javascript':'UTF-8'  }',
+                length : {if $config->defaultDepth}{$config->defaultDepth|escape:'javascript':'UTF-8'}{else}null{/if},
+                width  : {if $config->defaultWidth}{$config->defaultWidth|escape:'javascript':'UTF-8'}{else}null{/if},
+                height : {if $config->defaultHeight}{$config->defaultHeight|escape:'javascript':'UTF-8'}{else}null{/if},
+                weight : {if $config->defaultWeight}{$config->defaultWeight|escape:'javascript':'UTF-8'}{else}null{/if},
+                count  : 1,
+            },
+            defaultPaymentType : '{$config->defaultPaymentType|escape:'javascript':'UTF-8'}',
+            defaultCodAccount : '{$config->defaultCodAccount|escape:'javascript':'UTF-8'}',
+            defaultCodAccountHolderName : '{$config->defaultCodAccountHolderName|escape:'javascript':'UTF-8'}',
+            defaultCodAccountHolderAddr1 : '{$config->defaultCodAccountHolderAddr1|escape:'javascript':'UTF-8'}',
+            defaultCodAccountHolderAddr2 : '{$config->defaultCodAccountHolderAddr2|escape:'javascript':'UTF-8'}',
+            defaultServiceCode : '{$config->defaultServiceCode|escape:'javascript':'UTF-8'}',
+            moduleName : 'globkuriermodule',
+            partialsPath : '../modules/globkuriermodule/views/templates/partials/',
+            moduleApiUrl : '{$moduleApiUrl|escape:'javascript':'UTF-8'}',
+            login : '{$config->login|escape:'javascript':'UTF-8'}',
+            password : '{$config->password|escape:'javascript':'UTF-8'}',
+            apiKey : '{$config->apiKey|escape:'javascript':'UTF-8'}',
+            token : '{$token|escape:'javascript':'UTF-8'}',
+            clientId : '{$globClientId|escape:'javascript':'UTF-8'}',
+            todayDate : '{date("Y-m-d")|escape:'javascript':'UTF-8'}',
+            terminalCode : {if isset($terminalCode)}'{$terminalCode|escape:'javascript':'UTF-8'}'{else}null{/if},
+            terminalType : {if isset($terminalType)}'{$terminalType|escape:'javascript':'UTF-8'}'{else}null{/if},
+            terminalType2 : {if isset($terminalType)}'{$terminalType|escape:'javascript':'UTF-8'}'{else}'none'{/if},
+            defaultInPostPoint : {if $config->defaultInPostPoint}'{$config->defaultInPostPoint|escape:'javascript':'UTF-8'}'{else}null{/if},
+            prestaOrderId : '{$orderId|escape:'javascript':'UTF-8'}',
+            collectionTypes: '',
+            isoCode: '{$iso_code|escape:'javascript':'UTF-8'}',
+            lang1: '{l s='Parameter' mod='globkuriermodule'}',
+            lang2: '{l s='is required!' mod='globkuriermodule'}',
+            lang3: '{l s='Contact person' mod='globkuriermodule'}',
+            lang4: '{l s='Change address' mod='globkuriermodule'}',
+            lang5: '{l s='Name' mod='globkuriermodule'}',
+            lang6: '{l s='Street' mod='globkuriermodule'}',
+            lang7: '{l s='House number' mod='globkuriermodule'}',
+            lang8: '{l s='Apartment number' mod='globkuriermodule'}',
+            lang9: '{l s='Postcode' mod='globkuriermodule'}',
+            lang10: '{l s='City' mod='globkuriermodule'}',
+            lang11: '{l s='Country' mod='globkuriermodule'}',
+            lang12: '{l s='change' mod='globkuriermodule'}',
+            lang13: '{l s='Phone' mod='globkuriermodule'}',
+            lang14: '{l s='E-mail' mod='globkuriermodule'}',
+            lang15: '{l s='Cancel' mod='globkuriermodule'}',
+            lang16: '{l s='Save' mod='globkuriermodule'}',
+            lang17: '{l s='Complete the recipients address before quoting' mod='globkuriermodule'}',
+        };
 
         $(document).ready(function() {
             $(document).on('click', '.searchTerminals', function() {

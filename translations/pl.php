@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = [];
+$_MODULE = array();
 $_MODULE['<{globkuriermodule}prestashop>globkuriermodule_a7668e8a363d1bacc163881e2d24208f'] = 'Integracja Globkurier';
 $_MODULE['<{globkuriermodule}prestashop>globkuriermodule_125613edd7596ea2022ddfb1a24e6ca3'] = 'Oficjalny moduł integracyjny Globkurier do wysyłania przesyłek';
 $_MODULE['<{globkuriermodule}prestashop>globkuriermodule_2357fa4873645dccbeaf2cd856fa2fa5'] = 'Ustawienia modułu zostały poprawnie zapisane.';
@@ -44,8 +44,6 @@ $_MODULE['<{globkuriermodule}prestashop>config_page_v16_35b4b09d5d0686ec5c2e2cc9
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_a4b696b03ae8d5210f97e249846cdee7'] = 'Płatność online';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_db1b73ab06bd303c6dbc1ad332c16636'] = 'Prepaid';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_8fe7494a226a3c34665468ba6d40b24a'] = 'Płatność odroczona';
-// DEPRECATED: Replaced with Leaflet maps
-// $_MODULE['<{globkuriermodule}prestashop>config_page_v16_f9ae539a015bd1b6c974c17ed1bd3a0f'] = 'Google Maps API';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_d4afce0395e03d4ea941e9febdf1a882'] = 'Cache points for whole country';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_9de42a13d71ca327f0cd1f224cf92a1e'] = 'Włącz obsługę paczkomatów InPost';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_93cba07454f06a4a960172bbd6e2a435'] = 'Tak';
@@ -121,9 +119,9 @@ $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_8aace3ec18d83874d22850b7
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_eb399bcaca686f8609137153307eecf1'] = 'zmień';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_257548fcc33881767d79aa21a473a78a'] = 'Osoba kontaktowa';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_a9d093d11bc6e98b0c8e586ffa545c85'] = 'Odbiorca';
-$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_598b49a7386efb458c64abdef8a85790'] = 'Odbiór w punkcie';
-$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_e930470b2a3b934992cf86f3202b6eba'] = 'Twój klient wybrał odbiór w punkcie';
-$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_5d7a62db033e29947dc2d631d7dc6354'] = 'W tym wypadku w wycenie będą zawarte tylko usługi pasujące do tego punktu';
+$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_f5c00b8de0fd8cd58f8fd23f155d55de'] = 'Twój klient zdecydował się na dostawę przesyłki kurierem';
+$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_f471d3adf437a86cf4fe6d6faef0871a'] = 'z punktem odbioru';
+$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_f559514d645a273a3891d54bc1d5d11b'] = 'Jeśli klient wybrał przewoźnika przypisanego w konfiguracji modułu, w wycenie uwzględnione zostaną wyłącznie usługi odpowiadające wybranemu przewoźnikowi.';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_f07d9e63946c708ce0500430dc070113'] = 'Jeśli chcesz jednak, aby wyświetlane były wszystkie usługi kliknij przycisk poniżej:';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_92ff47dc085caa8e6f6a89ab9251e0c6'] = 'Pokaż wszystkich przewoźników';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_93cba07454f06a4a960172bbd6e2a435'] = 'Tak';
@@ -142,11 +140,11 @@ $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_ea9cf7e47ff33b2be14e6dd0
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_189a3357682c5d4d92d19d29cf8b035f'] = 'Przesyłka zostanie odebrana przez kuriera';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_27382fbaa3e57fa36209eb961ec05998'] = 'Nadam przesyłkę w terminalu';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_1f63493cded17526330b3073d325a19e'] = 'Opcje usług';
+$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_0e705cd35157c11787eb84a9d4b14824'] = 'Punkt odbioru';
+$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_a6d4367064bd2900d5c1f9df66489b7a'] = 'Wybierz/Zmień';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_5ecc71e68514f6441aa78854c8229df3'] = 'Data nadania';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_73f3e7512043f3e1ff3cf3b4767b7b37'] = 'Czas nadania';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_99938282f04071859941e18f16efcf42'] = 'wybierz';
-$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_0e705cd35157c11787eb84a9d4b14824'] = 'Punkt odbioru';
-$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_a6d4367064bd2900d5c1f9df66489b7a'] = 'Wybierz/Zmień';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_7f47c3c4007f901a2c81671177215d49'] = 'Punkt wysyłki';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_c453a4b8e8d98e82f35b67f433e3b4da'] = 'Płatność';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_b2c79697bc7b4e1a553806f50e90ab4b'] = 'Kwota pobrania';
@@ -224,7 +222,6 @@ $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_94a3750f044c39365ddd987d
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_1ace43ccc7e0af067b36c2d9b34efe7a'] = 'Niestety nie znaleźliśmy żadnych punktów odbioru w tej miejscowości';
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_5e408603ae11bdc576b14294ce20b230'] = 'Nie wybrano żadnego punktu odbioru!';
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_d55669822f1a8cf72ec1911e462a54eb'] = 'dla';
-$_MODULE['<{globkuriermodule}prestashop>carrier_list_17_auto_search_info'] = 'Automatycznie wyszukujemy punkty w okolicy Twojego adresu dostawy';
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_42537c6b0e91a45067148269bdd0de88'] = 'WYŚLIJ Z GLOBKURIEREM';
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_170a094ce3123d9a518c0903164b4001'] = 'Przesyłki nadane przez GlobKurier dla tego zamówienia';
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_6d9a83e9ff6b9d9eba96a7306a14e618'] = 'Nr zamówienia GlobKurier';

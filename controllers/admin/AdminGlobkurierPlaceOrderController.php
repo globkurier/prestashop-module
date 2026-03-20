@@ -77,13 +77,32 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
         ]);
 
         if (Tools::getValue('order_id')) {
-            $order = new Order(Tools::getValue('order_id'));
+            $order = new Order(Tools::getValue('order_id'));            
             $customer = new Customer($order->id_customer);
 
             if (Tools::getValue('invoice_address')) {
                 $adress = new Address($order->id_address_invoice);
             } else {
                 $adress = new Address($order->id_address_delivery);
+            }
+
+            // Carrier chosen in the PrestaShop order
+            $prestaCarrierId = !empty($order->id_carrier) ? (int) $order->id_carrier : null;
+            $prestaCarrierName = null;
+            if ($prestaCarrierId) {
+                try {
+                    // PrestaShop is version dependent - try common helper first
+                    if (class_exists('Carrier') && method_exists('Carrier', 'getCarrierName')) {
+                        $prestaCarrierName = Carrier::getCarrierName($prestaCarrierId, (int) $this->context->cookie->id_lang);
+                    } elseif (class_exists('Carrier')) {
+                        $carrier = new Carrier($prestaCarrierId);
+                        if (isset($carrier->name) && $carrier->name) {
+                            $prestaCarrierName = $carrier->name;
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    $prestaCarrierName = null;
+                }
             }
 
             $country = new Country($adress->id_country);
@@ -115,6 +134,8 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
                 'terminalCode' => $codeTerminal,
                 'terminalType' => $terminalType,
                 'receiver_country_iso' => $receiver_country_iso,
+                'presta_carrier_id' => $prestaCarrierId,
+                'presta_carrier_name' => $prestaCarrierName,
             ]);
         } else {
             $this->context->smarty->assign([
@@ -122,6 +143,8 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
                 'splitedAddress' => null,
                 'country' => $country_name,
                 'customer' => [],
+                'presta_carrier_id' => null,
+                'presta_carrier_name' => null,
             ]);
         }
 

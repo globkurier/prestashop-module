@@ -106,6 +106,21 @@ function setProcessing(on) {
 		const isInternational = receiverIso && (receiverIso.toUpperCase() !== 'PL');
 		$('#declaredValueGroup, #purposeGroup').toggle(!!isInternational);
 		if (!isInternational) { $('#declaredValueInput').val(''); $('#purposeSelect').val(''); }
+
+		// Terminal label "InPost za pobraniem" for COD-inpost.
+		// We don't rely on terminalType being COD-specific (DB usually stores only 'inpost').
+		const codLabelActive = hasCOD || (s.additionalInfo && s.additionalInfo.paymentType === 'COD') || (s.additionalInfo && !!s.additionalInfo.codAmount);
+		const $inpost = $('.terminalLabel[data-type="inpost"]');
+		const $inpostCod = $('.terminalLabel[data-type="inpost_cod"]');
+		if ($inpost.length && $inpostCod.length) {
+			if (codLabelActive && $inpost.is(':visible')) {
+				$inpost.hide();
+				$inpostCod.show();
+			} else if (!codLabelActive && $inpostCod.is(':visible')) {
+				$inpostCod.hide();
+				$inpost.show();
+			}
+		}
 	}
 
 function showOrderPlaced(order) {
@@ -520,6 +535,10 @@ function initStateFromInitialValues() {
 				case 'inpost':
 					GK.state.additionalInfo.inPostReceiverPoint = { id: iv.terminalCode };
 					break;
+				case 'inpost_cod':
+				case 'inpostCod':
+					GK.state.additionalInfo.inPostReceiverPoint = { id: iv.terminalCode };
+					break;
 				case 'ruch':
 					GK.state.additionalInfo.paczkaRuchReceiverPoint = { id: iv.terminalCode };
 					break;
@@ -857,6 +876,8 @@ function fetchProducts() {
                 if (!GK.state.showAllCarriers && terminalType) {
 					let map = {
 						inpost: function(p){ return (p.carrierName || '').toLowerCase().indexOf('inpost') > -1; },
+						inpost_cod: function(p){ return (p.carrierName || '').toLowerCase().indexOf('inpost') > -1; },
+						inpostcod: function(p){ return (p.carrierName || '').toLowerCase().indexOf('inpost') > -1; },
 						ruch: function(p){ return (p.carrierName || '').toLowerCase().indexOf('orlen') > -1 || (p.carrierName || '').toLowerCase().indexOf('ruch') > -1; },
 						pocztex48owp: function(p){ return (p.carrierName || '').toLowerCase().indexOf('poczta') > -1; },
 						dhlparcel: function(p){ return (p.carrierName || '').toLowerCase().indexOf('dhl') > -1; },
@@ -1010,7 +1031,42 @@ function renderServiceOptionsContainer() {
         }
         $('.terminalLabel').hide();
         if (window.InitialValues && window.InitialValues.terminalType) {
-            $('.terminalLabel[data-type="' + (window.InitialValues.terminalType || '') + '"]').show();
+            let tt = (window.InitialValues.terminalType || '') + '';
+            tt = tt.trim();
+            // Normalize potential camelCase variant.
+            if (tt === 'inpostCod') tt = 'inpost_cod';
+            $('.terminalLabel[data-type="' + tt + '"]').show();
+        } else if (
+            window.InitialValues &&
+            window.InitialValues.prestaCarrier &&
+            window.InitialValues.prestaCarrier.name
+        ) {
+            // Fallback: derive terminal label from PrestaShop carrier name.
+            // (We use it only for UI; selection of the actual pickup point still relies on terminalCode/terminalType.)
+            const n = (window.InitialValues.prestaCarrier.name || '').toLowerCase();
+            let tt = null;
+
+            if (n.indexOf('inpost') > -1 || n.indexOf('paczkomat') > -1) {
+                if (n.indexOf('cod') > -1 || n.indexOf('pobr') > -1 || n.indexOf('pobran') > -1) {
+                    tt = 'inpost_cod';
+                } else {
+                    tt = 'inpost';
+                }
+            } else if (n.indexOf('orlen') > -1 || n.indexOf('ruch') > -1) {
+                tt = 'ruch';
+            } else if (n.indexOf('pocztex') > -1) {
+                tt = 'pocztex48owp';
+            } else if (n.indexOf('dhl') > -1) {
+                tt = 'dhlparcel';
+            } else if (n.indexOf('dpd') > -1) {
+                tt = 'dpdpickup';
+            } else if (n.indexOf('fedex') > -1) {
+                tt = 'fedex';
+            }
+
+            if (tt) {
+                $('.terminalLabel[data-type="' + tt + '"]').show();
+            }
         }
 		// Initial dependent UI and requirements
 		updateCarrierDependentUI();
@@ -1910,7 +1966,11 @@ function renderServicesAndBind() {
 
 		if (window.InitialValues && window.InitialValues.terminalType) {
 			$('.terminalLabel').hide();
-			$('.terminalLabel[data-type="' + (window.InitialValues.terminalType || '') + '"]').show();
+			let tt = (window.InitialValues.terminalType || '') + '';
+			tt = tt.trim();
+			// Normalize potential camelCase variant.
+			if (tt === 'inpostCod') tt = 'inpost_cod';
+			$('.terminalLabel[data-type="' + tt + '"]').show();
 		}
 	});
 
