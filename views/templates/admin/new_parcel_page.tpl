@@ -117,7 +117,7 @@
                     <div class="panel" style="border: 3px dashed #79a600;">
                         <div class="panel-body">
                             {l s='Your customer has chosen to have the parcel delivered by a courier' mod='globkuriermodule'} <strong>{if $presta_carrier_name}{$presta_carrier_name|escape:'htmlall':'UTF-8'}{/if}</strong>
-                            {if $terminalCode}{l s='with pickup point' mod='globkuriermodule'}[<strong id="terminalCode"></strong>]{/if}
+                            {if isset($terminalCode) && $terminalCode}{l s='with pickup point' mod='globkuriermodule'}[<strong id="terminalCode"></strong>]{/if}
 
                             <br/><br/>
                             {l s='If the client selected a carrier mapped in the module configuration, only services matched to the selected carrier will be considered in the quote.' mod='globkuriermodule'}

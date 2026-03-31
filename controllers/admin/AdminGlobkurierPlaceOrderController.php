@@ -143,6 +143,9 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
                 'splitedAddress' => null,
                 'country' => $country_name,
                 'customer' => [],
+                'terminalCode' => null,
+                'terminalType' => null,
+                'receiver_country_iso' => 'PL',
                 'presta_carrier_id' => null,
                 'presta_carrier_name' => null,
             ]);
