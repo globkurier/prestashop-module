@@ -95,7 +95,16 @@ $_MODULE['<{globkuriermodule}prestashop>login_page_v16_b6d4223e60986fa4c9af77ee5
 $_MODULE['<{globkuriermodule}prestashop>login_page_v16_3788c4b4589ebb63b4b3142c00bb1923'] = 'Masz pytanie? Skontaktuj się z nami:';
 $_MODULE['<{globkuriermodule}prestashop>login_page_v16_e654f7a86a4458b9cd662267e0f29b52'] = 'Korzyści';
 $_MODULE['<{globkuriermodule}prestashop>login_page_v16_837a87fb68748be8f23aba661c291364'] = 'Zobacz, co zyskujesz';
-$_MODULE['<{globkuriermodule}prestashop>login_page_v16_c230abce247e79e132f6dfa0b69989ec'] = 'Full control over logistics';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_f60bd77e14e474072e46fcf015af4d3a'] = 'Pełna kontrola nad logistyką';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_be6493a4d0a9640b84e802155d3596b1'] = 'Wszystkie zamówienia trafiają automatycznie do panelu, a etykiety drukujesz jednym kliknięciem.';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_069faf357d1d33efb00e832550e5df4f'] = 'Wysyłka bez granic';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_e5e6d46b6b5bfc12cccfdb07e64f1bcb'] = 'Dostęp do ponad 50 przewoźników krajowych i międzynarodowych, bez podpisywania dodatkowych umów.';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_41fdc4e8cff0f23f2ab09b68b665f359'] = 'Wygoda dla klientów';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_da0484964fbc5908f5a0210932c39bdd'] = 'Różne opcje dostawy i punkty odbioru sprawiają, że każda paczka trafia tam, gdzie chce Twój klient.';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_e6b1afa02863361197bd32bd65057760'] = 'Pełna przejrzystość';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_731507fb06aee8bc83e53b75aa20aaf7'] = 'Śledzenie przesyłek w czasie rzeczywistym i powiadomienia mail/SMS budują zaufanie i lojalność.';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_30d968a1c254fb6d73ffc5301f1fc75d'] = 'Łatwe zwroty';
+$_MODULE['<{globkuriermodule}prestashop>login_page_v16_b1ff4f8a2407af79e91df07c303430c8'] = 'Etykieta zwrotna w paczce lub serwis zwroty.globkurier.pl gwarantują prostą obsługę i zadowolenie klienta.';
 $_MODULE['<{globkuriermodule}prestashop>login_page_v16_3ad59e1c287d1aef81b7adfc66c7104b'] = 'Jak rozpocząć';
 $_MODULE['<{globkuriermodule}prestashop>login_page_v16_685a96407d6545234f9c7654cca6b192'] = '1. Uzyskaj klucz API:';
 $_MODULE['<{globkuriermodule}prestashop>login_page_v16_c892a5ae1178205451fa73300d94dc8d'] = 'a) jeśli masz konto w GlobKurier, zaloguj się';

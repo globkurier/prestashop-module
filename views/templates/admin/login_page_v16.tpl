@@ -82,11 +82,11 @@
             <div class="col-lg-6 globconfig" style="padding: 10px 50px;">
               <h3>{l s='Benefits' mod='globkuriermodule'}: <span style="color: rgb(206, 0, 0);">{l s='Benefits of GlobKurier' mod='globkuriermodule'}:</span></h3>
               <ul style="padding: 10px; font-size: 1.2em; line-height: 25px;">
-                <li><strong>{l s='Pełna kontrola nad logistyką' mod='globkuriermodule'}</strong> – {l s='Wszystkie zamówienia trafiają automatycznie do panelu, a etykiety drukujesz jednym kliknięciem.' mod='globkuriermodule'}</li>
-                <li><strong>{l s='Wysyłka bez granic' mod='globkuriermodule'}</strong> – {l s='Dostęp do ponad 50 przewoźników krajowych i międzynarodowych, bez podpisywania dodatkowych umów.' mod='globkuriermodule'}</li>
-                <li><strong>{l s='Wygoda dla klientów' mod='globkuriermodule'}</strong> – {l s='Różne opcje dostawy i punkty odbioru sprawiają, że każda paczka trafia tam, gdzie chce Twój klient.' mod='globkuriermodule'}</li>
-                <li><strong>{l s='Pełna przejrzystość' mod='globkuriermodule'}</strong> – {l s='Śledzenie przesyłek w czasie rzeczywistym i powiadomienia mail/SMS budują zaufanie i lojalność.' mod='globkuriermodule'}</li>
-                <li><strong>{l s='Łatwe zwroty' mod='globkuriermodule'}</strong> – {l s='Etykieta zwrotna w paczce lub serwis zwroty.globkurier.pl gwarantują prostą obsługę i zadowolenie klienta.' mod='globkuriermodule'}</li>
+                <li><strong>{l s='Full control over logistics' mod='globkuriermodule'}</strong> – {l s='All orders are automatically transferred to the panel, and labels are printed with one click.' mod='globkuriermodule'}</li>
+                <li><strong>{l s='Shipping without borders' mod='globkuriermodule'}</strong> – {l s='Access to over 50 domestic and international carriers without signing additional contracts.' mod='globkuriermodule'}</li>
+                <li><strong>{l s='Convenience for customers' mod='globkuriermodule'}</strong> – {l s='Different delivery options and pickup points ensure that every package reaches the customer\'s desired location.' mod='globkuriermodule'}</li>
+                <li><strong>{l s='Full transparency' mod='globkuriermodule'}</strong> – {l s='Real-time tracking of shipments and email/SMS notifications build trust and loyalty.' mod='globkuriermodule'}</li>
+                <li><strong>{l s='Easy returns' mod='globkuriermodule'}</strong> – {l s='Return label in the package or return.globkurier.pl service ensures simple handling and customer satisfaction.' mod='globkuriermodule'}</li>
               </ul>
             </div>{* .col-lg-4 *}
 {*
