@@ -305,8 +305,13 @@ function showOrderErrors(obj) {
 			}
 		}
 
-		// Add customs section for international shipments (like in the API example)
-		if (data.senderAddress.countryId !== data.receiverAddress.countryId) {
+		// Add customs section only when API reports orderCustoms requirements
+		const hasOrderCustomsRequirements = !!(
+			GK.state.customRequired &&
+			GK.state.customRequired.orderCustoms &&
+			Object.keys(GK.state.customRequired.orderCustoms).length
+		);
+		if (hasOrderCustomsRequirements) {
 			data.customs = {
 				currency: (GK.state.orderSummary && GK.state.orderSummary.currency) || 'EUR',
 				total: s.additionalInfo && s.additionalInfo.declaredValue ? parseFloat(s.additionalInfo.declaredValue) : 0,
