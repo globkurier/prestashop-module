@@ -165,19 +165,42 @@ function showOrderErrors(obj) {
 		return Object.keys(r).length ? r : null;
 	}
 
+	function isPointLikeCollectionType(collectionType) {
+		return collectionType === 'POINT' || collectionType === 'CROSSBORDER';
+	}
+
+	function getSelectedCollectionTypeForApi() {
+		const ps = GK.state.pickedService || {};
+		const allowed = Array.isArray(ps.collectionTypes) ? ps.collectionTypes : [];
+		const selectedSendingType = $('input[name=pickup_type]:checked').val() || 'PICKUP';
+		const allowPickup = allowed.indexOf('PICKUP') > -1;
+		const allowPoint = allowed.indexOf('POINT') > -1;
+		const allowCrossborder = allowed.indexOf('CROSSBORDER') > -1;
+
+		if (!allowed.length) {
+			return selectedSendingType === 'POINT' ? 'POINT' : 'PICKUP';
+		}
+
+		// UI has two radio options only (PICKUP/POINT), so POINT can map to CROSSBORDER.
+		if (selectedSendingType === 'POINT') {
+			if (allowPoint) return 'POINT';
+			if (allowCrossborder) return 'CROSSBORDER';
+		}
+
+		if (selectedSendingType === 'PICKUP' && allowPickup) {
+			return 'PICKUP';
+		}
+
+		if (allowPickup) return 'PICKUP';
+		if (allowPoint) return 'POINT';
+		if (allowCrossborder) return 'CROSSBORDER';
+
+		return allowed[0] || 'PICKUP';
+	}
+
 	function buildOrderData() {
 		const s = GK.state;
-		// Determine collection type like Angular does
-		let collectionType = 'PICKUP';
-		if (s.pickedService && s.pickedService.collectionTypes) {
-			if (s.pickedService.collectionTypes.length > 1) {
-				// Multiple options available, use user selection
-				collectionType = $('input[name=pickup_type]:checked').val() || 'PICKUP';
-			} else {
-				// Only one option available, use it
-				collectionType = s.pickedService.collectionTypes[0];
-			}
-		}
+		const collectionType = getSelectedCollectionTypeForApi();
 		const addons = generateAdditionalServices(s.serviceOptions || [], s.additionalInfo || {});
 
 		const data = {
@@ -230,7 +253,7 @@ function showOrderErrors(obj) {
 
 			// Add pointId for specific carrier terminal points (like Angular does in generateAddress)
 			// For POINT collection type OR when delivery is to POINT (like InPost Paczkomat)
-			const isPointDelivery = collectionType === 'POINT' || (s.pickedService && s.pickedService.deliveryTypes && s.pickedService.deliveryTypes.includes('POINT'));
+			const isPointDelivery = isPointLikeCollectionType(collectionType) || (s.pickedService && s.pickedService.deliveryTypes && s.pickedService.deliveryTypes.includes('POINT'));
 			if (s.pickedService && isPointDelivery) {
 				const carrierName = (s.pickedService.carrierName || '').toLowerCase();
 				const serviceName = (s.pickedService.name || '').toLowerCase();
@@ -281,7 +304,7 @@ function showOrderErrors(obj) {
 			}
 
 			// Also add terminal/point ID for POINT collection type (fallback)
-			const isPointDeliveryFallback = collectionType === 'POINT' || (s.pickedService && s.pickedService.deliveryTypes && s.pickedService.deliveryTypes.includes('POINT'));
+			const isPointDeliveryFallback = isPointLikeCollectionType(collectionType) || (s.pickedService && s.pickedService.deliveryTypes && s.pickedService.deliveryTypes.includes('POINT'));
 			if (isPointDeliveryFallback && src.terminal) {
 				dst.pointId = src.terminal;
 			}
@@ -392,7 +415,7 @@ function showOrderErrors(obj) {
 		if (!GK.state.pickedService) return;
 
 		// Validate pickup date and time
-		const collectionType = $('input[name=pickup_type]:checked').val() || 'PICKUP';
+		const collectionType = getSelectedCollectionTypeForApi();
 		if (collectionType === 'PICKUP') {
 			const sendDate = $('#sendDateInput').val();
 			const timeRange = $('#pickupTimeSelect').val();
@@ -1142,7 +1165,7 @@ function enforceCollectionTypeRadios() {
     const ps = GK.state.pickedService || {};
     const allowed = Array.isArray(ps.collectionTypes) ? ps.collectionTypes : [];
     const allowPickup = allowed.indexOf('PICKUP') > -1;
-    const allowPoint = allowed.indexOf('POINT') > -1;
+    const allowPoint = allowed.indexOf('POINT') > -1 || allowed.indexOf('CROSSBORDER') > -1;
 
     // Enable/disable and show/hide radios
     const $pickupLabel = $('#pickup').closest('.radio');
@@ -1164,8 +1187,8 @@ function enforceCollectionTypeRadios() {
         // No collection types specified - default to PICKUP
         selected = 'PICKUP';
     } else if (allowed.length === 1) {
-        // Only one option available, auto-select it
-        selected = allowed[0];
+        // UI supports two sending modes: courier pickup or point drop-off.
+        selected = allowed[0] === 'PICKUP' ? 'PICKUP' : 'POINT';
     } else {
         // Multiple options available
         // Keep current selection if it's valid, otherwise pick first available
@@ -1423,7 +1446,7 @@ function fetchStates(countryId, opts) {
 		const s = GK.state;
     try { ensureCountryIdsFromIso(); } catch(e) {}
 		if (!s.pickedService) return;
-		const collectionType = $('input[name=pickup_type]:checked').val() || 'PICKUP';
+		const collectionType = getSelectedCollectionTypeForApi();
 		const receiverCountryId = s.receiver && s.receiver.country && s.receiver.country.id;
 		const senderCountryId = s.sender && s.sender.country && s.sender.country.id;
 		if (!receiverCountryId || !senderCountryId) return;
