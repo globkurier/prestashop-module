@@ -77,7 +77,7 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
         ]);
 
         if (Tools::getValue('order_id')) {
-            $order = new Order(Tools::getValue('order_id'));            
+            $order = new Order(Tools::getValue('order_id'));
             $customer = new Customer($order->id_customer);
 
             if (Tools::getValue('invoice_address')) {
@@ -91,10 +91,7 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
             $prestaCarrierName = null;
             if ($prestaCarrierId) {
                 try {
-                    // PrestaShop is version dependent - try common helper first
-                    if (class_exists('Carrier') && method_exists('Carrier', 'getCarrierName')) {
-                        $prestaCarrierName = Carrier::getCarrierName($prestaCarrierId, (int) $this->context->cookie->id_lang);
-                    } elseif (class_exists('Carrier')) {
+                    if (class_exists('Carrier')) {
                         $carrier = new Carrier($prestaCarrierId);
                         if (isset($carrier->name) && $carrier->name) {
                             $prestaCarrierName = $carrier->name;

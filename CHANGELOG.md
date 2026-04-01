@@ -1,7 +1,13 @@
+## [3.3.3] - 2025-04-01
++ Added order customs sending and CROSSBORDER collection type
++ Added carrier description and collectionType label on products list
++ Improved GitHub release information
++ Fixed terminalCode error, group margin and missing translations
+
 ## [3.3.2] - 2025-03-03
-+ refactor variables using namespaces and IIFE
-+ fix for displaying points in the Hummingbird theme
-+ add Insurance Premium support
++ Refactor variables using namespaces and IIFE
++ Fix for displaying points in the Hummingbird theme
++ Add Insurance Premium support
 
 
 ## [3.3.1] - 2025-11-26
