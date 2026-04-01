@@ -189,7 +189,7 @@
             <div class="col-lg-12" id="servicesListContainer" style="display:none;">
                 <div class="panel">
                     <div class="panel-heading">{l s='Shipping' mod='globkuriermodule'}</div>
-                    <div class="panel-body form-horizontal" id="serviceOptionsBody">
+                    <div class="panel-body form-horizontal" id="serviceOptionsBody" style="margin-left:20px;">
                         <div class="form-group deliverySending">
                             <label class="radio"><input type="radio" name="pickup_type" id="pickup" value="PICKUP" checked> {l s='The parcel will be picked up by a courier' mod='globkuriermodule'}</label>
                             <label class="radio"><input type="radio" name="pickup_type" id="point" value="POINT"> {l s='I will send the shipment at the terminal' mod='globkuriermodule'}</label>
