@@ -93,7 +93,7 @@ class AdminGlobkurierPlaceOrderController extends ModuleAdminController
                 try {
                     if (class_exists('Carrier')) {
                         $carrier = new Carrier($prestaCarrierId);
-                        if (isset($carrier->name) && $carrier->name) {
+                        if (Validate::isLoadedObject($carrier) && $carrier->name !== '') {
                             $prestaCarrierName = $carrier->name;
                         }
                     }
