@@ -875,6 +875,12 @@ function cardForProduct(product) {
 		return (
 			'<div class="col-lg-4 col-md-6 col-sm-6 glob-product-block text-center">' +
 				'<div class="glob-product-wrapper">' +
+				'<div class="glob-collectionTypes">' +
+					'<div class="glob-collectionType">' +
+					(product.collectionTypes || []).map(
+						function(type){ return '<span class="glob-collectionType-item glob-collectionType-item-' + type + '">' + type + '</span>'; }
+					).join('') + '</div>' +
+				'</div>' +
 				'<div class="glob-product-logo">' + logo + '</div>' +
 				'<strong>' + (product.carrierName || '') + '</strong><br/>' +
 				'<span>' + (product.name || '') + '</span><br/><br/>' +

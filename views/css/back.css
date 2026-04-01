@@ -66,6 +66,7 @@
 }
 
 .glob-product-wrapper {
+    position: relative;
     padding: 10px;
     border: 1px solid #e1e1e1;
     border-radius: 5px;
@@ -73,6 +74,22 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+}
+
+.glob-product-wrapper  .glob-collectionTypes {
+    position: relative;
+    margin:5px auto;
+}
+
+.glob-product-wrapper  .glob-collectionTypes .glob-collectionType-item {
+    display: inline-block;
+    padding: 2px 5px;
+    margin-right: 5px;
+    border-radius: 3px;
+    background-color: #f0f0f0;
+    color: #333;
+    font-size: 11px;
+    font-weight: bold;
 }
 
 .glob-product-wrapper:hover {
