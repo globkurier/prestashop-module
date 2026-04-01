@@ -16,6 +16,8 @@ $_MODULE['<{globkuriermodule}prestashop>config_page_v15_c840e45be8b86c40d1c67e72
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_f4f70727dc34561dfde1a3c529b6205c'] = 'Ustawienia';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_68079444604c24eb0eb03eb968f384f8'] = 'Pobierz';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_4680c295dbce735fb90a22066df374db'] = 'Twoja aktualna wersja modułu to';
+$_MODULE['<{globkuriermodule}prestashop>config_page_v16_8524a49944ae7ba2fa9d88067a7b0235'] = 'aktualna wersja';
+$_MODULE['<{globkuriermodule}prestashop>config_page_v16_e47d8362db025b4d036c772cd4907d33'] = 'Pobierz z GitHub';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_d1f953c9d544c352d1f47988da9067fa'] = 'Domyślny adres nadania';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_49ee3087348e8d44e1feda1917443987'] = 'Nazwa';
 $_MODULE['<{globkuriermodule}prestashop>config_page_v16_fde5e1ed5d4d49a5b2ee1482f838742d'] = 'Imię i nazwisko';
@@ -231,6 +233,9 @@ $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_94a3750f044c39365ddd987d
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_1ace43ccc7e0af067b36c2d9b34efe7a'] = 'Niestety nie znaleźliśmy żadnych punktów odbioru w tej miejscowości';
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_5e408603ae11bdc576b14294ce20b230'] = 'Nie wybrano żadnego punktu odbioru!';
 $_MODULE['<{globkuriermodule}prestashop>carrier_list_17_d55669822f1a8cf72ec1911e462a54eb'] = 'dla';
+$_MODULE['<{globkuriermodule}prestashop>github_update_notification_aa8d2f8568f9f916a599935c0d2bd953'] = 'Dostępna jest nowa wersja';
+$_MODULE['<{globkuriermodule}prestashop>github_update_notification_8524a49944ae7ba2fa9d88067a7b0235'] = 'aktualna wersja';
+$_MODULE['<{globkuriermodule}prestashop>github_update_notification_e47d8362db025b4d036c772cd4907d33'] = 'Pobierz z GitHub';
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_42537c6b0e91a45067148269bdd0de88'] = 'WYŚLIJ Z GLOBKURIEREM';
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_170a094ce3123d9a518c0903164b4001'] = 'Przesyłki nadane przez GlobKurier dla tego zamówienia';
 $_MODULE['<{globkuriermodule}prestashop>order_details_page_v16_6d9a83e9ff6b9d9eba96a7306a14e618'] = 'Nr zamówienia GlobKurier';

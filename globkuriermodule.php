@@ -80,6 +80,7 @@ class Globkuriermodule extends Module
         return parent::install()
             && $this->registerHook('displayHeader')
             && $this->registerHook('displayBackOfficeHeader')
+            && $this->registerHook('displayAdminAfterHeader')
             && $this->registerHook('displayCarrierList')
             && $this->registerHook('displayAfterCarrier')
             && $this->registerHook('displayAdminOrderMainBottom')
@@ -89,6 +90,8 @@ class Globkuriermodule extends Module
     public function uninstall()
     {
         Configuration::deleteByName('GLOBKURIER2_LIVE_MODE');
+        Configuration::deleteByName('GLOBKURIER_GITHUB_LATEST_VER');
+        Configuration::deleteByName('GLOBKURIER_GITHUB_CACHE_TIME');
         ModuleTabs::uninstall();
         // include(dirname(__FILE__).'/sql/uninstall.php');
         Config::purge();
@@ -131,11 +134,15 @@ class Globkuriermodule extends Module
         }
         $carriers = Carrier::getCarriers($this->context->language->id);
         $countries = $api->getCountries();
+        $latestVersion = $this->getLatestGithubVersion();
         $this->context->smarty->assign([
             'countries' => $countries,
             'carriers' => $carriers,
             'tokenAPI' => $api->getToken(),
             'moduleVersion' => $this->version,
+            'gk_latestVersion' => $latestVersion,
+            'gk_updateAvailable' => $latestVersion && version_compare($latestVersion, $this->version, '>'),
+            'gk_githubReleaseUrl' => 'https://github.com/globkurier/prestashop-module/releases/latest',
         ]);
         // Load jQuery-based config page script (Angular removed)
         $this->context->controller->addJS($this->_path . '/views/js/configApp.jquery.js');
@@ -487,6 +494,56 @@ class Globkuriermodule extends Module
     public function hookDisplayBackOfficeHeader($params)
     {
         $this->context->controller->addCSS($this->_path . 'views/css/back.css', 'all');
+    }
+
+    public function hookDisplayAdminAfterHeader($params)
+    {
+        $latestVersion = $this->getLatestGithubVersion();
+        if (!$latestVersion || version_compare($latestVersion, $this->version, '<=')) {
+            return '';
+        }
+
+        $this->context->smarty->assign([
+            'gk_currentVersion' => $this->version,
+            'gk_latestVersion' => $latestVersion,
+            'gk_githubReleaseUrl' => 'https://github.com/globkurier/prestashop-module/releases/latest',
+        ]);
+
+        return $this->display(__FILE__, 'views/templates/hooks/github_update_notification.tpl');
+    }
+
+    private function getLatestGithubVersion()
+    {
+        $cacheTime = (int) Configuration::get('GLOBKURIER_GITHUB_CACHE_TIME');
+        $cachedVersion = Configuration::get('GLOBKURIER_GITHUB_LATEST_VER');
+
+        if ($cachedVersion && (time() - $cacheTime) < 86400) {
+            return $cachedVersion;
+        }
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/repos/globkurier/prestashop-module/releases/latest');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'globkuriermodule/' . $this->version);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        if (!$result) {
+            return $cachedVersion ?: false;
+        }
+
+        $data = json_decode($result, true);
+        if (!isset($data['tag_name'])) {
+            return $cachedVersion ?: false;
+        }
+
+        $version = ltrim($data['tag_name'], 'v');
+        Configuration::updateValue('GLOBKURIER_GITHUB_LATEST_VER', $version);
+        Configuration::updateValue('GLOBKURIER_GITHUB_CACHE_TIME', time());
+
+        return $version;
     }
 
     /**

@@ -68,9 +68,17 @@
             </div>
             {/if}
             <div class="col-lg-12">
+                {if $gk_updateAvailable}
+                <div class="alert alert-warning">
+                    {l s='Your current version of the module is' mod='globkuriermodule'}: <b>{$moduleVersion|escape:'htmlall':'UTF-8'}</b>.
+                    ({l s='current version' mod='globkuriermodule'} <b>{$gk_latestVersion|escape:'htmlall':'UTF-8'}</b>).
+                    &nbsp;<a href="{$gk_githubReleaseUrl|escape:'html':'UTF-8'}" target="_blank" rel="noopener noreferrer">{l s='Download from GitHub' mod='globkuriermodule'}</a>
+                </div>
+                {else}
                 <div class="alert alert-info">
                     {l s='Your current version of the module is' mod='globkuriermodule'}: <b>{$moduleVersion|escape:'htmlall':'UTF-8'}</b>
                 </div>
+                {/if}
             </div>
             <div class="col-lg-5">
                 <div class="form-horizontal">
