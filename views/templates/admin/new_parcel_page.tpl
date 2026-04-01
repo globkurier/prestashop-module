@@ -158,6 +158,9 @@
                             <div class="col-lg-2"><img id="chosenServiceLogo" src="" alt="" style="max-width:100%; display:none;"></div>
                             <div class="col-lg-8"><strong id="chosenServiceCarrier"></strong><br/><span id="chosenServiceName"></span></div>
                         </div>
+                        <div class="row">
+                            <div class="col-lg-12"><div id="chosenServiceSummary" style="margin-top: 10px;"></div></div>
+                        </div>
                         <hr/>
                         <div class="row">
                             <div class="col-lg-6">

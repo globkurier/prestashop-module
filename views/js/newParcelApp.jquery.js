@@ -105,7 +105,16 @@ function setProcessing(on) {
 		const receiverIso = (s.receiver && s.receiver.country && (s.receiver.country.isoCode || s.receiver.country.code || s.receiver.country.iso)) || (window.InitialValues && window.InitialValues.receiver && window.InitialValues.receiver.countryCode) || null;
 		const isInternational = receiverIso && (receiverIso.toUpperCase() !== 'PL');
 		$('#declaredValueGroup, #purposeGroup').toggle(!!isInternational);
-		if (!isInternational) { $('#declaredValueInput').val(''); $('#purposeSelect').val(''); }
+		if (!isInternational) {
+			$('#declaredValueInput').val('');
+			$('#purposeSelect').val('');
+			if (s.additionalInfo) s.additionalInfo.purpose = '';
+		} else {
+			if (!s.additionalInfo) s.additionalInfo = {};
+			const selectedPurpose = s.additionalInfo.purpose || $('#purposeSelect').val() || 'SOLD';
+			s.additionalInfo.purpose = selectedPurpose;
+			$('#purposeSelect').val(selectedPurpose);
+		}
 
 		// Terminal label "InPost za pobraniem" for COD-inpost.
 		// We don't rely on terminalType being COD-specific (DB usually stores only 'inpost').
@@ -1216,6 +1225,11 @@ function updateChosenServiceUI() {
     }
     $('#chosenServiceCarrier').text(ps.carrierName || '');
     $('#chosenServiceName').text(ps.name || '');
+	$('#chosenServiceSummary').html(
+		Array.isArray(ps.labels)
+			? ('<ul style="margin:0; padding-left:18px;">' + ps.labels.map(function(l){ return '<li>' + l + '</li>'; }).join('') + '</ul>')
+			: (typeof ps.labels === 'string' ? ps.labels : '')
+	);
     // render labels (if any)
     try {
         const labels = Array.isArray(ps.labels) ? ps.labels : [];
@@ -1480,6 +1494,7 @@ function fetchStates(countryId, opts) {
 						GK.state.additionalInfo = GK.state.additionalInfo || {};
 						GK.state.additionalInfo.purpose = 'SOLD'; // Default value
 					}
+					$('#purposeSelect').val(GK.state.additionalInfo.purpose || 'SOLD');
 				} else {
 					$('#purposeGroup').hide();
 				}
