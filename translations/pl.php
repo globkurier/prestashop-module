@@ -156,7 +156,7 @@ $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_a6d4367064bd2900d5c1f9df
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_5ecc71e68514f6441aa78854c8229df3'] = 'Data nadania';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_73f3e7512043f3e1ff3cf3b4767b7b37'] = 'Czas nadania';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_99938282f04071859941e18f16efcf42'] = 'wybierz';
-$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_7f47c3c4007f901a2c81671177215d49'] = 'Punkt wysyłki';
+$_MODULE['<{globkuriermodule}prestashop>new_parcel_page_b0d8fc2c8ba7d1a21cff8f2fe0daa291'] = 'Punkt nadania';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_c453a4b8e8d98e82f35b67f433e3b4da'] = 'Płatność';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_b2c79697bc7b4e1a553806f50e90ab4b'] = 'Kwota pobrania';
 $_MODULE['<{globkuriermodule}prestashop>new_parcel_page_40d685765064fa31c5c72ac09a79bcd3'] = 'Numer konta';

@@ -215,11 +215,11 @@
                             <div class="col-lg-6"><label>{l s='Date sending' mod='globkuriermodule'}</label><input type="text" id="sendDateInput" class="form-control" placeholder="YYYY-MM-DD"></div>
                             <div class="col-lg-6"><label>{l s='Pickup time' mod='globkuriermodule'}</label><select id="pickupTimeSelect" class="form-control"><option value="">-- {l s='select' mod='globkuriermodule'} --</option></select></div>
                         </div>
-                        <div class="form-group row senderAddressPointId senderAddressPointIdinpost" style="display:none;">
-                            <label class="col-sm-4 col-form-label">{l s='InPost' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
+                        <div class="form-group row senderAddressPointId senderAddressPointIdUnified" style="display:none;">
+                            <label class="col-sm-4 col-form-label">{l s='Sending point' mod='globkuriermodule'}</label>
                             <div class="col-sm-8"><div class="well" style="padding:6px;">
-                                <span id="inpostSenderLabel"></span>
-                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="inPostSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
+                                <span id="senderPointLabel"></span>
+                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-role="sender">{l s='Choose/Change' mod='globkuriermodule'}</button>
                             </div></div>
                         </div>
                         <div class="form-group row receiverAddressPointId receiverAddressPointIdorlen" style="display:none;">
@@ -243,46 +243,11 @@
                                 <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="dhlparcelReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
                             </div></div>
                         </div>
-                        <div class="form-group row senderAddressPointId senderAddressPointIddhl" style="display:none;">
-                            <label class="col-sm-4 col-form-label">{l s='DHL ParcelShop' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
-                            <div class="col-sm-8"><div class="well" style="padding:6px;">
-                                <span id="dhlSenderLabel"></span>
-                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="dhlparcelSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
-                            </div></div>
-                        </div>
-                        <div class="form-group row senderAddressPointId senderAddressPointIdorlen" style="display:none;">
-                            <label class="col-sm-4 col-form-label">{l s='ORLEN Paczka' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
-                            <div class="col-sm-8"><div class="well" style="padding:6px;">
-                                <span id="orlenSenderLabel"></span>
-                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="paczkaRuchSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
-                            </div></div>
-                        </div>
-                        <div class="form-group row senderAddressPointId senderAddressPointIdpocztex48" style="display:none;">
-                            <label class="col-sm-4 col-form-label">{l s='Pocztex48 OWP' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
-                            <div class="col-sm-8"><div class="well" style="padding:6px;">
-                                <span id="pocztexSenderLabel"></span>
-                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="pocztex48owpSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
-                            </div></div>
-                        </div>
-                        <div class="form-group row senderAddressPointId senderAddressPointIddpd" style="display:none;">
-                            <label class="col-sm-4 col-form-label">{l s='DPD Pickup' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
-                            <div class="col-sm-8"><div class="well" style="padding:6px;">
-                                <span id="dpdSenderLabel"></span>
-                                <button class="btn btn-primary btn-xs open-terminal-picker" data-target="dpdpickupSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
-                            </div></div>
-                        </div>
                         <div class="form-group row receiverAddressPointId receiverAddressPointIdfedex" style="display:none;">
                             <label class="col-sm-4 col-form-label">{l s='FedEx' mod='globkuriermodule'}<br/>{l s='pickup point' mod='globkuriermodule'}</label>
                             <div class="col-sm-8"><div class="well" style="padding:6px;">
                                 <span id="fedexReceiverLabel"></span>
                                 <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="fedexReceiverPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
-                            </div></div>
-                        </div>
-                        <div class="form-group row senderAddressPointId senderAddressPointIdfedex" style="display:none;">
-                            <label class="col-sm-4 col-form-label">{l s='FedEx' mod='globkuriermodule'}<br/>{l s='sending point' mod='globkuriermodule'}</label>
-                            <div class="col-sm-8"><div class="well" style="padding:6px;">
-                                <span id="fedexSenderLabel"></span>
-                                <button class="btn btn-primary btn-gk-primary btn-xs open-terminal-picker" data-target="fedexSenderPoint">{l s='Choose/Change' mod='globkuriermodule'}</button>
                             </div></div>
                         </div>
                         <div class="form-group row receiverAddressPointId receiverAddressPointIddpd" style="display:none;">
