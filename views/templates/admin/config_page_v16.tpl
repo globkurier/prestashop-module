@@ -535,16 +535,35 @@
             </div>
         </div>
         {* End of DPD Pickupl *}
-
     </div>
     <div class="panel-footer">
         <input type="hidden" name="action" value="updateConfig"/>
-        <button type="submit" class="btn btn-default pull-right">
+        <button type="submit" class="btn btn-default pull-left">
             <i class="process-icon-save"></i> {l s='Save' mod='globkuriermodule'}
         </button>
     </div>
 </div>
 </form>
+
+<div id="globkurier-returns-banner">
+    <button type="button" class="globkurier-returns-banner__close" aria-label="Zamknij">×</button>
+    <div class="globkurier-returns-banner__icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 14l-4-4 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M5 10h11a4 4 0 0 1 0 8h-1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+    </div>
+    <h3 class="globkurier-returns-banner__title">
+        Szybkie i tanie zwroty na jedno kliknięcie				<br>
+        w Twoim sklepie			</h3>
+    <ul class="globkurier-returns-banner__list">
+        <li>Darmowe uruchomienie i korzystanie z narzędzia</li>
+        <li>Szybki i prosty proces aktywacji</li>
+        <li>Lepsza kontrola nad procesami i raportowaniem</li>
+    </ul>
+    <a href="https://zwroty.globkurier.pl/pl/zwroty-dla-sklepow-internetowych" target="_blank" rel="noopener noreferrer" class="globkurier-returns-banner__btn">
+        DOWIEDZ SIĘ WIĘCEJ			</a>
+</div>
 {literal}
 <div class="modal fade" id="servicesModal" tabindex="-1" role="dialog">
   <div class="modal-dialog">
@@ -562,6 +581,12 @@
   </div>
 </div>
 {/literal}
+
+<script>
+    document.querySelector('.globkurier-returns-banner__close')?.addEventListener('click', function() {
+        document.getElementById('globkurier-returns-banner').style.display = 'none';
+    });
+</script>
 
 <script type="text/javascript">
     let tokenAPI = '{$tokenAPI|escape:'javascript':'UTF-8'}';

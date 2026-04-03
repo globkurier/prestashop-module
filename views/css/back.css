@@ -220,3 +220,145 @@ h4.modal-title span.closeModal {
     margin-top: 10px;
     float: right;
 }
+
+#globkurier-returns-banner {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 280px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: 12px;
+    padding: 28px 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    z-index: 9999;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  #globkurier-returns-banner .globkurier-returns-banner__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.2s ease;
+  }
+  #globkurier-returns-banner .globkurier-returns-banner__close:hover {
+    color: #fff;
+  }
+  #globkurier-returns-banner .globkurier-returns-banner__icon {
+    margin-bottom: 12px;
+  }
+  #globkurier-returns-banner .globkurier-returns-banner__title {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin: 0 0 18px 0;
+    color: #fff;
+  }
+  #globkurier-returns-banner .globkurier-returns-banner__list {
+    list-style: none;
+    margin: 0 0 24px 0;
+    padding: 0;
+  }
+  #globkurier-returns-banner .globkurier-returns-banner__list li {
+    position: relative;
+    padding-left: 22px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  #globkurier-returns-banner .globkurier-returns-banner__list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #96c21f;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  #globkurier-returns-banner .globkurier-returns-banner__btn {
+    display: block;
+    text-align: center;
+    background: #96c21f;
+    color: #1a1a2e;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  #globkurier-returns-banner .globkurier-returns-banner__btn:hover {
+    background: #96c21f;
+    transform: translateY(-1px);
+    color: #1a1a2e;
+  }
+
+  @media (max-width: 1600px) {
+    #globkurier-returns-banner {
+      width: 240px;
+      padding: 22px 18px;
+    }
+    #globkurier-returns-banner .globkurier-returns-banner__title {
+      font-size: 16px;
+    }
+  }
+  @media (max-width: 671px) {
+    #globkurier-returns-banner .globkurier-returns-banner__list {
+      min-width: 100% !important;
+    }
+    #globkurier-returns-banner .globkurier-returns-banner__icon {
+      flex-basis: 100%;
+    }
+    #globkurier-returns-banner .globkurier-returns-banner__btn {
+      margin-left: 0 !important;
+    }
+  }
+  @media (max-width: 1120px) {
+    #globkurier-returns-banner {
+      position: relative;
+      left: 20px;
+      border-radius: 0;
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 24px;
+      width: calc(100% - 80px);
+    }
+    #globkurier-returns-banner .globkurier-returns-banner__close {
+      display: none;
+    }
+    #globkurier-returns-banner .globkurier-returns-banner__icon {
+      margin-bottom: 0;
+    }
+    #globkurier-returns-banner .globkurier-returns-banner__title {
+      flex: 1;
+      min-width: 200px;
+      margin: 0;
+      font-size: 16px;
+    }
+    #globkurier-returns-banner .globkurier-returns-banner__list {
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 20px;
+      flex: 2;
+      flex-direction: column;
+      min-width: 50%;
+    }
+    #globkurier-returns-banner .globkurier-returns-banner__list li {
+      margin-bottom: 0;
+    }
+    #globkurier-returns-banner .globkurier-returns-banner__btn {
+      flex-shrink: 0;
+      margin-left: auto;
+      margin-top: 20px;
+    }
+  }
