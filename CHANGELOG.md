@@ -1,3 +1,6 @@
+## [3.3.4] - 2025-04-14
++ Fixed CSS style conflicts
+
 ## [3.3.3] - 2025-04-01
 + Added order customs sending and CROSSBORDER collection type
 + Added carrier description and collectionType label on products list
