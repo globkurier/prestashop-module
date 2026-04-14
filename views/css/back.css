@@ -135,7 +135,7 @@
 .best-price-products .radio {
     margin-top: 0;
 }
-.col-lg-12.ng-pristine > div {
+.globkurier-col-lg-12.ng-pristine > div {
     display: block !important;
 }
 .deliverySending .radio.disabled {
@@ -177,7 +177,8 @@
     justify-content: center;
     align-items: center;
 }
-.loading:before {
+.deliverySending.loading:before,
+.servicesContainer.loading:before {
     content: "trwa ładowanie...";
     position: absolute;
     z-index: 9999;
