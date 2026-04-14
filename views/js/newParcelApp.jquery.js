@@ -50,6 +50,11 @@ function setProcessing(on) {
 		$('#processingBox').toggle(!!on);
 		$('#sendIcon').toggle(!on);
 		$('#processingIcon').toggle(!!on);
+		if (on) {
+			$('#sendOrderBtn').prop('disabled', true);
+		} else {
+			updateSendButtonDisabled();
+		}
 	}
 
 	function updateEnabledOptionsUI() {

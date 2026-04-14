@@ -368,6 +368,7 @@
             <button
                 type="button"
                 id="sendOrderBtn"
+                disabled
                 class="btn btn-success btn-gk-success"
                 style="padding: 12px 40px;"
             >
