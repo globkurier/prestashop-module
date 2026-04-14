@@ -20,48 +20,48 @@
 *  @author    PrestaShop SA <contact@prestashop.com>
 */
 
-/* Datepicker unavailable dates styling */
-.ui-datepicker .ui-datepicker-calendar td.unavailable {
+/* Datepicker unavailable dates styling — scoped via gk-datepicker class added in JS beforeShow */
+.gk-datepicker.ui-datepicker .ui-datepicker-calendar td.unavailable {
     background-color: #f5f5f5 !important;
     color: #ccc !important;
     cursor: not-allowed !important;
 }
 
-.ui-datepicker .ui-datepicker-calendar td.unavailable a {
+.gk-datepicker.ui-datepicker .ui-datepicker-calendar td.unavailable a {
     color: #ccc !important;
     text-decoration: line-through;
     cursor: not-allowed !important;
 }
 
-.ui-datepicker .ui-datepicker-calendar td.unavailable:hover {
+.gk-datepicker.ui-datepicker .ui-datepicker-calendar td.unavailable:hover {
     background-color: #f5f5f5 !important;
 }
 
-.bootstrap a {
+body[class*="controller-adminglobkurier"] .bootstrap a {
     color:#1e3042;
 }
 
-.bootstrap .btn.btn-primary.btn-gk-primary {
+body[class*="controller-adminglobkurier"] .bootstrap .btn.btn-primary.btn-gk-primary {
     background-color:#1e3042;
     border-color: #4B596D;
 }
 
-.bootstrap .btn.btn-primary.btn-gk-primary:hover {
+body[class*="controller-adminglobkurier"] .bootstrap .btn.btn-primary.btn-gk-primary:hover {
     background-color:#4B596D;
 }
 
-.bootstrap .btn.btn-success.btn-gk-success,
+body[class*="controller-adminglobkurier"] .bootstrap .btn.btn-success.btn-gk-success,
 .card-body .btn.btn-success.btn-gk-success {
     background-color:#96c21f;
     border-color: #79a600;
 }
 
-.bootstrap .btn.btn-success.btn-gk-success:hover,
+body[class*="controller-adminglobkurier"] .bootstrap .btn.btn-success.btn-gk-success:hover,
 .card-body .btn.btn-success.btn-gk-success:hover {
     background-color:#79a600;
 }
 
-.bootstrap .prestashop-switch.prestashop-switch-gk input:first-of-type:checked ~ .slide-button {
+body[class*="controller-adminglobkurier"] .bootstrap .prestashop-switch.prestashop-switch-gk input:first-of-type:checked ~ .slide-button {
     background:#96c21f;
 }
 
@@ -198,7 +198,7 @@
     width: 100% !important;
 }
 
-h4.modal-title span.closeModal {
+body[class*="controller-adminglobkurier"] h4.modal-title span.closeModal {
     cursor: pointer;
     font-weight: 700;
     float: right;
@@ -254,12 +254,15 @@ h4.modal-title span.closeModal {
   #globkurier-returns-banner .globkurier-returns-banner__icon {
     margin-bottom: 12px;
   }
-  #globkurier-returns-banner .globkurier-returns-banner__title {
-    font-size: 18px;
+  #globkurier-returns-banner h3.globkurier-returns-banner__title {
+    font-size: 18px !important;
     font-weight: 700;
-    line-height: 1.35;
-    margin: 0 0 18px 0;
-    color: #fff;
+    line-height: 1.35 !important;
+    margin: 0 0 18px 0 !important;
+    color: #fff !important;
+    font-family: inherit !important;
+    background-color: transparent !important;
+    border: none !important;
   }
   #globkurier-returns-banner .globkurier-returns-banner__list {
     list-style: none;
@@ -306,7 +309,7 @@ h4.modal-title span.closeModal {
       width: 240px;
       padding: 22px 18px;
     }
-    #globkurier-returns-banner .globkurier-returns-banner__title {
+    #globkurier-returns-banner h3.globkurier-returns-banner__title {
       font-size: 16px;
     }
   }
@@ -339,7 +342,7 @@ h4.modal-title span.closeModal {
     #globkurier-returns-banner .globkurier-returns-banner__icon {
       margin-bottom: 0;
     }
-    #globkurier-returns-banner .globkurier-returns-banner__title {
+    #globkurier-returns-banner h3.globkurier-returns-banner__title {
       flex: 1;
       min-width: 200px;
       margin: 0;

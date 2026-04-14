@@ -1351,6 +1351,9 @@ function updateChosenServiceUI() {
 				dateFormat: 'yy-mm-dd',
 				minDate: today,
 				maxDate: maxDate,
+				beforeShow: function(input, inst) {
+					inst.dpDiv.addClass('gk-datepicker');
+				},
 				beforeShowDay: function(date) {
 					const dateStr = $.datepicker.formatDate('yy-mm-dd', date);
 					const isAvailable = GK.state.availablePickupDates.includes(dateStr);
