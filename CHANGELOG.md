@@ -1,3 +1,8 @@
+## [3.3.5] - 2025-04-17
++ block duplicate orders
++ fix pickup widget in PS8
++ restore terminal in order form
+
 ## [3.3.4] - 2025-04-14
 + Fixed CSS style conflicts
 
