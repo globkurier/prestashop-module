@@ -138,7 +138,39 @@ $(function () {
     // $('input.delivery_option_radio').change(function() {
     // Support both Classic (.delivery-option) and Hummingbird (.delivery-options__item) themes
     $(document).on('click', '.delivery-option input[type=radio], .delivery-options__item input[type=radio], .js-delivery-option input[type=radio]', function () {
-        mainContainer.hide();
+        // Always use fresh DOM reference — PS 8 AJAX may have replaced the container
+        const $cont = $('#pickup-terminal-container');
+        const $searchInput = $cont.find('input[name="pickup_town"]');
+
+        // If config was not set by template script (PS 8 v-html/AJAX injection), init from data attributes
+        const contEl = $cont[0];
+        if (contEl && !window.GlobKurier.config) {
+            window.GlobKurier.config = {
+                carriers: {
+                    inpost: contEl.getAttribute('data-gk-carrier-inpost') || null,
+                    inpostCod: contEl.getAttribute('data-gk-carrier-inpost-cod') || null,
+                    paczkaruch: contEl.getAttribute('data-gk-carrier-paczkaruch') || null,
+                    pocztex48owp: contEl.getAttribute('data-gk-carrier-pocztex48owp') || null,
+                    dhlparcel: null,
+                    dpdpickup: contEl.getAttribute('data-gk-carrier-dpdpickup') || null
+                },
+                cart: {
+                    id: parseInt(contEl.getAttribute('data-gk-cart-id'), 10) || null,
+                    token: contEl.getAttribute('data-gk-token') || null
+                },
+                api: {
+                    endpoint: contEl.getAttribute('data-gk-rest-endpoint') || null,
+                    baseUrl: contEl.getAttribute('data-gk-base-url') || null
+                },
+                address: {
+                    city: contEl.getAttribute('data-gk-delivery-city') || '',
+                    postcode: contEl.getAttribute('data-gk-delivery-postcode') || ''
+                },
+                i18n: { mainText: '', mainText2: '' }
+            };
+        }
+
+        $cont.hide();
         $('.pickup-result').hide();
         $('#containerForMapOfTerminals').hide();
         deletePickupPoint();
@@ -167,85 +199,67 @@ $(function () {
         let carrierName = '',
             all_text = '';
 
-        // Use namespace for carrier IDs
-        const inpostId = window.GlobKurier.get('carriers.inpost');
-        const inpostCodId = window.GlobKurier.get('carriers.inpostCod');
-        const paczkaruchId = window.GlobKurier.get('carriers.paczkaruch');
-        const pocztexId = window.GlobKurier.get('carriers.pocztex48owp');
-        const dhlparcelId = window.GlobKurier.get('carriers.dhlparcel');
-        const dpdpickupId = window.GlobKurier.get('carriers.dpdpickup');
+        // Read carrier IDs: namespace config first, data attributes as fallback
+        const inpostId = window.GlobKurier.get('carriers.inpost') || (contEl && contEl.getAttribute('data-gk-carrier-inpost')) || null;
+        const inpostCodId = window.GlobKurier.get('carriers.inpostCod') || (contEl && contEl.getAttribute('data-gk-carrier-inpost-cod')) || null;
+        const paczkaruchId = window.GlobKurier.get('carriers.paczkaruch') || (contEl && contEl.getAttribute('data-gk-carrier-paczkaruch')) || null;
+        const pocztexId = window.GlobKurier.get('carriers.pocztex48owp') || (contEl && contEl.getAttribute('data-gk-carrier-pocztex48owp')) || null;
+        const dhlparcelId = window.GlobKurier.get('carriers.dhlparcel') || null;
+        const dpdpickupId = window.GlobKurier.get('carriers.dpdpickup') || (contEl && contEl.getAttribute('data-gk-carrier-dpdpickup')) || null;
 
         if (inpostId && $(this).val() == (inpostId + ',')) {
-            mainContainer.show();
-            searchTownInput.data("service-code", "PACZKOMAT");
+            $cont.show();
+            $searchInput.data("service-code", "PACZKOMAT");
             carrierName = 'Paczkomatów InPost';
             all_text = mainTextLang+' '+mainTextLang2+' '+carrierName;
-            // Pre-fill search field with delivery city
             setTimeout(function() {
-                const deliveryCity = window.GlobKurier.get('address.city');
-                if (deliveryCity) {
-                    searchTownInput.val(deliveryCity);
-                }
+                const deliveryCity = window.GlobKurier.get('address.city') || (contEl && contEl.getAttribute('data-gk-delivery-city')) || '';
+                if (deliveryCity) { $searchInput.val(deliveryCity); }
             }, 50);
         } else if (inpostCodId && $(this).val() == (inpostCodId + ',')) {
-            mainContainer.show();
-            searchTownInput.data("service-code", "PACZKOMAT");
+            $cont.show();
+            $searchInput.data("service-code", "PACZKOMAT");
             carrierName = 'Paczkomatów InPost (COD)';
             all_text = mainTextLang+' '+mainTextLang2+' '+carrierName;
-            // Pre-fill search field with delivery city
             setTimeout(function() {
-                const deliveryCity = window.GlobKurier.get('address.city');
-                if (deliveryCity) {
-                    searchTownInput.val(deliveryCity);
-                }
+                const deliveryCity = window.GlobKurier.get('address.city') || (contEl && contEl.getAttribute('data-gk-delivery-city')) || '';
+                if (deliveryCity) { $searchInput.val(deliveryCity); }
             }, 50);
         } else if (paczkaruchId && $(this).val() == (paczkaruchId + ',')) {
-            mainContainer.show();
-            searchTownInput.data("service-code", "ORLEN PACZKA");
+            $cont.show();
+            $searchInput.data("service-code", "ORLEN PACZKA");
             carrierName = 'ORLEN Paczki';
             all_text = mainTextLang+' '+mainTextLang2+' '+carrierName;
-            // Pre-fill search field with delivery city
             setTimeout(function() {
-                const deliveryCity = window.GlobKurier.get('address.city');
-                if (deliveryCity) {
-                    searchTownInput.val(deliveryCity);
-                }
+                const deliveryCity = window.GlobKurier.get('address.city') || (contEl && contEl.getAttribute('data-gk-delivery-city')) || '';
+                if (deliveryCity) { $searchInput.val(deliveryCity); }
             }, 50);
         } else if (pocztexId && $(this).val() == (pocztexId + ',')) {
-            mainContainer.show();
-            searchTownInput.data("service-code", "POCZTA POLSKA");
+            $cont.show();
+            $searchInput.data("service-code", "POCZTA POLSKA");
             carrierName = 'Pocztex48';
             all_text = mainTextLang+' '+mainTextLang2+' '+carrierName;
-            // Pre-fill search field with delivery city
             setTimeout(function() {
-                const deliveryCity = window.GlobKurier.get('address.city');
-                if (deliveryCity) {
-                    searchTownInput.val(deliveryCity);
-                }
+                const deliveryCity = window.GlobKurier.get('address.city') || (contEl && contEl.getAttribute('data-gk-delivery-city')) || '';
+                if (deliveryCity) { $searchInput.val(deliveryCity); }
             }, 50);
         } else if (dhlparcelId && $(this).val() == (dhlparcelId + ',')) {
-            mainContainer.show();
-            searchTownInput.data("service-code", "DHL PARCEL");
+            $cont.show();
+            $searchInput.data("service-code", "DHL PARCEL");
             carrierName = 'DHL ParcelShop';
             all_text = mainTextLang+' '+mainTextLang2+' '+carrierName;
-            // Pre-fill search field with delivery city
             setTimeout(function() {
-                const deliveryCity = window.GlobKurier.get('address.city');
-                if (deliveryCity) {
-                    searchTownInput.val(deliveryCity);
-                }
+                const deliveryCity = window.GlobKurier.get('address.city') || (contEl && contEl.getAttribute('data-gk-delivery-city')) || '';
+                if (deliveryCity) { $searchInput.val(deliveryCity); }
             }, 50);
         } else if (dpdpickupId && $(this).val() == (dpdpickupId + ',')) {
-            mainContainer.show();
-            searchTownInput.data("service-code", "DPD PICKUP");
+            $cont.show();
+            $searchInput.data("service-code", "DPD PICKUP");
             carrierName = 'DPD Pickup';
             all_text = mainTextLang+' '+mainTextLang2+' '+carrierName;
-            // Pre-fill search field with delivery city
             setTimeout(function() {
-                const deliveryCity = window.GlobKurier.get('address.city');
-                if (deliveryCity) {
-                    searchTownInput.val(deliveryCity);
-                }
+                const deliveryCity = window.GlobKurier.get('address.city') || (contEl && contEl.getAttribute('data-gk-delivery-city')) || '';
+                if (deliveryCity) { $searchInput.val(deliveryCity); }
             }, 50);
         }
         $('.pickup-search span').text(all_text);
@@ -254,10 +268,10 @@ $(function () {
 
     function deletePickupPoint()
     {
-        // Use namespace pattern with fallback to data attributes
-        const cartId = window.GlobKurier.get('cart.id');
-        const token = window.GlobKurier.get('cart.token');
-        const endpoint = window.GlobKurier.get('api.endpoint');
+        const el = document.getElementById('pickup-terminal-container');
+        const cartId = window.GlobKurier.get('cart.id') || (el && el.getAttribute('data-gk-cart-id'));
+        const token = window.GlobKurier.get('cart.token') || (el && el.getAttribute('data-gk-token'));
+        const endpoint = window.GlobKurier.get('api.endpoint') || (el && el.getAttribute('data-gk-rest-endpoint'));
 
         if (!cartId || !token || !endpoint) {
             console.error('GlobKurier Module: Missing required variables (cart_id, gk_token, or rest_endpoint)');
@@ -408,17 +422,20 @@ $(function () {
             }
             return true;
         }
-        // Use namespace pattern with fallback to data attributes
-        const cartId = window.GlobKurier.get('cart.id');
-        const token = window.GlobKurier.get('cart.token');
-        const endpoint = window.GlobKurier.get('api.endpoint');
+        const el = document.getElementById('pickup-terminal-container');
+        const cartId = window.GlobKurier.get('cart.id') || (el && el.getAttribute('data-gk-cart-id'));
+        const token = window.GlobKurier.get('cart.token') || (el && el.getAttribute('data-gk-token'));
+        const endpoint = window.GlobKurier.get('api.endpoint') || (el && el.getAttribute('data-gk-rest-endpoint'));
 
         if (!cartId || !token || !endpoint) {
             console.error('GlobKurier Module: Missing required variables (cart_id, gk_token, or rest_endpoint)');
             return;
         }
 
-        const productCode = searchTownInput.data("service-code");
+        // Always read service-code from the current container's input (stale reference fix for PS 8)
+        const productCode = el
+            ? ($(el).find('input[name="pickup_town"]').data("service-code") || searchTownInput.data("service-code"))
+            : searchTownInput.data("service-code");
         const url = endpoint.replaceAll("&amp;", "&");
         let a = '';
         switch (productCode) {

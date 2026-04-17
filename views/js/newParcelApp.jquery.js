@@ -1809,6 +1809,27 @@ function renderServicesAndBind() {
 			$('#inpostSenderLabel, #orlenSenderLabel, #pocztexSenderLabel, #dhlSenderLabel, #dpdSenderLabel, #fedexSenderLabel').text('');
 			$('#senderPointLabel').text('');
 
+			// Restore pre-loaded terminal from customer's cart selection (cleared above, but customer's choice must persist).
+			var iv = window.InitialValues;
+			if (iv && iv.terminalCode && iv.terminalType) {
+				if (!GK.state.additionalInfo) GK.state.additionalInfo = {};
+				var tt = (iv.terminalType + '').trim();
+				if (tt === 'inpost' || tt === 'inpost_cod' || tt === 'inpostCod') {
+					GK.state.additionalInfo.inPostReceiverPoint = { id: iv.terminalCode };
+				} else if (tt === 'ruch') {
+					GK.state.additionalInfo.paczkaRuchReceiverPoint = { id: iv.terminalCode };
+				} else if (tt === 'pocztex48owp') {
+					GK.state.additionalInfo.pocztex48owpReceiverPoint = { id: iv.terminalCode };
+				} else if (tt === 'dhlparcel') {
+					GK.state.additionalInfo.dhlparcelReceiverPoint = { id: iv.terminalCode };
+				} else if (tt === 'dpdpickup') {
+					GK.state.additionalInfo.dpdpickupReceiverPoint = { id: iv.terminalCode };
+				}
+				GK.state.receiver = GK.state.receiver || {};
+				GK.state.receiver.terminal = iv.terminalCode;
+				populateReceiverPoints();
+			}
+
 			// reset previously selected addons/options when changing service
 			GK.state.serviceOptions = [];
 			fetchAddonsAndPayments();

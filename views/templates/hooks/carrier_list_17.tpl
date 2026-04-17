@@ -32,7 +32,12 @@
      data-gk-rest-endpoint="{$rest_endpoint|escape:'html':'UTF-8'}"
      data-gk-delivery-city="{$city|escape:'html':'UTF-8'}"
      data-gk-delivery-postcode="{$postcode|escape:'html':'UTF-8'}"
-     data-gk-base-url="{$baseurl|escape:'html':'UTF-8'}">
+     data-gk-base-url="{$baseurl|escape:'html':'UTF-8'}"
+     data-gk-carrier-inpost="{if $globConfig->inPostEnabled}{$globConfig->inPostCarrier|escape:'html':'UTF-8'}{/if}"
+     data-gk-carrier-inpost-cod="{if $globConfig->inPostCODEnabled}{$globConfig->inPostCODCarrier|escape:'html':'UTF-8'}{/if}"
+     data-gk-carrier-paczkaruch="{if $globConfig->paczkaRuchEnabled}{$globConfig->paczkaRuchCarrier|escape:'html':'UTF-8'}{/if}"
+     data-gk-carrier-pocztex48owp="{if $globConfig->pocztex48owpEnabled}{$globConfig->pocztex48owpCarrier|escape:'html':'UTF-8'}{/if}"
+     data-gk-carrier-dpdpickup="{if $globConfig->dpdpickupEnabled}{$globConfig->dpdpickupCarrier|escape:'html':'UTF-8'}{/if}">
 
     <div class="no_results" style="display: none; color: red; text-align: center">
         {l s='No results found for: ' mod='globkuriermodule'} <b></b>
