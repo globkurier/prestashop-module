@@ -56,23 +56,19 @@ class AddressSplitter
     public function split($rawAddress)
     {
         $addressParts = $this->parseAddress($rawAddress);
-        $arr = [AddressPart::STREET_TYPE, AddressPart::OTHER, AddressPart::NUMBER];
+
+        // ul. 3 Maja 12/5  (Polish: street type + numbered street name + house + separator + apt)
+        $arr = [AddressPart::STREET_TYPE, AddressPart::NUMBER, AddressPart::OTHER,
+                     AddressPart::NUMBER, AddressPart::APARTMENT_SEPARATOR, AddressPart::NUMBER];
         if ($this->addressPartsMatch($arr, $addressParts)) {
             $this->streetType = (string) $addressParts[0];
-            $this->street = (string) $addressParts[1];
-            $this->houseNumber = (string) $addressParts[2];
+            $this->street = (string) $addressParts[1] . ' ' . (string) $addressParts[2];
+            $this->houseNumber = (string) $addressParts[3];
+            $this->apartmentNumber = (string) $addressParts[5];
             return true;
         }
 
-        $arr = [AddressPart::STREET_TYPE, AddressPart::OTHER, AddressPart::NUMBER,
-                     AddressPart::APARTMENT_SEPARATOR, AddressPart::NUMBER];
-        if ($this->addressPartsMatch($arr, $addressParts)) {
-            $this->streetType = (string) $addressParts[0];
-            $this->street = (string) $addressParts[1];
-            $this->houseNumber = (string) $addressParts[2];
-            $this->apartmentNumber = (string) $addressParts[4];
-            return true;
-        }
+        // ul. XYZ 5a 3/b  (Polish: street type + name + two-part house + separator + apt)
         $arr = [AddressPart::STREET_TYPE, AddressPart::OTHER, AddressPart::NUMBER, AddressPart::NUMBER,
                      AddressPart::APARTMENT_SEPARATOR, AddressPart::NUMBER];
         if ($this->addressPartsMatch($arr, $addressParts)) {
@@ -83,6 +79,28 @@ class AddressSplitter
             return true;
         }
 
+        // ul. XYZ 5/3  (Polish standard: street type + name + house + separator + apt)
+        $arr = [AddressPart::STREET_TYPE, AddressPart::OTHER, AddressPart::NUMBER,
+                     AddressPart::APARTMENT_SEPARATOR, AddressPart::NUMBER];
+        if ($this->addressPartsMatch($arr, $addressParts)) {
+            $this->streetType = (string) $addressParts[0];
+            $this->street = (string) $addressParts[1];
+            $this->houseNumber = (string) $addressParts[2];
+            $this->apartmentNumber = (string) $addressParts[4];
+            return true;
+        }
+
+        // 3 Maja 12/5  (Polish: numbered street name + house + separator + apt)
+        $arr = [AddressPart::NUMBER, AddressPart::OTHER, AddressPart::NUMBER,
+                     AddressPart::APARTMENT_SEPARATOR, AddressPart::NUMBER];
+        if ($this->addressPartsMatch($arr, $addressParts)) {
+            $this->street = (string) $addressParts[0] . ' ' . (string) $addressParts[1];
+            $this->houseNumber = (string) $addressParts[2];
+            $this->apartmentNumber = (string) $addressParts[4];
+            return true;
+        }
+
+        // XYZ 5 flat 3  (EU/US: name + house + apt indicator + apt)
         $arr = [AddressPart::OTHER, AddressPart::NUMBER, AddressPart::NUMBER,
                      AddressPart::APARTMENT_SEPARATOR, AddressPart::NUMBER];
         if ($this->addressPartsMatch($arr, $addressParts)) {
@@ -92,11 +110,25 @@ class AddressSplitter
             return true;
         }
 
-        if ($this->addressPartsMatch([AddressPart::OTHER, AddressPart::NUMBER], $addressParts)) {
-            $this->street = (string) $addressParts[0];
-            $this->houseNumber = (string) $addressParts[1];
+        // ul. 3 Maja 12  (Polish: street type + numbered street name + house)
+        $arr = [AddressPart::STREET_TYPE, AddressPart::NUMBER, AddressPart::OTHER, AddressPart::NUMBER];
+        if ($this->addressPartsMatch($arr, $addressParts)) {
+            $this->streetType = (string) $addressParts[0];
+            $this->street = (string) $addressParts[1] . ' ' . (string) $addressParts[2];
+            $this->houseNumber = (string) $addressParts[3];
             return true;
         }
+
+        // ul. XYZ 5  (Polish standard: street type + name + house)
+        $arr = [AddressPart::STREET_TYPE, AddressPart::OTHER, AddressPart::NUMBER];
+        if ($this->addressPartsMatch($arr, $addressParts)) {
+            $this->streetType = (string) $addressParts[0];
+            $this->street = (string) $addressParts[1];
+            $this->houseNumber = (string) $addressParts[2];
+            return true;
+        }
+
+        // XYZ 5/3  (Polish standard: name + house + separator + apt)
         $arr = [AddressPart::OTHER, AddressPart::NUMBER, AddressPart::APARTMENT_SEPARATOR, AddressPart::NUMBER];
         if ($this->addressPartsMatch($arr, $addressParts)) {
             $this->street = (string) $addressParts[0];
@@ -104,6 +136,38 @@ class AddressSplitter
             $this->apartmentNumber = (string) $addressParts[3];
             return true;
         }
+
+        // 123 Main Street flat 4  (US/UK: house number first + street name + apt indicator + apt)
+        $arr = [AddressPart::NUMBER, AddressPart::OTHER, AddressPart::APARTMENT_SEPARATOR, AddressPart::NUMBER];
+        if ($this->addressPartsMatch($arr, $addressParts)) {
+            $this->houseNumber = (string) $addressParts[0];
+            $this->street = (string) $addressParts[1];
+            $this->apartmentNumber = (string) $addressParts[3];
+            return true;
+        }
+
+        // 3 Maja 12  (Polish: numbered street name + house, no apt)
+        $arr = [AddressPart::NUMBER, AddressPart::OTHER, AddressPart::NUMBER];
+        if ($this->addressPartsMatch($arr, $addressParts)) {
+            $this->street = (string) $addressParts[0] . ' ' . (string) $addressParts[1];
+            $this->houseNumber = (string) $addressParts[2];
+            return true;
+        }
+
+        // XYZ 5  (Polish/EU standard: name + house, no apt)
+        if ($this->addressPartsMatch([AddressPart::OTHER, AddressPart::NUMBER], $addressParts)) {
+            $this->street = (string) $addressParts[0];
+            $this->houseNumber = (string) $addressParts[1];
+            return true;
+        }
+
+        // 123 Main Street  (US/UK: house number first + street name)
+        if ($this->addressPartsMatch([AddressPart::NUMBER, AddressPart::OTHER], $addressParts)) {
+            $this->houseNumber = (string) $addressParts[0];
+            $this->street = (string) $addressParts[1];
+            return true;
+        }
+
         return false;
     }
 
@@ -120,7 +184,7 @@ class AddressSplitter
             '((^|[ ])ul\.)|((^|[ ])ul )|((^|[ ])al\.)|((^|[ ])al )|((^|[ ])pl\.)|((^|[ ])pl )',
             AddressPart::STREET_TYPE
         );
-        $parts = $this->splitElement($parts, '(\/)|( m.)', AddressPart::APARTMENT_SEPARATOR);
+        $parts = $this->splitElement($parts, '(\/)|( m\.)|(?i)([ \t]+flat[ \t]*)|([ \t]+apt\.?[ \t]*)', AddressPart::APARTMENT_SEPARATOR);
         do {
             $numberOfPartsBefore = count($parts);
             $parts = $this->splitElement($parts, '[0-9]+[a-zA-Z]*', AddressPart::NUMBER);
@@ -189,6 +253,14 @@ class AddressSplitter
     {
         if (count($pattern) != count($addressParts)) {
             return false;
+        }
+        foreach ($pattern as $index => $expectedType) {
+            if (!($addressParts[$index] instanceof AddressPart)) {
+                return false;
+            }
+            if ($addressParts[$index]->getType() !== $expectedType) {
+                return false;
+            }
         }
         return true;
     }

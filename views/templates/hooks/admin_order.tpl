@@ -137,10 +137,10 @@
 {literal}
     <script type="text/javascript">
         $(function(){
-            var buttonShippingContainer = $('#new-glob-parcel');
+            const buttonShippingContainer = $('#new-glob-parcel');
             $('#addressShipping .well').append(buttonShippingContainer.contents());
 
-            var buttonInvoiceContainer = $('#new-glob-invoice-parcel');
+            const buttonInvoiceContainer = $('#new-glob-invoice-parcel');
             $('#addressInvoice .well').append(buttonInvoiceContainer.contents());
         });
 
@@ -152,10 +152,10 @@
 
         function getLabel(iurl)
         {
-            let url = iurl.attr('href'),
-                id = iurl.attr('data-id'),
-                pdf = iurl.attr('data-pdf'),
-                domId = iurl.attr('id');
+            const url = iurl.attr('href');
+            const id = iurl.attr('data-id');
+            const pdf = iurl.attr('data-pdf');
+            const domId = iurl.attr('id');
 
             if (pdf == 0) {
                 console.log('pdf=0');
