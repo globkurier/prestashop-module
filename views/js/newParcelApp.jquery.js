@@ -1082,7 +1082,10 @@ function renderServiceOptionsContainer() {
 		// Prefill UI for picked service summary
 		$('#pickedServiceName').text((s.pickedService.carrierName || '') + (s.pickedService.name ? (' – ' + s.pickedService.name) : ''));
 		$('#pickedServicePanel').show();
-        $('#summaryServiceName').text((s.pickedService.carrierName || '') + (s.pickedService.name ? (' – ' + s.pickedService.name) : ''));
+        $('#summaryServiceName').html(
+			(s.pickedService.carrierName || '') + (s.pickedService.name ? (' – ' + s.pickedService.name) : '')
+			+ ((s.pickedService.units && s.pickedService.units > 1) ? ' ' + "<b>(x" + s.pickedService.units + ")</b> " : '')
+		);
         $('#changeServiceBtn').off('click').on('click', function(){ GK.state.forceShowAll = true; GK.state.forModal = true; fetchProducts().then(function(){ $('#servicesPickModal').modal('show'); }); });
         // Always show terminal info block; fill defaults if available
         $('#terminalInfo').show();
@@ -1235,13 +1238,16 @@ function enforceCollectionTypeRadios() {
 }
 
 function updateChosenServiceUI() {
+
     const ps = GK.state.pickedService;
+	const carrierSubName = (ps.name || '') + ((ps.units && ps.units > 1) ? ' ' + "<b>(x" + ps.units + ")</b>" : '');
+
     if (!ps) return;
     if (ps.carrierLogoLink) {
         $('#chosenServiceLogo').attr('src', ps.carrierLogoLink).show();
     }
     $('#chosenServiceCarrier').text(ps.carrierName || '');
-    $('#chosenServiceName').text(ps.name || '');
+    $('#chosenServiceName').html(carrierSubName || '');
 	$('#chosenServiceSummary').html(
 		Array.isArray(ps.labels)
 			? ('<ul style="margin:0; padding-left:18px;">' + ps.labels.map(function(l){ return '<li>' + l + '</li>'; }).join('') + '</ul>')
